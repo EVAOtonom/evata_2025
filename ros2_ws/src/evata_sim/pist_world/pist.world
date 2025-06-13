@@ -1,0 +1,641 @@
+<?xml version="1.0"?>
+<sdf version='1.7'>
+	<world name='PIST'>
+		<scene>
+			<grid>false</grid>
+			<ambient>0.4 0.4 0.4 1</ambient>
+			<background>0.274 0.353 1 0</background>
+			<shadows>0</shadows>
+		</scene>
+		<plugin
+			filename="ignition-gazebo-physics-system"
+			name="gz::sim::systems::Physics">
+		</plugin>
+		<plugin
+			filename="ignition-gazebo-user-commands-system"
+			name="gz::sim::systems::UserCommands">
+		</plugin>
+		<plugin
+			filename="ignition-gazebo-scene-broadcaster-system"
+			name="gz::sim::systems::SceneBroadcaster">
+		</plugin>
+		<plugin
+			filename="ignition-gazebo-contact-system"
+			name="gz::sim::systems::Contact">
+		</plugin>
+		<plugin
+			filename="ignition-gazebo-sensors-system"
+			name="ignition::gazebo::systems::Sensors">
+			<render_engine>ogre2</render_engine>
+		</plugin>
+
+		<!-- Light -->
+		<light type="directional" name="sun">
+			<cast_shadows>true</cast_shadows>
+			<pose>0 0 10 0 0 0</pose>
+			<diffuse>0.8 0.8 0.8 1</diffuse>
+			<specular>0.2 0.2 0.2 1</specular>
+			<attenuation>
+				<range>1000</range>
+				<constant>0.9</constant>
+				<linear>0.01</linear>
+				<quadratic>0.001</quadratic>
+			</attenuation>
+			<direction>-0.5 0.1 -0.9</direction>
+		</light>
+
+
+		<!-- Pist  -->
+		<model name="SONPIST">
+			<static>true</static>
+			<link name="link">
+				<collision name="collision">
+					<geometry>
+						<mesh>
+							<uri>SONPIST.dae</uri>
+						</mesh>
+					</geometry>
+				</collision>
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>SONPIST.dae</uri>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<!-- Tabelalar -->
+
+		<model name="dur">
+			<static>true</static>
+			<pose>18.1686 -14.2362 0 0 0 -1.6456</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link4">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/dur.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="durak">
+			<static>true</static>
+			<pose>-42.1911 4.2702 0 0 0 -3.0219</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link3">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/durak.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="durak_2">
+			<static>true</static>
+			<pose>-20.6075 -25.5451 0 0 0 -1.5094</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link3">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/durak.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="durak_3">
+			<static>true</static>
+			<pose>6.7255 16.9317 0 0 0 0</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link3">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/durak.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+
+		<model name="engelli_park">
+			<static>true</static>
+			<pose>52.0752 23.6383 0 0 0 -1.6550</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link5">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/engellipark.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="engelli_park2">
+			<static>true</static>
+			<pose>51.9513 32.1565 0 0 0 -1.5577</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link29">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/engellipark.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="engelli_park3">
+			<static>true</static>
+			<pose>51.9605 35.1834 0 0 0 -1.5577</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link30">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/engellipark.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+
+		<model name="engelli_park4">
+			<static>true</static>
+			<pose>51.9406 40.7256 0 0 0 -1.5577</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link32">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/engellipark.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="girilmez">
+			<static>true</static>
+			<pose>-31.8019 31.8937 0 0 0 3.1256</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link6">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>/model://tabelalar/meshes/girilmez.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="iki_yon">
+			<static>true</static>
+			<pose>37 0 0 0 0 0</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link7">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/ikiyon.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="ileri">
+			<static>true</static>
+			<pose>-2.9745 24.0334 0 0 0 1.5017</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link8">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/ileri.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="ileri_sag">
+			<static>true</static>
+			<pose>36 0 0 0 0 0</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link9">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/ilerisag.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="ileri_sol">
+			<static>true</static>
+			<pose>-16.0518 40.5145 0 0 0 1.5295</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link10">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/ilerisol.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="kavsak">
+			<static>true</static>
+			<pose>3.1906 -10.4292 0 0 0 0</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link11">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/kavsak.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="kavsak_2">
+			<static>true</static>
+			<pose>-2.6605 -10.4292 0 0 0 0</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link35">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/kavsak.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="kavsak_3">
+			<static>true</static>
+			<pose>3.0269 10.9777 0 0 0 3.0479</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link39">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/kavsak.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="kavsak_4">
+			<static>true</static>
+			<pose>-2.5151 10.9308 0 0 0 -3.1357</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link40">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/kavsak.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="park">
+			<static>true</static>
+			<pose>52.0229 20.9028 0 0 0 -1.6336</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link12">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/park.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="park_yapilmaz">
+			<static>true</static>
+			<pose>52.0231 18.1399 0 0 0 -1.5211</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link13">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/parkyapilmaz.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="park_yapilmaz2">
+			<static>true</static>
+			<pose>52.0674 26.6380 0 0 0 -1.5211</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link25">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/parkyapilmaz.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="park_yapilmaz3">
+			<static>true</static>
+			<pose>51.9760 29.3446 0 0 0 -1.5211</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link26">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/parkyapilmaz.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="park_yapilmaz4">
+			<static>true</static>
+			<pose>52.0077 37.9012 0 0 0 -1.5211</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link31">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/parkyapilmaz.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="park_yasak">
+			<static>true</static>
+			<pose>38 0 0 0 0 0</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link14">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/parkyasak.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+		<model name="saga_donus">
+			<static>true</static>
+			<pose>39 0 0 0 0 0</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link15">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/sagdonusyasak.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+		<model name="sag_yon">
+			<static>true</static>
+			<pose>40 0 0 0 0 0</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link16">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/sagyon.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+		<model name="sola_donus">
+			<static>true</static>
+			<pose>41 0 0 0 0 0</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link17">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/soladonus.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="sola_donus_yasak">
+			<static>true</static>
+			<pose>3.9118 40.5735 0 0 0 1.5295</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link18">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/soldonusyasak.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="sola_donus_yasak2">
+			<static>true</static>
+			<pose>35 0 0 0 0 0</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link33">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/soldonusyasak.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="sola_donus_yasak3">
+			<static>true</static>
+			<pose>-31.2415 4.4956 0 0 0 3.1232</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link34">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/soldonusyasak.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="sol_sag">
+			<static>true</static>
+			<pose>42 0 0 0 0 0</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link19">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/solsag.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="sol_yon">
+			<static>true</static>
+			<pose>0.8754 -0.3927 0 0 0 -0.0827</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link20">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/solyon.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="sol_yon2">
+			<static>true</static>
+			<pose>1.1308 -0.0790 0 0 0 1.5742</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link36">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/solyon.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+
+		<model name="sol_yon3">
+			<static>true</static>
+			<pose>0.4828 -0.0661 0 0 0 -1.6431</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link37">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/solyon.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="sol_yon4">
+			<static>true</static>
+			<pose>0.7949 0.3440 0 0 0 3.0904</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link38">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/solyon.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+
+		<model name="trafige_kapali">
+			<static>true</static>
+			<pose>43 0 0 0 0 0</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link21">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/trafigekapali.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+
+		<!-- Dekor  -->
+
+		<model name="koni">
+			<static>true</static>
+			<pose>13.6057 46.748 0 0 0 0</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link22">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://dekorasyon/koni/koni.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+
+		<model name="bariyerTamamlanmış">
+			<static>true</static>
+			<pose>-0.4989 0.4262 0 0 0 0</pose>
+			<link name="link24">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://dekorasyon/engel2/engel.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="trafficLight">
+			<pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+			<include>
+				<uri>
+					model://stop_light
+				</uri>
+			</include>
+		</model>
+
+	</world>
+</sdf>

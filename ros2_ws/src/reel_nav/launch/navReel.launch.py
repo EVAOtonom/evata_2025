@@ -1,0 +1,110 @@
+import os
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
+import xacro
+
+def generate_launch_description():
+
+    # Mevcut çalışma dizinini al
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    # /install/evata_sim/share/evata_sim/launch kısmına kadar yolu al
+    src_dir = dir_path.split('/install')[0]  # install kısmını çıkar
+    sdf_path = os.path.join(src_dir, "src","reel_nav",'final_deneme.sdf')  
+    # Parametreler
+    use_sim_time = LaunchConfiguration('use_sim_time', default='false')
+    slam_mode = LaunchConfiguration('slam', default='True')
+    rviz_config_dir = os.path.join(src_dir,"src","reel_nav","config" ,"nav2_evata_view.rviz")
+    lidarslam_param_dir = os.path.join(src_dir,"src","lidarslam_ros2","lidarslam","param","lidarslam.yaml") 
+    nav2_launch_file_dir = os.path.join(get_package_share_directory('nav2_bringup'), 'launch')
+    slam_params_file = os.path.join(src_dir, "src", "reel_nav", "config", "slam_toolbox_params.yaml")  # SLAM yapılandırması
+    map_dir = LaunchConfiguration(
+        'map',
+        default=os.path.join(src_dir,"src","reel_nav",'map', 'map 1.yaml')
+    )
+    param_dir = LaunchConfiguration(
+        'params_file',
+        default=os.path.join(src_dir,"src","reel_nav","config", 'evata.yaml')
+    )
+   
+   
+     # Xacro dosyasını oku ve işleme yap
+    doc = xacro.parse(open(sdf_path))
+    xacro.process_doc(doc)
+    
+    return LaunchDescription([
+        # Launch argümanları
+        DeclareLaunchArgument(
+            'use_sim_time',
+            default_value='false',
+            description='Use simulation clock if true'
+        ),        
+        
+        DeclareLaunchArgument(
+            'map',
+            default_value=map_dir,
+            description='Full path to map file to load'
+        ),
+        DeclareLaunchArgument(
+            'params_file',
+            default_value=param_dir,
+            description='Full path to param file to load'
+        ),        
+
+        Node(
+   		 package='tf2_ros',
+    		executable='static_transform_publisher',
+    		name='static_tf_map_to_odom',
+    		output='log',
+    		arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom']
+		),
+
+
+		
+		        #tekerlekler için
+        Node(
+            package='joint_state_publisher',
+            executable='joint_state_publisher',
+            name='joint_state_publisher',
+            output='screen',
+            parameters=[{'use_sim_time': use_sim_time,
+                         'robot_description': doc.toxml()}]),   
+       
+      #tf tree için         
+        Node(
+            package='robot_state_publisher',
+            executable='robot_state_publisher',
+            name='robot_state_publisher',
+            output='screen',
+            parameters=[{'use_sim_time': use_sim_time,
+                         'robot_description': doc.toxml()}]),        
+
+                # NAV2 launch dosyasını dahil et
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([nav2_launch_file_dir, '/bringup_launch.py']),
+            launch_arguments={
+                'map': map_dir,
+                'use_sim_time': use_sim_time,
+                'params_file': param_dir
+            }.items(),
+        ),
+        
+     
+
+
+        # RViz
+        Node(
+            package='rviz2',
+            executable='rviz2',
+            name='rviz2',
+            arguments=['-d', rviz_config_dir],
+            parameters=[{'use_sim_time': use_sim_time}],
+            output='screen'
+        ),
+
+
+
+    ])
