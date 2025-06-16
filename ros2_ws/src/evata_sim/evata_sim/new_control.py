@@ -1,4 +1,3 @@
-import os
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
@@ -12,25 +11,31 @@ from sensor_msgs.msg import Imu
 import math
 import time
 from tf_transformations import euler_from_quaternion
-from ament_index_python.packages import get_package_share_directory
 import numpy as np
-import json
+import json  # JSON formatında subscirbe için
+
+            
+def xy_to_latlon(x, y, ref_lat, ref_lon):
+    delta_lat = y / 111320
+    delta_lon = x / (40075000 * math.cos(math.radians(ref_lat)) / 360)
+    lat = ref_lat + delta_lat
+    lon = ref_lon + delta_lon
+    return lat, lon
 
 class ControlNode(Node):
     def __init__(self):
         super().__init__('new_control')
 
-        package_path = get_package_share_directory('evata_sim')
-        waypoint_path = os.path.join(package_path, 'waypoint', 'waypoint.txt')
-        self.waypoints = self.load_waypoints(waypoint_path)
+        self.waypoints = self.load_waypoints('/home/dilara/ros2_ws/src/evata_sim/evata_sim/waypoint.txt')
         self.current_pose = None
         self.current_yaw = 0.0
         self.mode = 'normal'
         self.distance_threshold = 2.0
         self.saved_goal = None
         self.motion_enabled = True
-        self.last_cmd_vel = Twist()
+        self.last_cmd_vel = Twist()  # Son hız komutunu saklamak için
         self.original_goal = None
+        self.forward_timer = None
 
 
         self.create_subscription(String, '/detected_signs', self.sign_callback, 10)
@@ -77,15 +82,49 @@ class ControlNode(Node):
         goal_msg.pose.header.stamp = self.get_clock().now().to_msg()
         goal_msg.pose.pose.position.x = forward_x
         goal_msg.pose.pose.position.y = forward_y
-        goal_msg.pose.pose.orientation.w = 1.0  # Baş yönü aynı kalsın
+        goal_msg.pose.pose.orientation.w = 1.0
 
-        self.mode = 'forward'
-        self.forward_goal_sent = True
+        self.forward_goal = goal_msg
 
         send_goal_future = self.nav_client.send_goal_async(goal_msg)
-        send_goal_future.add_done_callback(self.goal_response_callback)
-
+        send_goal_future.add_done_callback(self.forward_goal_response_callback)
+        self.forward_timer = self.create_timer(25.0, self.forward_timer_callback)
         
+    def forward_goal_response_callback(self, future):
+        goal_handle = future.result()
+        if not goal_handle.accepted:
+            self.get_logger().warn("❌ İleri hedef reddedildi.")
+            return
+
+        self.get_logger().info("🚗 İleri hedefe gidiliyor (25 saniye)...")
+        self.active_goal_handle = goal_handle
+
+
+    def forward_timer_callback(self):
+        self.forward_timer.cancel()
+
+        self.get_logger().info("⏱️ 25 saniye doldu, ileri hedef iptal ediliyor...")
+
+        if self.active_goal_handle and self.active_goal_handle.status == GoalStatus.STATUS_EXECUTING:
+            future = self.active_goal_handle.cancel_goal_async()
+
+            def on_cancel_done(_):
+                self.get_logger().info("🛑 Hedef iptal edildi.")
+                self.command_pub.publish(String(data='green'))
+                self.get_logger().info("🟢 'green' komutu yayınlandı (live_gps aktif).")
+                self.mode = 'normal'
+                self.original_goal = None
+                self.active_goal_handle = None
+
+            future.add_done_callback(on_cancel_done)
+        else:
+            self.command_pub.publish(String(data='green'))
+            self.get_logger().info("🟢 'green' komutu yayınlandı (live_gps aktif).")
+            self.mode = 'normal'
+            self.original_goal = None
+            self.active_goal_handle = None
+
+
     def send_nearest_right_waypoint(self):
         if not self.current_pose:
             return
@@ -97,6 +136,8 @@ class ControlNode(Node):
         right_waypoints = []
 
         for wp_x, wp_y in self.waypoints:
+            wp_x = wp['x']
+            wp_y = wp['y']
             dx = wp_x - x
             dy = wp_y - y
             distance = math.hypot(dx, dy)
@@ -135,6 +176,8 @@ class ControlNode(Node):
         left_waypoints = []
 
         for wp_x, wp_y in self.waypoints:
+            wp_x = wp['x']
+            wp_y = wp['y']
             dx = wp_x - x
             dy = wp_y - y
             distance = math.hypot(dx, dy)
@@ -175,6 +218,8 @@ class ControlNode(Node):
         left_waypoints = []
 
         for wp_x, wp_y in self.waypoints:
+            wp_x = wp['x']
+            wp_y = wp['y']
             dx = wp_x - x
             dy = wp_y - y
             distance = math.hypot(dx, dy)
@@ -249,19 +294,14 @@ class ControlNode(Node):
                 self.mode = 'normal'
                 
     def check_waypoint_distance(self):
-        if (self.mode not in ['waypoint', 'forward']) or not self.current_pose or not hasattr(self, 'nearest_waypoint'):
+        if (self.mode not in ['waypoint']) or not self.current_pose or not hasattr(self, 'nearest_waypoint'):
             return
 
         x = self.current_pose.position.x
         y = self.current_pose.position.y
         
-        # Forward modunda hedef pozisyonunu aktif hedefden al
-        if self.mode == 'forward' and self.active_goal_handle:
-            target_x = self.active_goal_handle.goal.pose.pose.position.x
-            target_y = self.active_goal_handle.goal.pose.pose.position.y
-            
         # Waypoint modunda nearest_waypoint'i kullan
-        elif self.mode == 'waypoint' and hasattr(self, 'nearest_waypoint'):
+        if self.mode == 'waypoint' and hasattr(self, 'nearest_waypoint'):
             target_x = self.nearest_waypoint[0]
             target_y = self.nearest_waypoint[1]
         else:
@@ -286,9 +326,8 @@ class ControlNode(Node):
         points = []
         with open(file_path, 'r') as f:
             for line in f:
-                if line.strip() and not line.startswith("#"):
-                    x, y, lat, lon = map(float, line.strip().split())
-                    points.append((x, y))
+                if line.strip() and not line.startswith("#"):x, y, lat, lon = map(float, line.strip().split())
+                points.append({'x': x, 'y': y, 'lat': lat, 'lon': lon})
         return points
 
     def odom_callback(self, msg):
@@ -317,14 +356,14 @@ class ControlNode(Node):
             data = json.loads(msg.data)
 
             if self.current_pose and self.mode == 'normal':    
-                if 'sag' in data:
-                    self.get_logger().info("🛑 'sag' levhası algılandı.")
+                if 'sagyon' in data:
+                    self.get_logger().info("🛑 'sagyon' levhası algılandı.")
                     self.command_pub.publish(String(data='red'))
                     time.sleep(0.2)
                     self.mode = 'waypoint'
                     self.send_nearest_right_waypoint()
-                elif 'soladonus' in data:
-                    self.get_logger().info("🛑 'sol' levhası algılandı.")
+                elif 'solyon' in data:
+                    self.get_logger().info("🛑 'solyon' levhası algılandı.")
                     self.command_pub.publish(String(data='red'))
                     time.sleep(0.2)
                     self.mode = 'waypoint'
@@ -335,15 +374,18 @@ class ControlNode(Node):
                     time.sleep(0.2)
                     self.mode = 'waypoint'
                     self.send_nearest_noentry_waypoint()
-                elif 'sagdonusyok' in data or 'soladonulmez' in data or 'ilerivesag' in data or 'ilerivesol' in data:
+                elif 'sagdonulmez' in data or 'soladonulmez' in data or 'ilerivesag' in data or 'ilerivesol' in data:
                     self.get_logger().info("➡️ Düz git levhası algılandı, 10 metre ilerleniyor.")
                     self.command_pub.publish(String(data='red'))
                     time.sleep(0.2)
                     self.mode = 'forward'
                     if self.active_goal_handle:
                         self.original_goal = self.active_goal_handle.goal
-                    self.go_forward_and_return()
-
+                        cancel_future = self.active_goal_handle.cancel_goal_async()
+                        cancel_future.add_done_callback(lambda _: self.go_forward_and_return())
+                    else:
+                        self.go_forward_and_return()
+  
         except Exception as e:
             self.get_logger().error(f"❌ JSON parse hatası: {e}")
 
@@ -358,4 +400,3 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
-
