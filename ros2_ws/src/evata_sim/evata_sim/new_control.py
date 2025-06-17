@@ -13,6 +13,8 @@ import time
 from tf_transformations import euler_from_quaternion
 import numpy as np
 import json  # JSON formatında subscirbe için
+from ament_index_python.packages import get_package_share_directory
+import os
 
             
 def xy_to_latlon(x, y, ref_lat, ref_lon):
@@ -26,7 +28,11 @@ class ControlNode(Node):
     def __init__(self):
         super().__init__('new_control')
 
-        self.waypoints = self.load_waypoints('/home/otonom/evata_2025/ros2_ws/src/evata_sim/evata_sim/waypoint.txt')
+ # Get waypoints file path from package share directory
+        package_path = get_package_share_directory('evata_sim')
+        waypoints_file = os.path.join(package_path, 'waypoint', 'waypoint.txt')
+        
+        self.waypoints = self.load_waypoints(waypoints_file)
         self.current_pose = None
         self.current_yaw = 0.0
         self.mode = 'normal'
@@ -63,7 +69,7 @@ class ControlNode(Node):
             # Hareket izni varsa, gelen komutu olduğu gibi ilet
             self.vel_pub.publish(msg)
             
-    def go_forward_and_return(self, distance=10.0):
+    def go_forward_and_return(self, distance=15.0):
         if not self.current_pose:
             self.get_logger().warn("❌ Geçerli pozisyon yok. Hareket iptal edildi.")
             return
@@ -88,7 +94,7 @@ class ControlNode(Node):
 
         send_goal_future = self.nav_client.send_goal_async(goal_msg)
         send_goal_future.add_done_callback(self.forward_goal_response_callback)
-        self.forward_timer = self.create_timer(25.0, self.forward_timer_callback)
+        self.forward_timer = self.create_timer(35.0, self.forward_timer_callback)
         
     def forward_goal_response_callback(self, future):
         goal_handle = future.result()
@@ -135,7 +141,7 @@ class ControlNode(Node):
 
         right_waypoints = []
 
-        for wp_x, wp_y in self.waypoints:
+        for wp in self.waypoints:
             wp_x = wp['x']
             wp_y = wp['y']
             dx = wp_x - x
@@ -175,7 +181,7 @@ class ControlNode(Node):
 
         left_waypoints = []
 
-        for wp_x, wp_y in self.waypoints:
+        for wp in self.waypoints:
             wp_x = wp['x']
             wp_y = wp['y']
             dx = wp_x - x
@@ -217,7 +223,7 @@ class ControlNode(Node):
         right_waypoints = []
         left_waypoints = []
 
-        for wp_x, wp_y in self.waypoints:
+        for wp in self.waypoints:
             wp_x = wp['x']
             wp_y = wp['y']
             dx = wp_x - x
@@ -370,12 +376,33 @@ class ControlNode(Node):
                     self.mode = 'waypoint'
                     self.send_nearest_left_waypoint()
                 elif 'girme' in data or 'kazi' in data or 'notraffic' in data:
+                    # Mevcut pozisyon ile tabela arası mesafe kontrolü
+                    if hasattr(data, 'distance') and data['distance'] <= 5.0:  # 5 metre içindeyse
+                        self.get_logger().info("🛑 Girilmez levhası 5m içinde - İşlem yapılmıyor")
+                        return
+                    
                     self.get_logger().info("🛑 Girilmez türü levha algılandı.")
                     self.command_pub.publish(String(data='red'))
                     time.sleep(0.2)
                     self.mode = 'waypoint'
                     self.send_nearest_noentry_waypoint()
-                elif 'sagdonulmez' in data or 'soladonulmez' in data or 'ilerivesag' in data or 'ilerivesol' in data:
+                elif 'sagdonulmez' in data or 'soladonulmez' in data:
+                    # 6 metre mesafe kontrolü
+                    if hasattr(data, 'distance') and data['distance'] <= 6.0:
+                        self.get_logger().info("🛑 Dönülmez levhası 6m içinde - İşlem yapılmıyor")
+                        return
+                    
+                    self.get_logger().info("➡️ Dönülmez levhası algılandı, 10 metre ilerleniyor.")
+                    self.command_pub.publish(String(data='red'))
+                    time.sleep(0.2)
+                    self.mode = 'forward'
+                    if self.active_goal_handle:
+                        self.original_goal = self.active_goal_handle.goal
+                        cancel_future = self.active_goal_handle.cancel_goal_async()
+                        cancel_future.add_done_callback(lambda _: self.go_forward_and_return())
+                    else:
+                        self.go_forward_and_return()
+                elif 'ilerivesag' in data or 'ilerivesol' in data:
                     self.get_logger().info("➡️ Düz git levhası algılandı, 10 metre ilerleniyor.")
                     self.command_pub.publish(String(data='red'))
                     time.sleep(0.2)

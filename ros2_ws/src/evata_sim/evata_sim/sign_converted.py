@@ -1,5 +1,6 @@
 #!/usr/bin/env python3.10
 
+import os
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image, CameraInfo, PointCloud2
@@ -10,6 +11,7 @@ import numpy as np
 from ultralytics import YOLO
 import logging
 from sensor_msgs_py import point_cloud2
+from ament_index_python.packages import get_package_share_directory
 import math
 import json
 import time
@@ -19,7 +21,10 @@ logging.getLogger('ultralytics').setLevel(logging.ERROR)
 class SignDetector(Node):
     def __init__(self):
         super().__init__('sign_detector_node')
-        self.model = YOLO("/home/otonom/evata_2025/ros2_ws/src/evata_sim/evata_sim/best.pt")
+        package_path = get_package_share_directory('evata_sim')
+        model_path = os.path.join(package_path, 'model', 'best.pt')
+        
+        self.model = YOLO(model_path)
         self.bridge = CvBridge()
         self.fx = 277.0
         self.tracked_signs = {}

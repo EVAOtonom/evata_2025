@@ -275,7 +275,7 @@ class ImageSaver(Node):
                     x2_pair = x_values_sorted[valid_pairs[0] + 1]
                     mid_x = (x1_pair + x2_pair) // 2
                     mid_points.append((mid_x, y))  # Orta noktayı listeye ekle
-                    print(f"y = {y}, x1 = {x1_pair}, x2 = {x2_pair}, Orta Nokta = ({mid_x}, {y})")
+                    #print(f"y = {y}, x1 = {x1_pair}, x2 = {x2_pair}, Orta Nokta = ({mid_x}, {y})")
                 else:
                     for x in x_values:
                         adjusted_x = x - 275
@@ -283,7 +283,7 @@ class ImageSaver(Node):
                         adjusted_x = max(x1, min(x2, adjusted_x))
                         if adjusted_x > x1:
                             fallback_points.append((adjusted_x, y))
-                            print(f"Fallback: y = {y}, min_x = {adjusted_x}, adjusted_x = {adjusted_x}")
+                            #print(f"Fallback: y = {y}, min_x = {adjusted_x}, adjusted_x = {adjusted_x}")
         if all_points and self.latest_pointcloud is not None:
             try:
                 matched_points = []

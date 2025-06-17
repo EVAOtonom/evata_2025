@@ -48,7 +48,10 @@ def generate_launch_description():
             '-allow_renaming', 'true',
             '-x', '32.6016',
             '-y', '43.6005',
-            '-z', '0.6'
+            '-z', '0.6',
+            '-R', '0.0',  # Roll (raw) - 0
+            '-P', '0.0',  # Pitch - 0
+            '-Y', '3.1'   # Yaw - 0
         ],
     )
 
