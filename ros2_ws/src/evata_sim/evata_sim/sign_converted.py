@@ -1,10 +1,8 @@
 #!/usr/bin/env python3.10
 
-import os
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image, CameraInfo, PointCloud2
-from ament_index_python.packages import get_package_share_directory
 from std_msgs.msg import String
 from cv_bridge import CvBridge
 import cv2
@@ -21,9 +19,7 @@ logging.getLogger('ultralytics').setLevel(logging.ERROR)
 class SignDetector(Node):
     def __init__(self):
         super().__init__('sign_detector_node')
-        package_path = get_package_share_directory('evata_sim')
-        model_path = os.path.join(package_path, 'model', 'best.pt')
-        self.model = YOLO(model_path)
+        self.model = YOLO("/home/otonom/evata_2025/ros2_ws/src/evata_sim/evata_sim/best.pt")
         self.bridge = CvBridge()
         self.fx = 277.0
         self.tracked_signs = {}
@@ -129,6 +125,7 @@ class SignDetector(Node):
                     x, y, z = pt
                     if math.isnan(z) or math.isinf(z):
                         return -1
+                    print(math.sqrt(x**2 + y**2 + z**2))
                     return math.sqrt(x**2 + y**2 + z**2)
             return -1
         except Exception as e:

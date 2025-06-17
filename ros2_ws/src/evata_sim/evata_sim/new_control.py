@@ -26,7 +26,7 @@ class ControlNode(Node):
     def __init__(self):
         super().__init__('new_control')
 
-        self.waypoints = self.load_waypoints('/home/dilara/ros2_ws/src/evata_sim/evata_sim/waypoint.txt')
+        self.waypoints = self.load_waypoints('/home/otonom/evata_2025/ros2_ws/src/evata_sim/evata_sim/waypoint.txt')
         self.current_pose = None
         self.current_yaw = 0.0
         self.mode = 'normal'
@@ -326,8 +326,9 @@ class ControlNode(Node):
         points = []
         with open(file_path, 'r') as f:
             for line in f:
-                if line.strip() and not line.startswith("#"):x, y, lat, lon = map(float, line.strip().split())
-                points.append({'x': x, 'y': y, 'lat': lat, 'lon': lon})
+                if line.strip() and not line.startswith("#"):
+                    x, y, lat, lon = map(float, line.strip().split())
+                    points.append({'x': x, 'y': y, 'lat': lat, 'lon': lon})
         return points
 
     def odom_callback(self, msg):

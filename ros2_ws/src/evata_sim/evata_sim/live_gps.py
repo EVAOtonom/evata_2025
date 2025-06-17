@@ -24,8 +24,8 @@ class GPSNavigator(Node):
         self.gps_map = self.load_gps_map(self.gps_map_file)
 
         self.gps_targets = [
-            (40.789941, 29.509221),
-            (40.789937, 29.509312)
+            (40.789641, 29.508691),
+            (40.7895937, 29.5090505)
         ]
         self.current_index = 0
 
