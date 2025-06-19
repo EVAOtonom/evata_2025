@@ -18,6 +18,7 @@ class GPSNavigator(Node):
         super().__init__('gps_navigator')
         self.distance_threshold = 2.0  # 2 metre esneme payı
         self.create_timer(0.5, self.check_goal_distance)
+        self.goal_cancelling = False
 
         self.saved_goal = None
 
@@ -52,10 +53,8 @@ class GPSNavigator(Node):
         self.send_next_goal()
 
     def check_goal_distance(self):
-        if not self.current_pose or self.current_index >= len(self.gps_targets):
-            return
-            
-        if not self.motion_enabled or self.paused:
+        if (self.paused or not self.motion_enabled or not self.current_pose or 
+            self.goal_cancelling or self.current_index >= len(self.gps_targets)):
             return
         
         target_lat, target_lon = self.gps_targets[self.current_index]
@@ -67,26 +66,34 @@ class GPSNavigator(Node):
         distance = math.hypot(target_x - current_x, target_y - current_y)
         
         if distance < self.distance_threshold:
+            self.goal_cancelling = True  # Kilitle
             self.get_logger().info(f'✅ Hedefe {distance:.2f}m kaldı - Tamamlandı sayılıyor.')
             
-            # Mevcut goal'ı iptal et
             if self.goal_handle:
-                self.goal_handle.cancel_goal_async()
-            
-            # Sonraki hedefe geç
-            self.saved_goal = None
-            time.sleep(1.0)
-            self.current_index += 1
+                cancel_future = self.goal_handle.cancel_goal_async()
+                cancel_future.add_done_callback(self._handle_distance_cancel)
+            else:
+                self._proceed_to_next()
+        def load_gps_map(self, path):
+            gps_points = []
+            with open(path, 'r') as f:
+                for line in f:
+                    if line.strip().startswith("#") or len(line.strip()) == 0:
+                        continue
+                    x, y, lat, lon = map(float, line.strip().split())
+                    gps_points.append((x, y, lat, lon))
+            return gps_points
+        
+    def _handle_distance_cancel(self, future):
+        self.goal_cancelling = False
+        self.goal_handle = None
+        self._proceed_to_next()
+
+    def _proceed_to_next(self):
+        self.current_index += 1
+        self.saved_goal = None
+        if self.current_index < len(self.gps_targets):
             self.send_next_goal()
-    def load_gps_map(self, path):
-        gps_points = []
-        with open(path, 'r') as f:
-            for line in f:
-                if line.strip().startswith("#") or len(line.strip()) == 0:
-                    continue
-                x, y, lat, lon = map(float, line.strip().split())
-                gps_points.append((x, y, lat, lon))
-        return gps_points
 
     def gps_to_xy(self, lat, lon):
         nearest_points = sorted(

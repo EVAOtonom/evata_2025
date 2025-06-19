@@ -197,6 +197,27 @@ local_costmap:
         max_obstacle_height: 2.5  # Gerçek ortam için
         min_obstacle_height: 0.1  # Zemin filtreleme
         mark_threshold: 2  # 3D için artırıldı
+        observation_sources: scan lane_pointcloud  # Added lane_pointcloud here
+        scan:
+          topic: /scan
+          max_obstacle_height: 2.5
+          clearing: True
+          marking: True
+          data_type: "LaserScan"
+          raytrace_max_range: 8.0
+          raytrace_min_range: 0.0
+          obstacle_max_range: 7.5
+          obstacle_min_range: 0.0
+        lane_pointcloud:  # New point cloud configuration
+          topic: /lane_pointcloud
+          max_obstacle_height: 2.5
+          clearing: False  # Typically for soft obstacles we don't want them to clear other obstacles
+          marking: True
+          data_type: "PointCloud2"
+          raytrace_max_range: 8.0
+          raytrace_min_range: 0.0
+          obstacle_max_range: 7.5
+          obstacle_min_range: 0.0
       always_send_full_costmap: True
 
 global_costmap:
@@ -213,8 +234,28 @@ global_costmap:
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
-        enabled: False
-        observation_sources: 
+        enabled: True
+        observation_sources: scan lane_pointcloud  # Added lane_pointcloud here
+        scan:
+          topic: /scan
+          max_obstacle_height: 2.5
+          clearing: True
+          marking: True
+          data_type: "LaserScan"
+          raytrace_max_range: 8.0
+          raytrace_min_range: 0.0
+          obstacle_max_range: 7.5
+          obstacle_min_range: 0.0
+        lane_pointcloud:  # New point cloud configuration
+          topic: /lane_pointcloud
+          max_obstacle_height: 2.5
+          clearing: False  # Typically for soft obstacles we don't want them to clear other obstacles
+          marking: True
+          data_type: "PointCloud2"
+          raytrace_max_range: 8.0
+          raytrace_min_range: 0.0
+          obstacle_max_range: 7.5
+          obstacle_min_range: 0.0
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
         map_subscribe_transient_local: True

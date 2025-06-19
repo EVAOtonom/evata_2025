@@ -328,8 +328,50 @@ class ControlNode(Node):
                 self._handle_waypoint_completion()
 
     def _handle_forward_completion(self):
-        self.get_logger().info("⏳ 10 metre ileri gidildi, orijinal hedefe dönülüyor...")
+        self.get_logger().info("⏳ 20 metre ileri gidildi, orijinal hedefe dönülüyor...")
         
+        if self.original_goal:
+            self.get_logger().info("↩️ Orijinal hedefe geri dönülüyor...")
+            send_goal_future = self.nav_client.send_goal_async(self.original_goal)
+            send_goal_future.add_done_callback(self.original_goal_response_callback)
+            self.original_goal = None
+        else:
+            self.get_logger().info("ℹ️ live_gps'e devam ediliyor...")
+            self.command_pub.publish(String(data='green'))
+            self.mode = 'normal'
+            self.sign_processing = False
+            self.last_sign_processed = None
+
+    def original_goal_response_callback(self, future):
+        goal_handle = future.result()
+        if goal_handle.accepted:
+            self.get_logger().info("✅ Orijinal hedef kabul edildi.")
+            self.active_goal_handle = goal_handle
+            result_future = goal_handle.get_result_async()
+            result_future.add_done_callback(self.original_goal_result_callback)
+        else:
+            self.get_logger().warn("❌ Orijinal hedef reddedildi, live_gps'e devam ediliyor.")
+            self.command_pub.publish(String(data='green'))
+        
+        self.mode = 'normal'
+        self.sign_processing = False
+        self.last_sign_processed = None
+
+    def original_goal_result_callback(self, future):
+        result = future.result()
+        if result.status == GoalStatus.STATUS_SUCCEEDED:
+            self.get_logger().info("✅ Orijinal hedefe ulaşıldı.")
+        elif result.status == GoalStatus.STATUS_CANCELED:
+            self.get_logger().info("⏸️ Hedef iptal edildi.")
+            # Eğer saved_goal varsa ve motion enabled ise devam et
+            if self.saved_goal and self.motion_enabled and not self.paused:
+                self.get_logger().info("↩️ Kaydedilen hedefe dönülüyor...")
+                lat, lon = self.saved_goal
+                x, y = self.gps_to_xy(lat, lon)
+                self.send_goal(x, y)
+        
+        self.active_goal_handle = None
+
         if self.original_goal:
             self.get_logger().info("↩️ Orijinal hedefe geri dönülüyor...")
             send_goal_future = self.nav_client.send_goal_async(self.original_goal)
