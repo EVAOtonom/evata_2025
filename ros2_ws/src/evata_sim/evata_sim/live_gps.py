@@ -16,6 +16,8 @@ import time
 class GPSNavigator(Node):
     def __init__(self):
         super().__init__('gps_navigator')
+        self.distance_threshold = 2.0  # 2 metre esneme payı
+        self.create_timer(0.5, self.check_goal_distance)
 
         self.saved_goal = None
 
@@ -49,6 +51,33 @@ class GPSNavigator(Node):
 
         self.send_next_goal()
 
+    def check_goal_distance(self):
+        if not self.current_pose or self.current_index >= len(self.gps_targets):
+            return
+            
+        if not self.motion_enabled or self.paused:
+            return
+        
+        target_lat, target_lon = self.gps_targets[self.current_index]
+        target_x, target_y = self.gps_to_xy(target_lat, target_lon)
+        
+        current_x = self.current_pose.position.x
+        current_y = self.current_pose.position.y
+        
+        distance = math.hypot(target_x - current_x, target_y - current_y)
+        
+        if distance < self.distance_threshold:
+            self.get_logger().info(f'✅ Hedefe {distance:.2f}m kaldı - Tamamlandı sayılıyor.')
+            
+            # Mevcut goal'ı iptal et
+            if self.goal_handle:
+                self.goal_handle.cancel_goal_async()
+            
+            # Sonraki hedefe geç
+            self.saved_goal = None
+            time.sleep(1.0)
+            self.current_index += 1
+            self.send_next_goal()
     def load_gps_map(self, path):
         gps_points = []
         with open(path, 'r') as f:
@@ -105,7 +134,7 @@ class GPSNavigator(Node):
         gps_msg.altitude = 0.0
         self.gps_pub.publish(gps_msg)
 
-        self.get_logger().info(f"Corrected GPS: lat={corrected_lat:.7f}, lon={corrected_lon:.7f}")
+        #self.get_logger().info(f"Corrected GPS: lat={corrected_lat:.7f}, lon={corrected_lon:.7f}")
 
         if self.prev_x is not None and self.prev_y is not None:
             dx = x - self.prev_x
@@ -155,7 +184,7 @@ class GPSNavigator(Node):
         else:
             direction = "❓"
 
-        self.get_logger().info(f"🧭 Anlık yön: {direction} ({angle_deg:.1f}°)")
+        #self.get_logger().info(f"🧭 Anlık yön: {direction} ({angle_deg:.1f}°)")
 
     def send_next_goal(self):
         if self.paused:

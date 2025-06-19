@@ -334,7 +334,7 @@ class ImageSaver(Node):
 
                     pc2_msg = point_cloud2.create_cloud(header, fields, matched_points)
                     self.filtered_pointcloud_pub.publish(pc2_msg)
-                    self.get_logger().info(f"Published filtered PointCloud2 with {len(matched_points)} points")
+                    #self.get_logger().info(f"Published filtered PointCloud2 with {len(matched_points)} points")
 
             except Exception as e:
                 self.get_logger().error(f"Error creating filtered PointCloud: {str(e)}")
