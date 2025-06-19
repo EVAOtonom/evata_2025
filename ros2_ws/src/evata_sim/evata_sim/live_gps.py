@@ -74,15 +74,15 @@ class GPSNavigator(Node):
                 cancel_future.add_done_callback(self._handle_distance_cancel)
             else:
                 self._proceed_to_next()
-        def load_gps_map(self, path):
-            gps_points = []
-            with open(path, 'r') as f:
-                for line in f:
-                    if line.strip().startswith("#") or len(line.strip()) == 0:
-                        continue
-                    x, y, lat, lon = map(float, line.strip().split())
-                    gps_points.append((x, y, lat, lon))
-            return gps_points
+    def load_gps_map(self, path):
+        gps_points = []
+        with open(path, 'r') as f:
+            for line in f:
+                if line.strip().startswith("#") or len(line.strip()) == 0:
+                    continue
+                x, y, lat, lon = map(float, line.strip().split())
+                gps_points.append((x, y, lat, lon))
+        return gps_points
         
     def _handle_distance_cancel(self, future):
         self.goal_cancelling = False
