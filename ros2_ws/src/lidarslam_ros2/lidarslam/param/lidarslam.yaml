@@ -8,9 +8,9 @@ scan_matcher:
     gicp_corr_dist_threshold: 5.0
     trans_for_mapupdate: 1.5
     vg_size_for_input: 0.5
-    vg_size_for_map: 0.1
+    vg_size_for_map: 0.3
     use_min_max_filter: true
-    scan_min_range: 1.0
+    scan_min_range: 2.0
     scan_max_range: 200.0
     scan_period: 0.2
     map_publish_period: 15.0

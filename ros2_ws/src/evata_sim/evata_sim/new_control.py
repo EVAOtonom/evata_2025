@@ -111,27 +111,28 @@ class ControlNode(Node):
             if not (self.current_pose and self.mode == 'normal'):
                 return
 
+            # Tüm modlar için aktif hedefi kaydet (forward/waypoint farketmez)
             if self.active_goal_handle:
                 self.original_goal = self._get_goal_from_handle(self.active_goal_handle)
+                self.get_logger().info(f"💾 Orijinal hedef kaydedildi: {self.original_goal.pose.pose.position}")
 
             self.sign_processing = True
             self.last_sign_processed = data
-
             self._process_sign(data)
 
         except Exception as e:
             self.get_logger().error(f"❌ JSON parse hatası: {e}")
 
     def _process_sign(self, data):
-        if 'sagyon' in data:
-            self._handle_direction_sign('sagyon', self._send_nearest_right_waypoint)
-        elif 'solyon' in data:
-            self._handle_direction_sign('solyon', self._send_nearest_left_waypoint)
-        elif any(sign in data for sign in ['girme', 'kazi', 'notraffic']):
+        if any(sign in data for sign in ['sag', 'ileriden_saga']):
+            self._handle_direction_sign('sag', self._send_nearest_right_waypoint)
+        elif any(sign in data for sign in ['sol', 'ileriden_sola']):
+            self._handle_direction_sign('sol', self._send_nearest_left_waypoint)
+        elif any(sign in data for sign in ['girisiyok', 'kazi_calismalari', 'tasittragiginekapali']):
             self._handle_no_entry_sign(data)
-        elif any(sign in data for sign in ['sagdonulmez', 'soladonulmez']):
+        elif any(sign in data for sign in ['sagadonulmez', 'soladonulmez']):
             self._handle_no_turn_sign(data)
-        elif any(sign in data for sign in ['ilerivesag', 'ilerivesol']):
+        elif any(sign in data for sign in ['ilerisag', 'ilerisol']):
             self._handle_straight_sign()
 
     def _handle_direction_sign(self, sign_type, waypoint_function):
@@ -157,11 +158,11 @@ class ControlNode(Node):
             self.get_logger().info("🛑 Dönülmez levhası 6m içinde - İşlem yapılmıyor")
             return
         
-        self.get_logger().info("➡️ Dönülmez levhası algılandı, 10 metre ilerleniyor.")
+        self.get_logger().info("➡️ Dönülmez levhası algılandı, 20 metre ilerleniyor.")
         self._execute_forward_movement()
 
     def _handle_straight_sign(self):
-        self.get_logger().info("➡️ Düz git levhası algılandı, 10 metre ilerleniyor.")
+        self.get_logger().info("➡️ Düz git levhası algılandı, 20 metre ilerleniyor.")
         self._execute_forward_movement()
 
     def _execute_forward_movement(self):
@@ -260,17 +261,18 @@ class ControlNode(Node):
             return
 
         x, y = self.current_pose.position.x, self.current_pose.position.y
-
-        right_waypoints = self._get_side_waypoints((-100, -20))
-        left_waypoints = self._get_side_waypoints((20, 100))
-
-        all_waypoints = right_waypoints + left_waypoints
         
-        if not all_waypoints:
+        # Tüm uygun waypoint'leri bul (hem sağ hem sol)
+        waypoints = self._get_side_waypoints((-100, -20)) + self._get_side_waypoints((20, 100))
+        
+        if not waypoints:
             self.get_logger().warn("❌ Girilmez bölge için waypoint yok!")
             return
 
-        nearest = min(all_waypoints, key=lambda p: math.hypot(p[0]-x, p[1]-y))
+        # En yakın waypoint'i seç
+        nearest = min(waypoints, key=lambda p: math.hypot(p[0]-x, p[1]-y))
+        self.nearest_waypoint = nearest  # Bunu ekledik (diğer yön işaretleriyle tutarlılık için)
+        
         self.get_logger().info(f"📍 En yakın GİRİLMEZ waypoint: {nearest}")
         
         goal_msg = self._create_navigation_goal(nearest[0], nearest[1])
@@ -393,35 +395,26 @@ class ControlNode(Node):
         distance_remaining = math.hypot(target[0] - current_x, target[1] - current_y)
         
         if distance_remaining < self.distance_threshold:
-            self.get_logger().info(f"✅ Hedefe {distance_remaining:.2f}m kaldı, tamamlandı sayılıyor")
+            self.get_logger().info(f"✅ Hedefe {distance_remaining:.2f}m kala tamamlandı sayılıyor")
             
-            # Daha güvenli fake result oluşturma
-            class FakeResult:
-                def __init__(self):
-                    self.status = GoalStatus.STATUS_SUCCEEDED
-                    self.result = NavigateToPose.Result()  # Gerekli result nesnesi
-                    
-            # Callback'i doğrudan çağır
-            self._handle_goal_completion(FakeResult())
-                
-    def _handle_goal_completion(self, result):
-        """Hedef tamamlandığında yapılacak işlemler"""
+            if self.active_goal_handle:
+                self.active_goal_handle.cancel_goal_async()  # Nav2 uyumlu iptal
+            
+            self._handle_goal_completion()  # TEK ÇAĞRI
+
+    def _handle_goal_completion(self):
         self.get_logger().info("🔄 Hedef tamamlandı, yeni rotaya geçiliyor...")
         
-        # 1. Mevcut hedefi temizle
-        self.active_goal_handle = None
+        # 1 saniye bekle (nav2'nin stabilize olması için)
+        time.sleep(1.0)
         
-        # 2. GPS navigasyonunu yeniden başlat
+        # GPS modunu yeniden başlat
         self.command_pub.publish(String(data='green'))
         
-        # 3. Modu ve işaret durumunu sıfırla
+        # Durumu sıfırla
         self.mode = 'normal'
+        self.active_goal_handle = None
         self.last_sign_processed = None
-        self.sign_processing = False
-        
-        # 4. Yeni işaret varsa işle
-        if hasattr(self, 'last_detected_sign'):
-            self._process_sign(self.last_detected_sign)
 
     def _get_current_target(self):
         if self.mode == 'waypoint' and hasattr(self, 'nearest_waypoint'):

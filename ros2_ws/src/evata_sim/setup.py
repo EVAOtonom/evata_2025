@@ -18,6 +18,7 @@ setup(
         (os.path.join('share', package_name, 'model'), ['evata_sim/sol300best.pt']),
         (os.path.join('share', package_name, 'model'), ['evata_sim/best.pt']),    
         (os.path.join('share', package_name, 'waypoint'), ['evata_sim/waypoint.txt']),
+        (os.path.join('share', package_name, 'json'), ['evata_sim/gps_targets.json']),
     ],
     install_requires=['setuptools'],
     zip_safe=False,
@@ -38,7 +39,8 @@ setup(
             "sign_converted=" + package_name + ".sign_converted:main",
             "live_gps=" + package_name + ".live_gps:main",
             "new_control=" + package_name + ".new_control:main",
-            "keyboard_publisher=" + package_name + ".keyboard_publisher:main"
+            "keyboard_publisher=" + package_name + ".keyboard_publisher:main",
+            "isikhareket=" + package_name + ".isikhareket:main"
         ],
     },
 )

@@ -24,8 +24,9 @@ setup(
             'Aks = reel_evata.Aks:main',
             'stabilThrottle = reel_evata.stabilThrottle:main',
             'velocity_plotter = reel_evata.velocity_plotter:main',
-            'tarikutay = reel_evata.tarikutay:main',
-            "laneDetection=" + package_name + ".laneDetection:main"
+            'cmd_vel = reel_evata.cmd_vel:main',
+            "laneDetection=" + package_name + ".laneDetection:main",
+            'toggle_brake= reel_evata.toggle_brake:main',
         
         ],
     },

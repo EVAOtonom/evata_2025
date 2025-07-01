@@ -12,6 +12,7 @@ from action_msgs.msg import GoalStatus
 import math
 import os
 import time
+import json
 
 class GPSNavigator(Node):
     def __init__(self):
@@ -26,10 +27,8 @@ class GPSNavigator(Node):
         self.gps_map_file = os.path.join(package_path, 'gps_data', 'gps_map.txt')
         self.gps_map = self.load_gps_map(self.gps_map_file)
 
-        self.gps_targets = [
-            (40.789641, 29.508691),
-            (40.7895937, 29.5090505)
-        ]
+        self.gps_target_file = os.path.join(package_path, 'json', 'gps_targets.json')
+        self.gps_targets = self.load_gps_targets(self.gps_target_file)
         self.current_index = 0
 
         self.paused = False
@@ -65,7 +64,8 @@ class GPSNavigator(Node):
         
         distance = math.hypot(target_x - current_x, target_y - current_y)
         
-        if distance < self.distance_threshold:
+        # Sadece 2 metre veya daha yakınsa iptal et
+        if distance <= 2.0:  # 2 metre veya daha yakın
             self.goal_cancelling = True  # Kilitle
             self.get_logger().info(f'✅ Hedefe {distance:.2f}m kaldı - Tamamlandı sayılıyor.')
             
@@ -74,6 +74,7 @@ class GPSNavigator(Node):
                 cancel_future.add_done_callback(self._handle_distance_cancel)
             else:
                 self._proceed_to_next()
+
     def load_gps_map(self, path):
         gps_points = []
         with open(path, 'r') as f:
@@ -227,8 +228,8 @@ class GPSNavigator(Node):
     def control_callback(self, msg):
         if msg.data == 'red':
             self.motion_enabled = False
-            self.get_logger().info("🛑 live_gps redreduldu.")
-
+            self.get_logger().info("🛑 Hareket durduruldu, hedefe 2m kala iptal edilecek.")
+            
             if self.current_index < len(self.gps_targets):
                 self.saved_goal = {
                     'target': self.gps_targets[self.current_index],
@@ -236,12 +237,9 @@ class GPSNavigator(Node):
                 }
                 self.get_logger().info(f"💾 Hedef kaydedildi: {self.saved_goal['target']}")
 
-            if self.goal_handle:
-                self.goal_handle.cancel_goal_async()
-
         elif msg.data == 'green':
             self.motion_enabled = True
-            self.get_logger().info("✅ live_gps green ediyor (manuel).")
+            self.get_logger().info("✅ Hareket yeniden başlatılıyor.")
             if self.saved_goal:
                 self.get_logger().info(f"↩️ Kaydedilen hedefe dönülüyor: {self.saved_goal['target']}")
                 lat, lon = self.saved_goal['target']
@@ -283,6 +281,11 @@ class GPSNavigator(Node):
             self.send_next_goal()
         else:
             self.get_logger().warn(f"⚠️ Hedef işlemi beklenmeyen bir redumla tamamlandı. Status: {result.status}")
+            
+    def load_gps_targets(self, path):
+        with open(path, 'r') as f:
+            data = json.load(f)
+            return [(point['lat'], point['lon']) for point in data]
 
 
 def main(args=None):
