@@ -77,14 +77,11 @@ class ImageSaver(Node):
         model.eval()
         self.model = model
         self.device = device
-        self.sol_sayac = 0
-        self.sag_sayac = 0
-        self.onceki_deger = None
-        self.serit = None
-
         self.filtered_pointcloud_pub = self.create_publisher(PointCloud2, '/lane_pointcloud', 10)
-
         self.image_center_x = 640  # Görselin orta noktası (1280x720 için)
+
+        self.last_process_time = 0.0
+        self.process_interval = 1.0 / 5  # 5 FPS
 
 
     def calculate_steering_angle(self, mid_points):
@@ -110,6 +107,11 @@ class ImageSaver(Node):
 
 
     def image_callback(self, msg):
+        current_time = time.time()
+        if current_time - self.last_process_time < self.process_interval:
+            return
+        self.last_process_time = current_time
+
         try:
             self.latest_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
             self.detect(self.latest_image)
@@ -176,47 +178,6 @@ class ImageSaver(Node):
 
         # Şerit çizgilerinin koordinatlarını bulma
         y_coords, x_coords = np.where(thinned_ll_mask_for_show == 1)
-
-        # Sol ve sağ şerit çizgilerini ayırma
-        sol_mask = x_coords < mid_point
-        sag_mask = x_coords >= mid_point
-
-        sol = list(zip(y_coords[sol_mask], x_coords[sol_mask]))
-        sag = list(zip(y_coords[sag_mask], x_coords[sag_mask]))
-
-        
-
-        # Hangi tarafta daha fazla nokta olduğunu belirle
-        if len(sol) < len(sag):
-            mevcut_deger = 0
-        elif len(sag) < len(sol):
-            mevcut_deger = 1
-        else:
-            mevcut_deger = None  # Eşitse veya hiç nokta yoksa
-
-        # Önceki değerle karşılaştır
-        if mevcut_deger == self.onceki_deger:
-            if mevcut_deger == 0:
-                self.sol_sayac += 1
-            elif mevcut_deger == 1:
-                self.sag_sayac += 1
-        else:
-            # Değer değişti, sayaçları sıfırla
-            print("else girdi")
-            self.sol_sayac = 0
-            self.sag_sayac = 0
-            self.onceki_deger = mevcut_deger
-
-
-        # Eğer 100 kere üst üste aynı değer gelirse ekrana yazdır
-        if self.sol_sayac >= 100:
-            self.serit = "sol"
-            self.sol_sayac = 0  # Sayaçı sıfırla (isteğe bağlı)
-            print("sol")
-        elif self.sag_sayac >= 50:
-            self.serit = "sag"
-            self.sag_sayac = 0  # Sayaçı sıfırla (isteğe bağlı)
-            print("sağ")
 
         roi_y_start = 520
         roi_y_end = 720
@@ -359,8 +320,6 @@ class ImageSaver(Node):
                     plot_one_box(xyxy, im0s, line_thickness=3)
             # Show result
             show_seg_result(im0s, (da_seg_mask, thinned_ll_mask_for_show), is_demo=True)
-            cv2.putText(im0s, f"Serit = {self.serit}", (10,30), cv2.FONT_HERSHEY_SIMPLEX,
-                        1, (0,255,0), 2, cv2.LINE_AA)
             if len(mid_points) >= 2:
                 for i in range(1, len(mid_points)):
                     cv2.line(im0s, mid_points[i - 1], mid_points[i], (0, 255, 0), thickness=2)

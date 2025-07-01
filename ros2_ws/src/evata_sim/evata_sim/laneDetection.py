@@ -4,7 +4,6 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import cv2
 import cv2.ximgproc
-from geometry_msgs.msg import Twist  # Twist mesajı için import
 from sensor_msgs.msg import PointCloud2, PointField
 from sensor_msgs_py import point_cloud2
 import math
@@ -78,19 +77,14 @@ class ImageSaver(Node):
         model.eval()
         self.model = model
         self.device = device
-        self.sol_sayac = 0
-        self.sag_sayac = 0
-        self.onceki_deger = None
-        self.serit = None
-
-        self.cmd_vel_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
         self.filtered_pointcloud_pub = self.create_publisher(PointCloud2, '/lane_pointcloud', 10)
-
         self.image_center_x = 640  # Görselin orta noktası (1280x720 için)
 
+        self.last_process_time = 0.0
+        self.process_interval = 1.0 / 5  # 5 FPS
 
-    def calculate_steering_angle(self, mid_points):
-        """Orta noktaların x koordinatlarının ortalamasına göre dönme açısını hesapla."""
+    """def calculate_steering_angle(self, mid_points):
+        "Orta noktaların x koordinatlarının ortalamasına göre dönme açısını hesapla."
         if not mid_points:
             return 0.0  # Orta nokta yoksa düz git
 
@@ -107,37 +101,29 @@ class ImageSaver(Node):
         max_deviation = self.image_center_x  # Maksimum sapma (640 piksel)
         steering_angle = deviation / max_deviation  # -1.0 (sola) ile 1.0 (sağa) arasında
 
-        return -steering_angle
-
-    def publish_cmd_vel(self, steering_angle):
-        """Tekerlek açısına göre Twist mesajı gönder."""
-        msg = Twist()
-
-        # İleri hareket için hız değerlerini ayarlayın
-        msg.linear.x = 0.5 # İleri hareket
-        msg.linear.y = 0.0  # Y ekseninde hareket yok
-        msg.linear.z = 0.0  # Z ekseninde hareket yok
-
-        # Dönme hareketi için hız değerlerini ayarlayın
-        msg.angular.x = 0.0  # Dönme hareketi yok
-        msg.angular.y = 0.0  # Dönme hareketi yok
-        msg.angular.z = steering_angle  # Hesaplanan dönme açısı
-
-        #self.cmd_vel_publisher.publish(msg)
-        #self.get_logger().info(f"Publishing: linear.x={msg.linear.x}, angular.z={msg.angular.z}")
+        return -steering_angle"""
 
     def image_callback(self, msg):
+        current_time = time.time()
+        if current_time - self.last_process_time < self.process_interval:
+            return  # Henüz işleme zamanı değil, fonksiyondan çık
+
+        self.last_process_time = current_time
+        
         try:
             self.latest_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
             self.detect(self.latest_image)
         except Exception as e:
             self.get_logger().error(f'Failed to process image: {e}')
+
+        
     
     def point_cloud_callback(self, msg):
         self.latest_pointcloud = msg
         # Store camera info if available (you might need to subscribe to camera info topic)
         if hasattr(msg, 'header'):
             self.latest_pointcloud_header = msg.header
+
 
 
     def detect(self, source, imgsz=640, conf_thres=0.3, iou_thres=0.45, 
@@ -193,47 +179,6 @@ class ImageSaver(Node):
 
         # Şerit çizgilerinin koordinatlarını bulma
         y_coords, x_coords = np.where(thinned_ll_mask_for_show == 1)
-
-        # Sol ve sağ şerit çizgilerini ayırma
-        sol_mask = x_coords < mid_point
-        sag_mask = x_coords >= mid_point
-
-        sol = list(zip(y_coords[sol_mask], x_coords[sol_mask]))
-        sag = list(zip(y_coords[sag_mask], x_coords[sag_mask]))
-
-        
-
-        # Hangi tarafta daha fazla nokta olduğunu belirle
-        if len(sol) < len(sag):
-            mevcut_deger = 0
-        elif len(sag) < len(sol):
-            mevcut_deger = 1
-        else:
-            mevcut_deger = None  # Eşitse veya hiç nokta yoksa
-
-        # Önceki değerle karşılaştır
-        if mevcut_deger == self.onceki_deger:
-            if mevcut_deger == 0:
-                self.sol_sayac += 1
-            elif mevcut_deger == 1:
-                self.sag_sayac += 1
-        else:
-            # Değer değişti, sayaçları sıfırla
-            print("else girdi")
-            self.sol_sayac = 0
-            self.sag_sayac = 0
-            self.onceki_deger = mevcut_deger
-
-
-        # Eğer 100 kere üst üste aynı değer gelirse ekrana yazdır
-        if self.sol_sayac >= 100:
-            self.serit = "sol"
-            self.sol_sayac = 0  # Sayaçı sıfırla (isteğe bağlı)
-            print("sol")
-        elif self.sag_sayac >= 50:
-            self.serit = "sag"
-            self.sag_sayac = 0  # Sayaçı sıfırla (isteğe bağlı)
-            print("sağ")
 
         roi_y_start = 520
         roi_y_end = 720
@@ -342,7 +287,7 @@ class ImageSaver(Node):
         # Eğer mid_points boşsa, fallback_points'i kullan
         if not mid_points and fallback_points:
             mid_points = fallback_points
-            print("Using fallback points")
+            #print("Using fallback points")
 
         # ROI alanını ana görselde belirginleştirme (dikdörtgen çizme)
         roi_top_left = (get_roi_x_bounds(roi_y_start)[0], roi_y_start)
@@ -362,8 +307,7 @@ class ImageSaver(Node):
                 cv2.circle(im0s, point, radius=5, color=(0, 0, 255), thickness=-1)
 
             # Tekerlek açısını hesapla ve gönder
-            steering_angle = self.calculate_steering_angle(mid_points)
-            self.publish_cmd_vel(steering_angle)
+            #steering_angle = self.calculate_steering_angle(mid_points)
         
 
             # Process detections
@@ -376,8 +320,7 @@ class ImageSaver(Node):
                     plot_one_box(xyxy, im0s, line_thickness=3)
             # Show result
             show_seg_result(im0s, (da_seg_mask, thinned_ll_mask_for_show), is_demo=True)
-            cv2.putText(im0s, f"Serit = {self.serit}", (10,30), cv2.FONT_HERSHEY_SIMPLEX,
-                        1, (0,255,0), 2, cv2.LINE_AA)
+
             if len(mid_points) >= 2:
                 for i in range(1, len(mid_points)):
                     cv2.line(im0s, mid_points[i - 1], mid_points[i], (0, 255, 0), thickness=2)
