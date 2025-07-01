@@ -80,7 +80,9 @@ def generate_launch_description():
             name='robot_state_publisher',
             output='screen',
             parameters=[{'use_sim_time': use_sim_time,
-                         'robot_description': doc.toxml()}]),        
+                         'robot_description': doc.toxml()}]), 
+                         
+                                
 
                 # NAV2 launch dosyasını dahil et
         IncludeLaunchDescription(
@@ -93,6 +95,11 @@ def generate_launch_description():
         ),
         
      
+Node(
+    package='reel_evata',
+    executable='OdometerListener',
+    output='screen'
+),
 
 
         # RViz
