@@ -153,6 +153,22 @@
       <child>zed_camera_link</child>
     </joint>
 
+    <link name="zed_imu_link">
+	    <pose>0 0 0 0 0 0</pose> <!-- Kamera merkezine göre IMU -->
+	    <inertial>
+	      <mass>0.01</mass>
+	      <inertia>
+	        <ixx>0.00001</ixx> <iyy>0.00001</iyy> <izz>0.00001</izz>
+	      </inertia>
+	    </inertial>
+    </link>
+
+    <joint name="zed_imu_joint" type="fixed">
+	    <parent>zed_camera_link</parent>
+	    <child>zed_imu_link</child>
+	    <pose>0 0 0 0 0 0</pose> <!-- IMU, kameranın merkezinde -->
+    </joint>
+
     <link name="rslidar">
       <pose>0 0 0 0 0 0</pose>
       <inertial>
