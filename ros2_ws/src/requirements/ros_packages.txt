@@ -1,0 +1,371 @@
+ii  fonts-khmeros-core                                 5.0-9ubuntu1                            all          KhmerOS Unicode fonts for the Khmer language of Cambodia
+ii  ros-humble-action-msgs                             1.2.1-1jammy.20250607.030101            amd64        Messages and service definitions common among all ROS actions.
+ii  ros-humble-action-tutorials-cpp                    0.20.5-1jammy.20250617.223558           amd64        C++ action tutorial cpp code
+ii  ros-humble-action-tutorials-interfaces             0.20.5-1jammy.20250607.041318           amd64        Action tutorials action
+ii  ros-humble-action-tutorials-py                     0.20.5-1jammy.20250607.051042           amd64        Python action tutorial code
+ii  ros-humble-actionlib-msgs                          4.9.0-1jammy.20250617.203711            amd64        A package containing some message definitions used in the implementation of ROS 1 actions.
+ii  ros-humble-actuator-msgs                           0.0.1-1jammy.20250617.203544            amd64        ROS 2 message interface for Actuators.
+ii  ros-humble-ament-cmake                             1.3.11-1jammy.20250522.042128           amd64        The entry point package for the ament buildsystem in CMake.
+ii  ros-humble-ament-cmake-auto                        1.3.11-1jammy.20250522.045714           amd64        The auto-magic functions for ease to use of the ament buildsystem in CMake.
+ii  ros-humble-ament-cmake-copyright                   0.12.12-1jammy.20250522.050052          amd64        The CMake API for ament_copyright to check every source file contains copyright reference.
+ii  ros-humble-ament-cmake-core                        1.3.11-1jammy.20250522.031130           amd64        The core of the ament buildsystem in CMake.
+ii  ros-humble-ament-cmake-cppcheck                    0.12.12-1jammy.20250522.050206          amd64        The CMake API for ament_cppcheck to perform static code analysis on C/C++ code using Cppcheck.
+ii  ros-humble-ament-cmake-cpplint                     0.12.12-1jammy.20250522.050212          amd64        The CMake API for ament_cpplint to lint C / C++ code using cpplint.
+ii  ros-humble-ament-cmake-export-definitions          1.3.11-1jammy.20250522.035520           amd64        The ability to export definitions to downstream packages in the ament buildsystem.
+ii  ros-humble-ament-cmake-export-dependencies         1.3.11-1jammy.20250522.035743           amd64        The ability to export dependencies to downstream packages in the ament buildsystem in CMake.
+ii  ros-humble-ament-cmake-export-include-directories  1.3.11-1jammy.20250522.041343           amd64        The ability to export include directories to downstream packages in the ament buildsystem in CMake.
+ii  ros-humble-ament-cmake-export-interfaces           1.3.11-1jammy.20250522.041407           amd64        The ability to export interfaces to downstream packages in the ament buildsystem in CMake.
+ii  ros-humble-ament-cmake-export-libraries            1.3.11-1jammy.20250522.041341           amd64        The ability to export libraries to downstream packages in the ament buildsystem in CMake.
+ii  ros-humble-ament-cmake-export-link-flags           1.3.11-1jammy.20250522.041347           amd64        The ability to export link flags to downstream packages in the ament buildsystem.
+ii  ros-humble-ament-cmake-export-targets              1.3.11-1jammy.20250522.041408           amd64        The ability to export targets to downstream packages in the ament buildsystem in CMake.
+ii  ros-humble-ament-cmake-flake8                      0.12.12-1jammy.20250522.050323          amd64        The CMake API for ament_flake8 to check code syntax and style conventions with flake8.
+ii  ros-humble-ament-cmake-gen-version-h               1.3.11-1jammy.20250522.041836           amd64        Generate a C header containing the version number of the package
+ii  ros-humble-ament-cmake-gmock                       1.3.11-1jammy.20250522.045643           amd64        The ability to add Google mock-based tests in the ament buildsystem in CMake.
+ii  ros-humble-ament-cmake-gtest                       1.3.11-1jammy.20250522.041805           amd64        The ability to add gtest-based tests in the ament buildsystem in CMake.
+ii  ros-humble-ament-cmake-include-directories         1.3.11-1jammy.20250522.041359           amd64        The functionality to order include directories according to a chain of prefixes in the ament buildsystem in CMake.
+ii  ros-humble-ament-cmake-libraries                   1.3.11-1jammy.20250522.035640           amd64        The functionality to deduplicate libraries in the ament buildsystem in CMake.
+ii  ros-humble-ament-cmake-lint-cmake                  0.12.12-1jammy.20250522.045938          amd64        The CMake API for ament_lint_cmake to lint CMake code using cmakelint.
+ii  ros-humble-ament-cmake-pep257                      0.12.12-1jammy.20250522.050351          amd64        The CMake API for ament_pep257 to check code against the docstring style conventions in PEP 257.
+ii  ros-humble-ament-cmake-pytest                      1.3.11-1jammy.20250522.041834           amd64        The ability to run Python tests using pytest in the ament buildsystem in CMake.
+ii  ros-humble-ament-cmake-python                      1.3.11-1jammy.20250522.041357           amd64        The ability to use Python in the ament buildsystem in CMake.
+ii  ros-humble-ament-cmake-ros                         0.10.0-3jammy.20250522.051239           amd64        The ROS specific CMake bits in the ament buildsystem.
+ii  ros-humble-ament-cmake-target-dependencies         1.3.11-1jammy.20250522.041435           amd64        The ability to add definitions, include directories and libraries of a package to a target in the ament buildsystem in CMake.
+ii  ros-humble-ament-cmake-test                        1.3.11-1jammy.20250522.041440           amd64        The ability to add tests in the ament buildsystem in CMake.
+ii  ros-humble-ament-cmake-uncrustify                  0.12.12-1jammy.20250522.050224          amd64        The CMake API for ament_uncrustify to check code against styleconventions using uncrustify.
+ii  ros-humble-ament-cmake-version                     1.3.11-1jammy.20250522.035642           amd64        The ability to override the exported package version in the ament buildsystem.
+ii  ros-humble-ament-cmake-xmllint                     0.12.12-1jammy.20250522.050345          amd64        The CMake API for ament_xmllint to check XML file using xmmlint.
+ii  ros-humble-ament-copyright                         0.12.12-1jammy.20250522.045550          amd64        The ability to check source files for copyright and license information.
+ii  ros-humble-ament-cppcheck                          0.12.12-1jammy.20250522.041418          amd64        The ability to perform static code analysis on C/C++ code using Cppcheck and generate xUnit test result files.
+ii  ros-humble-ament-cpplint                           0.12.12-1jammy.20250522.045826          amd64        The ability to check code against the Google style conventions using cpplint and generate xUnit test result files.
+ii  ros-humble-ament-flake8                            0.12.12-1jammy.20250522.041449          amd64        The ability to check code for style and syntax conventions with flake8.
+ii  ros-humble-ament-index-cpp                         1.4.0-2jammy.20250522.051258            amd64        C++ API to access the ament resource index.
+ii  ros-humble-ament-index-python                      1.4.0-2jammy.20250522.050141            amd64        Python API to access the ament resource index.
+ii  ros-humble-ament-lint                              0.12.12-1jammy.20250522.041417          amd64        Providing common API for ament linter packages.
+ii  ros-humble-ament-lint-auto                         0.12.12-1jammy.20250522.041843          amd64        The auto-magic functions for ease to use of the ament linters in CMake.
+ii  ros-humble-ament-lint-cmake                        0.12.12-1jammy.20250522.045836          amd64        The ability to lint CMake code using cmakelint and generate xUnit test result files.
+ii  ros-humble-ament-lint-common                       0.12.12-1jammy.20250522.050437          amd64        The list of commonly used linters in the ament build system in CMake.
+ii  ros-humble-ament-package                           0.14.1-1jammy.20250522.030837           amd64        The parser for the manifest files in the ament buildsystem.
+ii  ros-humble-ament-pep257                            0.12.12-1jammy.20250522.041529          amd64        The ability to check code against the docstring style conventions in PEP 257 and generate xUnit test result files.
+ii  ros-humble-ament-uncrustify                        0.12.12-1jammy.20250522.045713          amd64        The ability to check code against style conventions using uncrustify and generate xUnit test result files.
+ii  ros-humble-ament-xmllint                           0.12.12-1jammy.20250522.045847          amd64        The ability to check XML files like the package manifest using xmllint and generate xUnit test result files.
+ii  ros-humble-angles                                  1.15.0-1jammy.20250522.043910           amd64        This package provides a set of simple math utilities to work with angles.
+ii  ros-humble-backward-ros                            1.0.7-1jammy.20250522.041422            amd64        The backward_ros package is a ros wrapper of backward-cpp from https://github.com/bombela/backward-cpp
+ii  ros-humble-behaviortree-cpp-v3                     3.8.7-1jammy.20250617.221846            amd64        This package provides the Behavior Trees core library.
+ii  ros-humble-bond                                    4.1.2-1jammy.20250617.203601            amd64        A bond allows two processes, A and B, to know when the other has terminated, either cleanly or by crashing.
+ii  ros-humble-bondcpp                                 4.1.2-1jammy.20250617.223139            amd64        C++ implementation of bond, a mechanism for checking when another process has terminated.
+ii  ros-humble-builtin-interfaces                      1.2.1-1jammy.20250607.025231            amd64        A package containing message and service definitions for types defined in the OMG IDL Platform Specific Model.
+ii  ros-humble-class-loader                            2.2.0-3jammy.20250607.020046            amd64        The class_loader package is a ROS-independent package for loading plugins during runtime and the foundation of the higher level ROS &quot;pluginlib&quot; library.
+ii  ros-humble-common-interfaces                       4.9.0-1jammy.20250617.212055            amd64        common_interfaces contains messages and services that are widely used by other ROS packages.
+ii  ros-humble-composition                             0.20.5-1jammy.20250617.220210           amd64        Examples for composing multiple nodes in a single process.
+ii  ros-humble-composition-interfaces                  1.2.1-1jammy.20250607.030117            amd64        A package containing message and service definitions for managing composable nodes in a container process.
+ii  ros-humble-compressed-depth-image-transport        2.5.3-1jammy.20250617.225615            amd64        Compressed_depth_image_transport provides a plugin to image_transport for transparently sending depth images (raw, floating-point) using PNG compression.
+ii  ros-humble-compressed-image-transport              2.5.3-1jammy.20250617.225618            amd64        Compressed_image_transport provides a plugin to image_transport for transparently sending images encoded as JPEG or PNG.
+ii  ros-humble-console-bridge-vendor                   1.4.1-1jammy.20250522.072307            amd64        Wrapper around console_bridge, providing nothing but a dependency on console_bridge, on some systems.
+ii  ros-humble-costmap-queue                           1.1.18-1jammy.20250617.235322           amd64        The costmap_queue package
+ii  ros-humble-cv-bridge                               3.2.1-1jammy.20250617.212054            amd64        This contains CvBridge, which converts between ROS2 Image messages and OpenCV images.
+ii  ros-humble-demo-nodes-cpp                          0.20.5-1jammy.20250617.220237           amd64        C++ nodes which were previously in the ros2/examples repository but are now just used for demo purposes.
+ii  ros-humble-demo-nodes-cpp-native                   0.20.5-1jammy.20250617.220243           amd64        C++ nodes which access the native handles of the rmw implementation.
+ii  ros-humble-demo-nodes-py                           0.20.5-1jammy.20250617.203233           amd64        Python nodes which were previously in the ros2/examples repository but are now just used for demo purposes.
+ii  ros-humble-depthimage-to-laserscan                 2.5.1-1jammy.20250617.220907            amd64        depthimage_to_laserscan
+ii  ros-humble-desktop                                 0.10.0-1jammy.20250618.013431           amd64        A package which extends 'ros_base' and includes high level packages like vizualization tools and demos.
+ii  ros-humble-diagnostic-msgs                         4.9.0-1jammy.20250617.204706            amd64        A package containing some diagnostics related message and service definitions.
+ii  ros-humble-diagnostic-updater                      4.0.6-1jammy.20250617.223050            amd64        diagnostic_updater contains tools for easily updating diagnostics.
+ii  ros-humble-domain-coordinator                      0.10.0-3jammy.20250522.045926           amd64        A tool to coordinate unique ROS_DOMAIN_IDs across multiple processes
+ii  ros-humble-draco-point-cloud-transport             1.0.11-1jammy.20250617.230551           amd64        draco_point_cloud_transport provides a plugin to point_cloud_transport for sending point clouds encoded with KD tree compression.
+ii  ros-humble-dummy-map-server                        0.20.5-1jammy.20250617.222730           amd64        dummy map server node
+ii  ros-humble-dummy-robot-bringup                     0.20.5-1jammy.20250617.230112           amd64        dummy robot bringup
+ii  ros-humble-dummy-sensors                           0.20.5-1jammy.20250617.220909           amd64        dummy sensor nodes
+ii  ros-humble-dwb-core                                1.1.18-1jammy.20250617.235114           amd64        TODO
+ii  ros-humble-dwb-critics                             1.1.18-1jammy.20250617.235605           amd64        The dwb_critics package
+ii  ros-humble-dwb-msgs                                1.1.18-1jammy.20250617.205126           amd64        Message/Service definitions specifically for the dwb_core
+ii  ros-humble-dwb-plugins                             1.1.18-1jammy.20250617.235503           amd64        Standard implementations of the GoalChecker and TrajectoryGenerators for dwb_core
+ii  ros-humble-eigen3-cmake-module                     0.1.1-4jammy.20250522.072942            amd64        Exports a custom CMake module to find Eigen3.
+ii  ros-humble-example-interfaces                      0.9.3-2jammy.20250607.041323            amd64        Contains message and service definitions used by the examples.
+ii  ros-humble-examples-rclcpp-minimal-action-client   0.15.3-1jammy.20250617.224023           amd64        Minimal action client examples
+ii  ros-humble-examples-rclcpp-minimal-action-server   0.15.3-1jammy.20250617.224043           amd64        Minimal action server examples
+ii  ros-humble-examples-rclcpp-minimal-client          0.15.3-1jammy.20250617.222049           amd64        Examples of minimal service clients
+ii  ros-humble-examples-rclcpp-minimal-composition     0.15.3-1jammy.20250617.220246           amd64        Minimalist examples of composing nodes in the same process
+ii  ros-humble-examples-rclcpp-minimal-publisher       0.15.3-1jammy.20250617.215325           amd64        Examples of minimal publisher nodes
+ii  ros-humble-examples-rclcpp-minimal-service         0.15.3-1jammy.20250617.222049           amd64        A minimal service server which adds two numbers
+ii  ros-humble-examples-rclcpp-minimal-subscriber      0.15.3-1jammy.20250617.220307           amd64        Examples of minimal subscribers
+ii  ros-humble-examples-rclcpp-minimal-timer           0.15.3-1jammy.20250617.222050           amd64        Examples of minimal nodes which have timers
+ii  ros-humble-examples-rclcpp-multithreaded-executor  0.15.3-1jammy.20250617.215328           amd64        Package containing example of how to implement a multithreaded executor
+ii  ros-humble-examples-rclpy-executors                0.15.3-1jammy.20250617.203410           amd64        Examples of creating and using exectors to run multiple nodes in the same process
+ii  ros-humble-examples-rclpy-minimal-action-client    0.15.3-1jammy.20250607.051101           amd64        Examples of minimal action clients using rclpy.
+ii  ros-humble-examples-rclpy-minimal-action-server    0.15.3-1jammy.20250607.051107           amd64        Examples of minimal action servers using rclpy.
+ii  ros-humble-examples-rclpy-minimal-client           0.15.3-1jammy.20250617.203243           amd64        Examples of minimal service clients using rclpy.
+ii  ros-humble-examples-rclpy-minimal-publisher        0.15.3-1jammy.20250617.203410           amd64        Examples of minimal publishers using rclpy.
+ii  ros-humble-examples-rclpy-minimal-service          0.15.3-1jammy.20250617.203442           amd64        Examples of minimal service servers using rclpy.
+ii  ros-humble-examples-rclpy-minimal-subscriber       0.15.3-1jammy.20250617.203300           amd64        Examples of minimal subscribers using rclpy.
+ii  ros-humble-fastcdr                                 1.0.24-2jammy.20250522.041440           amd64        CDR serialization implementation.
+ii  ros-humble-fastrtps                                2.6.10-1jammy.20250522.073349           amd64        *eprosima Fast DDS* (formerly Fast RTPS) is a C++ implementation of the DDS (Data Distribution Service) standard of the OMG (Object Management Group).
+ii  ros-humble-fastrtps-cmake-module                   2.2.2-2jammy.20250522.072455            amd64        Provide CMake module to find eProsima FastRTPS.
+ii  ros-humble-ffmpeg-encoder-decoder                  2.0.1-1jammy.20250617.215339            amd64        ROS2 convenience wrapper around ffmpeg for encoding/decoding
+ii  ros-humble-ffmpeg-image-transport                  2.0.3-1jammy.20250617.230903            amd64        ffmpeg_image_transport provides a plugin to image_transport for transparently sending an image stream encoded with ffmpeg.
+ii  ros-humble-ffmpeg-image-transport-msgs             1.1.2-1jammy.20250617.203950            amd64        messages for ffmpeg image transport plugin
+ii  ros-humble-foonathan-memory-vendor                 1.2.0-3jammy.20250522.073150            amd64        Foonathan/memory vendor package for Fast-RTPS.
+ii  ros-humble-geographic-msgs                         1.0.6-1jammy.20250617.204847            amd64        ROS messages for Geographic Information Systems.
+ii  ros-humble-geometry-msgs                           4.9.0-1jammy.20250617.203954            amd64        A package containing some geometry related message definitions.
+ii  ros-humble-geometry2                               0.25.13-1jammy.20250617.233726          amd64        A metapackage to bring in the default packages second generation Transform Library in ros, tf2.
+ii  ros-humble-gmock-vendor                            1.10.9006-1jammy.20250522.045616        amd64        The package provides GoogleMock.
+ii  ros-humble-gps-msgs                                2.1.0-1jammy.20250617.204001            amd64        GPS messages for use in GPS drivers
+ii  ros-humble-gtest-vendor                            1.10.9006-1jammy.20250522.041453        amd64        The package provides GoogleTest.
+ii  ros-humble-ignition-cmake2-vendor                  0.0.2-2jammy.20250522.073142            amd64        This package provides the Ignition CMake 2.x library.
+ii  ros-humble-ignition-math6-vendor                   0.0.2-2jammy.20250522.073317            amd64        This package provides the Ignition Math 6.x library.
+ii  ros-humble-image-geometry                          3.2.1-1jammy.20250617.212110            amd64        `image_geometry` contains C++ and Python libraries for interpreting images geometrically.
+ii  ros-humble-image-tools                             0.20.5-1jammy.20250617.220331           amd64        Tools to capture and play back images to and from DDS subscriptions and publications.
+ii  ros-humble-image-transport                         3.1.12-1jammy.20250617.223920           amd64        image_transport should always be used to subscribe to and publish images.
+ii  ros-humble-image-transport-plugins                 2.5.3-1jammy.20250617.230704            amd64        A set of plugins for publishing and subscribing to sensor_msgs/Image topics in representations other than raw pixel data.
+ii  ros-humble-interactive-markers                     2.3.2-2jammy.20250617.233254            amd64        3D interactive marker communication library for RViz and similar tools.
+ii  ros-humble-intra-process-demo                      0.20.5-1jammy.20250617.215612           amd64        Demonstrations of intra process communication.
+ii  ros-humble-joint-state-publisher                   2.4.0-1jammy.20250617.211629            amd64        This package contains a tool for setting and publishing joint state values for a given URDF.
+ii  ros-humble-joint-state-publisher-gui               2.4.0-1jammy.20250617.214108            amd64        This package contains a GUI tool for setting and publishing joint state values for a given URDF.
+ii  ros-humble-joy                                     3.3.0-1jammy.20250617.220919            amd64        The joy package contains joy_node, a node that interfaces a generic joystick to ROS 2.
+ii  ros-humble-kdl-parser                              2.6.4-1jammy.20250607.024454            amd64        The Kinematics and Dynamics Library (KDL) defines a tree structure to represent the kinematic and dynamic parameters of a robot mechanism.
+ii  ros-humble-keyboard-handler                        0.0.5-1jammy.20250522.072402            amd64        Handler for input from keyboard
+ii  ros-humble-laser-geometry                          2.4.0-2jammy.20250617.220937            amd64        This package contains a class for converting from a 2D laser scan as defined by sensor_msgs/LaserScan into a point cloud as defined by sensor_msgs/PointCloud or sensor_msgs/PointCloud2.
+ii  ros-humble-launch                                  1.0.9-1jammy.20250607.011421            amd64        The ROS launch tool.
+ii  ros-humble-launch-ros                              0.19.9-1jammy.20250607.034429           amd64        ROS specific extensions to the launch tool.
+ii  ros-humble-launch-testing                          1.0.9-1jammy.20250607.012240            amd64        A package to create tests which involve launch files and multiple processes.
+ii  ros-humble-launch-testing-ament-cmake              1.0.9-1jammy.20250607.012758            amd64        A package providing cmake functions for running launch tests from the build.
+ii  ros-humble-launch-testing-ros                      0.19.9-1jammy.20250617.203301           amd64        A package providing utilities for writing ROS2 enabled launch tests.
+ii  ros-humble-launch-xml                              1.0.9-1jammy.20250607.011836            amd64        XML frontend for the launch package.
+ii  ros-humble-launch-yaml                             1.0.9-1jammy.20250607.012047            amd64        YAML frontend for the launch package.
+ii  ros-humble-libcurl-vendor                          3.1.3-1jammy.20250522.044706            amd64        Wrapper around libcurl, it provides a fixed CMake module and an ExternalProject build of it.
+ii  ros-humble-libg2o                                  2020.5.29-4jammy.20250522.044709        amd64        The libg2o library from http://openslam.org/g2o.html
+ii  ros-humble-libstatistics-collector                 1.3.4-1jammy.20250617.202109            amd64        Lightweight aggregation utilities to collect statistics and measure message metrics.
+ii  ros-humble-libyaml-vendor                          1.2.2-2jammy.20250607.020227            amd64        Vendored version of libyaml.
+ii  ros-humble-lifecycle                               0.20.5-1jammy.20250617.223022           amd64        Package containing demos for lifecycle implementation
+ii  ros-humble-lifecycle-msgs                          1.2.1-1jammy.20250607.025325            amd64        A package containing some lifecycle related message and service definitions.
+ii  ros-humble-logging-demo                            0.20.5-1jammy.20250617.220339           amd64        Examples for using and configuring loggers.
+ii  ros-humble-map-msgs                                2.1.0-3jammy.20250617.205752            amd64        This package defines messages commonly used in mapping packages.
+ii  ros-humble-message-filters                         4.3.7-1jammy.20250617.222948            amd64        A set of ROS2 message filters which take in messages and may output those messages at a later time, based on the conditions that filter needs met.
+ii  ros-humble-message-tf-frame-transformer            1.1.1-1jammy.20250617.233337            amd64        Transforms messages of arbitrary type to a different frame using tf2::doTransform
+ii  ros-humble-nav-2d-msgs                             1.1.18-1jammy.20250617.204926           amd64        Basic message types for two dimensional navigation, extending from geometry_msgs::Pose2D.
+ii  ros-humble-nav-2d-utils                            1.1.18-1jammy.20250617.232300           amd64        A handful of useful utility functions for nav_2d packages.
+ii  ros-humble-nav-msgs                                4.9.0-1jammy.20250617.204728            amd64        A package containing some navigation related message and service definitions.
+ii  ros-humble-nav2-amcl                               1.1.18-1jammy.20250617.232211           amd64        amcl is a probabilistic localization system for a robot moving in 2D.
+ii  ros-humble-nav2-behavior-tree                      1.1.18-1jammy.20250617.231932           amd64        TODO
+ii  ros-humble-nav2-behaviors                          1.1.18-1jammy.20250617.235432           amd64        TODO
+ii  ros-humble-nav2-bringup                            1.1.18-1jammy.20250618.013411           amd64        Bringup scripts and configurations for the Nav2 stack
+ii  ros-humble-nav2-bt-navigator                       1.1.18-1jammy.20250617.235419           amd64        TODO
+ii  ros-humble-nav2-collision-monitor                  1.1.18-1jammy.20250617.235022           amd64        Collision Monitor
+ii  ros-humble-nav2-common                             1.1.18-1jammy.20250607.034714           amd64        Common support functionality used throughout the navigation 2 stack
+ii  ros-humble-nav2-constrained-smoother               1.1.18-1jammy.20250617.235332           amd64        Ceres constrained smoother
+ii  ros-humble-nav2-controller                         1.1.18-1jammy.20250617.235124           amd64        Controller action interface
+ii  ros-humble-nav2-core                               1.1.18-1jammy.20250617.234909           amd64        A set of headers for plugins core to the Nav2 stack
+ii  ros-humble-nav2-costmap-2d                         1.1.18-1jammy.20250617.232912           amd64        This package provides an implementation of a 2D costmap that takes in sensor data from the world, builds a 2D or 3D occupancy grid of the data (depending on whether a voxel based implementation is used), and inflates costs in a 2D costmap based on the occupancy grid and a user specified inflation radius.
+ii  ros-humble-nav2-dwb-controller                     1.1.18-1jammy.20250618.000108           amd64        ROS2 controller (DWB) metapackage
+ii  ros-humble-nav2-lifecycle-manager                  1.1.18-1jammy.20250617.231940           amd64        A controller/manager for the lifecycle nodes of the Navigation 2 system
+ii  ros-humble-nav2-map-server                         1.1.18-1jammy.20250617.232249           amd64        Refactored map server for ROS2 Navigation
+ii  ros-humble-nav2-mppi-controller                    1.1.18-1jammy.20250617.235132           amd64        nav2_mppi_controller
+ii  ros-humble-nav2-msgs                               1.1.18-1jammy.20250617.215521           amd64        Messages and service files for the Nav2 stack
+ii  ros-humble-nav2-navfn-planner                      1.1.18-1jammy.20250617.235151           amd64        TODO
+ii  ros-humble-nav2-planner                            1.1.18-1jammy.20250617.235240           amd64        TODO
+ii  ros-humble-nav2-regulated-pure-pursuit-controller  1.1.18-1jammy.20250617.235241           amd64        Regulated Pure Pursuit Controller
+ii  ros-humble-nav2-rotation-shim-controller           1.1.18-1jammy.20250617.235639           amd64        Rotation Shim Controller
+ii  ros-humble-nav2-rviz-plugins                       1.1.18-1jammy.20250618.011908           amd64        Navigation 2 plugins for rviz
+ii  ros-humble-nav2-simple-commander                   1.1.18-1jammy.20250617.220643           amd64        An importable library for writing mobile robot applications in python3
+ii  ros-humble-nav2-smac-planner                       1.1.18-1jammy.20250617.235243           amd64        Smac global planning plugin: A*, Hybrid-A*, State Lattice
+ii  ros-humble-nav2-smoother                           1.1.18-1jammy.20250617.235132           amd64        Smoother action interface
+ii  ros-humble-nav2-theta-star-planner                 1.1.18-1jammy.20250617.235343           amd64        Theta* Global Planning Plugin
+ii  ros-humble-nav2-util                               1.1.18-1jammy.20250617.231140           amd64        TODO
+ii  ros-humble-nav2-velocity-smoother                  1.1.18-1jammy.20250617.233259           amd64        Nav2's Output velocity smoother
+ii  ros-humble-nav2-voxel-grid                         1.1.18-1jammy.20250617.222136           amd64        voxel_grid provides an implementation of an efficient 3D voxel grid.
+ii  ros-humble-nav2-waypoint-follower                  1.1.18-1jammy.20250617.235305           amd64        A waypoint follower navigation server
+ii  ros-humble-navigation2                             1.1.18-1jammy.20250618.012434           amd64        ROS2 Navigation Stack
+ii  ros-humble-nmea-msgs                               2.0.0-4jammy.20250617.203406            amd64        The nmea_msgs package contains messages related to data in the NMEA format.
+ii  ros-humble-ompl                                    1.7.0-3jammy.20250522.035126            amd64        OMPL is a free sampling-based motion planning library.
+ii  ros-humble-orocos-kdl-vendor                       0.2.5-1jammy.20250522.073100            amd64        Wrapper around orocos_kdl, providing nothing but a dependency on orocos_kdl on some systems.
+ii  ros-humble-osrf-pycommon                           2.1.6-1jammy.20250522.035129            amd64        Commonly needed Python modules, used by Python software developed at OSRF.
+ii  ros-humble-pcl-conversions                         2.4.5-2jammy.20250617.223655            amd64        Provides conversions from PCL data types and ROS message types
+ii  ros-humble-pcl-msgs                                1.0.0-7jammy.20250617.205803            amd64        Package containing PCL (Point Cloud Library)-related ROS messages.
+ii  ros-humble-pendulum-control                        0.20.5-1jammy.20250617.220012           amd64        Demonstrates ROS 2's realtime capabilities with a simulated inverted pendulum.
+ii  ros-humble-pendulum-msgs                           0.20.5-1jammy.20250607.025652           amd64        Custom messages for real-time pendulum control.
+ii  ros-humble-pluginlib                               5.1.0-3jammy.20250607.023300            amd64        The pluginlib package provides tools for writing and dynamically loading plugins using the ROS build infrastructure.
+ii  ros-humble-point-cloud-interfaces                  1.0.11-1jammy.20250617.205750           amd64        msg definitions for use with point_cloud_transport plugins.
+ii  ros-humble-point-cloud-transport                   1.0.18-1jammy.20250617.223938           amd64        Support for transporting PointCloud2 messages in compressed format and plugin interface for implementing additional PointCloud2 transports.
+ii  ros-humble-point-cloud-transport-plugins           1.0.11-1jammy.20250617.230821           amd64        Metapackage with common point_cloud_transport plugins
+ii  ros-humble-pointcloud-to-laserscan                 2.0.1-3jammy.20250617.225447            amd64        Converts a 3D Point Cloud into a 2D laser scan.
+ii  ros-humble-pybind11-vendor                         2.4.2-1jammy.20250522.045058            amd64        Wrapper around pybind11.
+ii  ros-humble-python-cmake-module                     0.10.0-2jammy.20250522.072611           amd64        Provide CMake module with extra functionality for Python.
+ii  ros-humble-python-orocos-kdl-vendor                0.2.5-1jammy.20250522.073228            amd64        Wrapper around PyKDL, providing nothing but a dependency on PyKDL on some systems.
+ii  ros-humble-python-qt-binding                       1.1.2-1jammy.20250522.072615            amd64        This stack provides Python bindings for Qt.
+ii  ros-humble-qt-dotgraph                             2.2.4-1jammy.20250522.072842            amd64        qt_dotgraph provides helpers to work with dot graphs.
+ii  ros-humble-qt-gui                                  2.2.4-1jammy.20250522.072850            amd64        qt_gui provides the infrastructure for an integrated graphical user interface based on Qt.
+ii  ros-humble-qt-gui-cpp                              2.2.4-1jammy.20250607.023436            amd64        qt_gui_cpp provides the foundation for C++-bindings for qt_gui and creates bindings for every generator available.
+ii  ros-humble-qt-gui-py-common                        2.2.4-1jammy.20250522.072857            amd64        qt_gui_py_common provides common functionality for GUI plugins written in Python.
+ii  ros-humble-quality-of-service-demo-cpp             0.20.5-1jammy.20250617.220529           amd64        C++ Demo applications for Quality of Service features
+ii  ros-humble-quality-of-service-demo-py              0.20.5-1jammy.20250617.203340           amd64        Python Demo applications for Quality of Service features
+ii  ros-humble-rcl                                     5.3.9-1jammy.20250607.032105            amd64        The ROS client library common implementation.
+ii  ros-humble-rcl-action                              5.3.9-1jammy.20250607.033224            amd64        Package containing a C-based ROS action implementation
+ii  ros-humble-rcl-interfaces                          1.2.1-1jammy.20250607.025714            amd64        The ROS client library common interfaces.
+ii  ros-humble-rcl-lifecycle                           5.3.9-1jammy.20250607.033224            amd64        Package containing a C-based lifecycle implementation
+ii  ros-humble-rcl-logging-interface                   2.3.1-1jammy.20250607.015555            amd64        Interface that rcl_logging backends needs to implement.
+ii  ros-humble-rcl-logging-spdlog                      2.3.1-1jammy.20250607.015801            amd64        Implementation of rcl_logging API for an spdlog backend.
+ii  ros-humble-rcl-yaml-param-parser                   5.3.9-1jammy.20250607.020535            amd64        Parse a YAML parameter file and populate the C data structure.
+ii  ros-humble-rclcpp                                  16.0.12-1jammy.20250617.210639          amd64        The ROS client library in C++.
+ii  ros-humble-rclcpp-action                           16.0.12-1jammy.20250617.222234          amd64        Adds action APIs for C++.
+ii  ros-humble-rclcpp-components                       16.0.12-1jammy.20250617.215706          amd64        Package containing tools for dynamically loadable components
+ii  ros-humble-rclcpp-lifecycle                        16.0.12-1jammy.20250617.222248          amd64        Package containing a prototype for lifecycle implementation
+ii  ros-humble-rclpy                                   3.3.16-1jammy.20250607.033641           amd64        Package containing the Python client.
+ii  ros-humble-rcpputils                               2.4.5-1jammy.20250607.015207            amd64        Package containing utility code for C++.
+ii  ros-humble-rcutils                                 5.1.6-1jammy.20250607.014101            amd64        Package containing various utility types and functions for C
+ii  ros-humble-resource-retriever                      3.1.3-1jammy.20250522.072747            amd64        This package retrieves data from url-format files such as http://, ftp://, package:// file://, etc., and loads the data into memory.
+ii  ros-humble-rmw                                     6.1.2-1jammy.20250607.015321            amd64        Contains the ROS middleware API.
+ii  ros-humble-rmw-dds-common                          1.6.0-2jammy.20250607.025502            amd64        Define a common interface between DDS implementations of ROS middleware.
+ii  ros-humble-rmw-fastrtps-cpp                        6.2.7-1jammy.20250607.031129            amd64        Implement the ROS middleware interface using eProsima FastRTPS static code generation in C++.
+ii  ros-humble-rmw-fastrtps-shared-cpp                 6.2.7-1jammy.20250607.025731            amd64        Code shared on static and dynamic type support of rmw_fastrtps_cpp.
+ii  ros-humble-rmw-implementation                      2.8.4-1jammy.20250607.031631            amd64        Proxy implementation of the ROS 2 Middleware Interface.
+ii  ros-humble-rmw-implementation-cmake                6.1.2-1jammy.20250522.072625            amd64        CMake functions which can discover and enumerate available implementations.
+ii  ros-humble-robot-localization                      3.5.3-1jammy.20250617.231252            amd64        Provides nonlinear state estimation through sensor fusion of an abritrary number of sensors.
+ii  ros-humble-robot-state-publisher                   3.0.3-2jammy.20250617.225227            amd64        This package take the joint angles of a robot as input, and publishes the 3D poses of the robot links to tf2, using a kinematic tree model of the robot.
+ii  ros-humble-ros-base                                0.10.0-1jammy.20250618.005618           amd64        A package which extends 'ros_core' and includes other basic functionalities like tf2 and urdf.
+ii  ros-humble-ros-core                                0.10.0-1jammy.20250617.231910           amd64        A package to aggregate the packages required to use publish / subscribe, services, generate messages and other core ROS concepts.
+ii  ros-humble-ros-environment                         3.2.2-1jammy.20250522.035554            amd64        The package provides the environment variables `ROS_VERSION` and `ROS_DISTRO`.
+ii  ros-humble-ros-gz                                  0.244.20-1jammy.20250618.013536         amd64        Meta-package containing interfaces for using ROS 2 with Gazebo simulation.
+ii  ros-humble-ros-gz-bridge                           0.244.20-1jammy.20250617.220534         amd64        Bridge communication between ROS and Gazebo Transport
+ii  ros-humble-ros-gz-image                            0.244.20-1jammy.20250617.225438         amd64        Image utilities for Gazebo simulation with ROS.
+ii  ros-humble-ros-gz-interfaces                       0.244.20-1jammy.20250617.204734         amd64        Message and service data structures for interacting with Gazebo from ROS2.
+ii  ros-humble-ros-gz-sim                              0.244.20-1jammy.20250617.215546         amd64        Tools for using Gazebo Sim simulation with ROS.
+ii  ros-humble-ros-gz-sim-demos                        0.244.20-1jammy.20250618.013506         amd64        Demos using Gazebo Sim simulation with ROS.
+ii  ros-humble-ros-ign                                 0.244.20-1jammy.20250618.013627         amd64        Shim meta-package to redirect to ros_gz.
+ii  ros-humble-ros-ign-bridge                          0.244.20-1jammy.20250617.230709         amd64        Shim package to redirect to ros_gz_bridge.
+ii  ros-humble-ros-ign-bridge-dbgsym                   0.244.20-1jammy.20250617.230709         amd64        debug symbols for ros-humble-ros-ign-bridge
+ii  ros-humble-ros-ign-gazebo                          0.244.20-1jammy.20250617.222602         amd64        Shim package to redirect to ros_gz_sim.
+ii  ros-humble-ros-ign-gazebo-dbgsym                   0.244.20-1jammy.20250617.222602         amd64        debug symbols for ros-humble-ros-ign-gazebo
+ii  ros-humble-ros-ign-gazebo-demos                    0.244.20-1jammy.20250618.013543         amd64        Shim package to redirect to ros_gz_sim_demos.
+ii  ros-humble-ros-ign-image                           0.244.20-1jammy.20250617.230808         amd64        Shim package to redirect to ros_gz_image.
+ii  ros-humble-ros-ign-image-dbgsym                    0.244.20-1jammy.20250617.230808         amd64        debug symbols for ros-humble-ros-ign-image
+ii  ros-humble-ros-ign-interfaces                      0.244.20-1jammy.20250617.212015         amd64        Shim package to redirect to ros_gz_interfaces.
+ii  ros-humble-ros-ign-interfaces-dbgsym               0.244.20-1jammy.20250617.212015         amd64        debug symbols for ros-humble-ros-ign-interfaces
+ii  ros-humble-ros-workspace                           1.0.2-2jammy.20250522.033818            amd64        Provides the prefix level environment files for ROS 2 packages.
+ii  ros-humble-ros2action                              0.18.12-1jammy.20250617.212011          amd64        The action command for ROS 2 command line tools.
+ii  ros-humble-ros2bag                                 0.15.14-1jammy.20250618.004720          amd64        Entry point for rosbag in ROS 2
+ii  ros-humble-ros2cli                                 0.18.12-1jammy.20250607.041407          amd64        Framework for ROS 2 command line tools.
+ii  ros-humble-ros2cli-common-extensions               0.1.1-4jammy.20250617.231021            amd64        Meta package for ros2cli common extensions
+ii  ros-humble-ros2component                           0.18.12-1jammy.20250617.221030          amd64        The component command for ROS 2 command line tools.
+ii  ros-humble-ros2doctor                              0.18.12-1jammy.20250617.203433          amd64        A command line tool to check potential issues in a ROS 2 system
+ii  ros-humble-ros2interface                           0.18.12-1jammy.20250617.205321          amd64        The interface command for ROS 2 command line tools
+ii  ros-humble-ros2launch                              0.19.9-1jammy.20250617.213805           amd64        The launch command for ROS 2 command line tools.
+ii  ros-humble-ros2lifecycle                           0.18.12-1jammy.20250617.230640          amd64        The lifecycle command for ROS 2 command line tools.
+ii  ros-humble-ros2multicast                           0.18.12-1jammy.20250607.055437          amd64        The multicast command for ROS 2 command line tools.
+ii  ros-humble-ros2node                                0.18.12-1jammy.20250617.211207          amd64        The node command for ROS 2 command line tools.
+ii  ros-humble-ros2param                               0.18.12-1jammy.20250617.211425          amd64        The param command for ROS 2 command line tools.
+ii  ros-humble-ros2pkg                                 0.18.12-1jammy.20250617.211218          amd64        The pkg command for ROS 2 command line tools.
+ii  ros-humble-ros2run                                 0.18.12-1jammy.20250617.214037          amd64        The run command for ROS 2 command line tools.
+ii  ros-humble-ros2service                             0.18.12-1jammy.20250617.210533          amd64        The service command for ROS 2 command line tools.
+ii  ros-humble-ros2topic                               0.18.12-1jammy.20250617.211429          amd64        The topic command for ROS 2 command line tools.
+ii  ros-humble-rosbag2                                 0.15.14-1jammy.20250618.005538          amd64        Meta package for rosbag2 related packages
+ii  ros-humble-rosbag2-compression                     0.15.14-1jammy.20250618.000740          amd64        Compression implementations for rosbag2 bags and messages.
+ii  ros-humble-rosbag2-compression-zstd                0.15.14-1jammy.20250618.001203          amd64        Zstandard compression library implementation of rosbag2_compression
+ii  ros-humble-rosbag2-cpp                             0.15.14-1jammy.20250617.235907          amd64        C++ ROSBag2 client library
+ii  ros-humble-rosbag2-interfaces                      0.15.14-1jammy.20250607.025903          amd64        Interface definitions for controlling rosbag2
+ii  ros-humble-rosbag2-py                              0.15.14-1jammy.20250618.004447          amd64        Python API for rosbag2
+ii  ros-humble-rosbag2-storage                         0.15.14-1jammy.20250617.234548          amd64        ROS2 independent storage format to store serialized ROS2 messages
+ii  ros-humble-rosbag2-storage-default-plugins         0.15.14-1jammy.20250617.235629          amd64        ROSBag2 SQLite3 storage plugin
+ii  ros-humble-rosbag2-transport                       0.15.14-1jammy.20250618.003016          amd64        Layer encapsulating ROS middleware to allow rosbag2 to be used with or without middleware
+ii  ros-humble-rosgraph-msgs                           1.2.1-1jammy.20250607.025930            amd64        Messages relating to the ROS Computation Graph.
+ii  ros-humble-rosidl-adapter                          3.1.6-1jammy.20250522.050613            amd64        API and scripts to parse .msg/.srv/.action files and convert them to .idl.
+ii  ros-humble-rosidl-cli                              3.1.6-1jammy.20250522.045949            amd64        Command line tools for ROS interface generation.
+ii  ros-humble-rosidl-cmake                            3.1.6-1jammy.20250522.072802            amd64        The CMake functionality to invoke code generation for ROS interface files.
+ii  ros-humble-rosidl-default-generators               1.2.0-2jammy.20250607.024925            amd64        A configuration package defining the default ROS interface generators.
+ii  ros-humble-rosidl-default-runtime                  1.2.0-2jammy.20250607.024921            amd64        A configuration package defining the runtime for the ROS interfaces.
+ii  ros-humble-rosidl-generator-c                      3.1.6-1jammy.20250607.015329            amd64        Generate the ROS interfaces in C.
+ii  ros-humble-rosidl-generator-cpp                    3.1.6-1jammy.20250607.023242            amd64        Generate the ROS interfaces in C++.
+ii  ros-humble-rosidl-generator-py                     0.14.4-1jammy.20250607.024354           amd64        Generate the ROS interfaces in Python.
+ii  ros-humble-rosidl-parser                           3.1.6-1jammy.20250522.072630            amd64        The parser for `.idl` ROS interface files.
+ii  ros-humble-rosidl-runtime-c                        3.1.6-1jammy.20250607.015038            amd64        Provides definitions, initialization and finalization functions, and macros for getting and working with rosidl typesupport types in C.
+ii  ros-humble-rosidl-runtime-cpp                      3.1.6-1jammy.20250607.020008            amd64        Provides definitions and templated functions for getting and working with rosidl typesupport types in C++.
+ii  ros-humble-rosidl-runtime-py                       0.9.3-1jammy.20250617.203508            amd64        Runtime utilities for working with generated ROS interfaces in Python.
+ii  ros-humble-rosidl-typesupport-c                    2.0.2-1jammy.20250607.023234            amd64        Generate the type support for C messages.
+ii  ros-humble-rosidl-typesupport-cpp                  2.0.2-1jammy.20250607.023536            amd64        Generate the type support for C++ messages.
+ii  ros-humble-rosidl-typesupport-fastrtps-c           2.2.2-2jammy.20250607.024051            amd64        Generate the C interfaces for eProsima FastRTPS.
+ii  ros-humble-rosidl-typesupport-fastrtps-cpp         2.2.2-2jammy.20250607.023813            amd64        Generate the C++ interfaces for eProsima FastRTPS.
+ii  ros-humble-rosidl-typesupport-interface            3.1.6-1jammy.20250522.072632            amd64        The interface for rosidl typesupport packages.
+ii  ros-humble-rosidl-typesupport-introspection-c      3.1.6-1jammy.20250607.020021            amd64        Generate the message type support for dynamic message construction in C.
+ii  ros-humble-rosidl-typesupport-introspection-cpp    3.1.6-1jammy.20250607.023249            amd64        Generate the message type support for dynamic message construction in C++.
+ii  ros-humble-rpyutils                                0.2.1-2jammy.20250522.045954            amd64        Package containing various utility types and functions for Python
+ii  ros-humble-rqt-action                              2.0.1-3jammy.20250607.095848            amd64        rqt_action provides a feature to introspect all available ROS action types.
+ii  ros-humble-rqt-bag                                 1.1.5-1jammy.20250618.004648            amd64        rqt_bag provides a GUI plugin for displaying and replaying ROS bag files.
+ii  ros-humble-rqt-bag-plugins                         1.1.5-1jammy.20250618.005907            amd64        rqt_bag provides a GUI plugin for displaying and replaying ROS bag files.
+ii  ros-humble-rqt-common-plugins                      1.2.0-1jammy.20250618.005953            amd64        rqt_common_plugins metapackage provides ROS backend graphical tools suite that can be used on/off of robot runtime.
+ii  ros-humble-rqt-console                             2.0.3-1jammy.20250607.093025            amd64        rqt_console provides a GUI plugin for displaying and filtering ROS messages.
+ii  ros-humble-rqt-graph                               1.3.1-1jammy.20250607.093323            amd64        rqt_graph provides a GUI plugin for visualizing the ROS computation graph.
+ii  ros-humble-rqt-gui                                 1.1.7-1jammy.20250607.051136            amd64        rqt_gui provides the main to start an instance of the ROS integrated graphical user interface provided by qt_gui.
+ii  ros-humble-rqt-gui-cpp                             1.1.7-1jammy.20250617.222314            amd64        rqt_gui_cpp enables GUI plugins to use the C++ client library for ROS.
+ii  ros-humble-rqt-gui-py                              1.1.7-1jammy.20250607.092723            amd64        rqt_gui_py enables GUI plugins to use the Python client library for ROS.
+ii  ros-humble-rqt-image-view                          1.2.0-2jammy.20250617.224656            amd64        rqt_image_view provides a GUI plugin for displaying images using image_transport.
+ii  ros-humble-rqt-msg                                 1.2.0-1jammy.20250607.093131            amd64        A Python GUI plugin for introspecting available ROS message types.
+ii  ros-humble-rqt-plot                                1.1.5-1jammy.20250617.203554            amd64        rqt_plot provides a GUI plugin visualizing numeric values in a 2D plot using different plotting backends.
+ii  ros-humble-rqt-publisher                           1.5.0-1jammy.20250607.093139            amd64        rqt_publisher provides a GUI plugin for publishing arbitrary messages with fixed or computed field values.
+ii  ros-humble-rqt-py-common                           1.1.7-1jammy.20250607.034953            amd64        rqt_py_common provides common functionality for rqt plugins written in Python.
+ii  ros-humble-rqt-py-console                          1.0.2-3jammy.20250607.093123            amd64        rqt_py_console is a Python GUI plugin providing an interactive Python console.
+ii  ros-humble-rqt-reconfigure                         1.1.2-1jammy.20250607.093136            amd64        This rqt plugin provides a way to view and edit parameters on nodes.
+ii  ros-humble-rqt-service-caller                      1.0.5-3jammy.20250607.093149            amd64        rqt_service_caller provides a GUI plugin for calling arbitrary services.
+ii  ros-humble-rqt-shell                               1.0.2-3jammy.20250607.093327            amd64        rqt_shell is a Python GUI plugin providing an interactive shell.
+ii  ros-humble-rqt-srv                                 1.0.3-3jammy.20250607.093209            amd64        A Python GUI plugin for introspecting available ROS message types.
+ii  ros-humble-rqt-tf-tree                             1.0.5-1jammy.20250617.225600            amd64        rqt_tf_tree provides a GUI plugin for visualizing the ROS TF frame tree.
+ii  ros-humble-rqt-topic                               1.5.0-1jammy.20250607.093153            amd64        rqt_topic provides a GUI plugin for displaying debug information about ROS topics including publishers, subscribers, publishing rate, and ROS Messages.
+ii  ros-humble-rttest                                  0.13.0-2jammy.20250522.072706           amd64        Instrumentation library for real-time performance testing
+ii  ros-humble-rviz-assimp-vendor                      11.2.17-1jammy.20250522.073119          amd64        Wrapper around assimp, providing nothing but a dependency on assimp, on some systems.
+ii  ros-humble-rviz-common                             11.2.17-1jammy.20250617.234657          amd64        Common rviz API, used by rviz plugins and applications.
+ii  ros-humble-rviz-default-plugins                    11.2.17-1jammy.20250618.001713          amd64        Several default plugins for rviz to cover the basic functionality.
+ii  ros-humble-rviz-ogre-vendor                        11.2.17-1jammy.20250522.073121          amd64        Wrapper around ogre3d, it provides a fixed CMake module and an ExternalProject build of ogre.
+ii  ros-humble-rviz-rendering                          11.2.17-1jammy.20250522.080617          amd64        Library which provides the 3D rendering functionality in rviz.
+ii  ros-humble-rviz2                                   11.2.17-1jammy.20250618.012448          amd64        3D visualization tool for ROS.
+ii  ros-humble-sdformat-urdf                           1.0.1-1jammy.20250607.024449            amd64        URDF plugin to parse SDFormat XML into URDF C++ DOM objects.
+ii  ros-humble-sdl2-vendor                             3.3.0-1jammy.20250522.045229            amd64        Vendor library for SDL2.
+ii  ros-humble-sensor-msgs                             4.9.0-1jammy.20250617.204740            amd64        A package containing some sensor data related message and service definitions.
+ii  ros-humble-sensor-msgs-py                          4.9.0-1jammy.20250617.212138            amd64        A package for easy creation and reading of PointCloud2 messages in Python.
+ii  ros-humble-shape-msgs                              4.9.0-1jammy.20250617.211812            amd64        A package containing some message definitions which describe geometric shapes.
+ii  ros-humble-shared-queues-vendor                    0.15.14-1jammy.20250522.045251          amd64        Vendor package for concurrent queues from moodycamel
+ii  ros-humble-slam-toolbox                            2.6.10-1jammy.20250618.011909           amd64        This package provides a sped up improved slam karto with updated SDK and visualization and modification toolsets
+ii  ros-humble-smclib                                  4.1.2-1jammy.20250522.072717            amd64        The State Machine Compiler (SMC) from http://smc.sourceforge.net/ converts a language-independent description of a state machine into the source code to support that state machine.
+ii  ros-humble-spdlog-vendor                           1.3.1-1jammy.20250522.072720            amd64        Wrapper around spdlog, providing nothing but a dependency on spdlog, on some systems.
+ii  ros-humble-sqlite3-vendor                          0.15.14-1jammy.20250522.045350          amd64        SQLite 3 vendor package
+ii  ros-humble-sros2                                   0.10.6-1jammy.20250617.214000           amd64        Command line tools for managing SROS2 keys
+ii  ros-humble-sros2-cmake                             0.10.6-1jammy.20250617.221601           amd64        CMake macros to configure security
+ii  ros-humble-statistics-msgs                         1.2.1-1jammy.20250607.025949            amd64        Message definitions for reporting statistics for topics and system resources.
+ii  ros-humble-std-msgs                                4.9.0-1jammy.20250617.200920            amd64        A package containing some standard message definitions.
+ii  ros-humble-std-srvs                                4.9.0-1jammy.20250617.200742            amd64        A package containing some standard service definitions.
+ii  ros-humble-stereo-msgs                             4.9.0-1jammy.20250617.205806            amd64        A package containing some stereo camera related message definitions.
+ii  ros-humble-tango-icons-vendor                      0.1.1-3jammy.20250522.072721            amd64        tango_icons_vendor provides the public domain Tango icons for non-linux systems (Tango Icon Library) from the Tango Desktop Project
+ii  ros-humble-teleop-twist-joy                        2.4.7-1jammy.20250617.221307            amd64        Generic joystick teleop for twist robots.
+ii  ros-humble-teleop-twist-keyboard                   2.4.0-1jammy.20250617.211454            amd64        A robot-agnostic teleoperation node to convert keyboard commands to Twist messages.
+ii  ros-humble-tf-transformations                      1.1.0-1jammy.20250522.045554            amd64        Reimplementation of the tf/transformations.py library for common Python spatial operations
+ii  ros-humble-tf2                                     0.25.13-1jammy.20250617.211823          amd64        tf2 is the second generation of the transform library, which lets the user keep track of multiple coordinate frames over time.
+ii  ros-humble-tf2-bullet                              0.25.13-1jammy.20250617.230838          amd64        tf2_bullet
+ii  ros-humble-tf2-eigen                               0.25.13-1jammy.20250617.230812          amd64        tf2_eigen
+ii  ros-humble-tf2-eigen-kdl                           0.25.13-1jammy.20250617.221210          amd64        Conversion functions between: - Eigen and KDL
+ii  ros-humble-tf2-geometry-msgs                       0.25.13-1jammy.20250617.230844          amd64        tf2_geometry_msgs
+ii  ros-humble-tf2-kdl                                 0.25.13-1jammy.20250617.225300          amd64        KDL binding for tf2
+ii  ros-humble-tf2-msgs                                0.25.13-1jammy.20250617.211539          amd64        tf2_msgs
+ii  ros-humble-tf2-py                                  0.25.13-1jammy.20250617.212115          amd64        The tf2_py package
+ii  ros-humble-tf2-ros                                 0.25.13-1jammy.20250617.223749          amd64        This package contains the C++ ROS bindings for the tf2 library
+ii  ros-humble-tf2-ros-py                              0.25.13-1jammy.20250617.212305          amd64        This package contains the ROS Python bindings for the tf2 library
+ii  ros-humble-tf2-sensor-msgs                         0.25.13-1jammy.20250617.225051          amd64        Small lib to transform sensor_msgs with tf.
+ii  ros-humble-tf2-tools                               0.25.13-1jammy.20250617.214112          amd64        tf2_tools
+ii  ros-humble-theora-image-transport                  2.5.3-1jammy.20250617.224626            amd64        Theora_image_transport provides a plugin to image_transport for transparently sending an image stream encoded with the Theora codec.
+ii  ros-humble-tinyxml-vendor                          0.8.3-2jammy.20250522.045418            amd64        CMake shim over the tinxml library.
+ii  ros-humble-tinyxml2-vendor                         0.7.6-1jammy.20250522.045420            amd64        Wrapper around tinyxml2, providing nothing but a dependency on tinyxml2, on some systems.
+ii  ros-humble-tlsf                                    0.7.0-2jammy.20250522.072741            amd64        TLSF allocator version 2.4.6
+ii  ros-humble-tlsf-cpp                                0.13.0-2jammy.20250617.215548           amd64        C++ stdlib-compatible wrapper around tlsf allocator and ROS2 examples
+ii  ros-humble-topic-monitor                           0.20.5-1jammy.20250617.203340           amd64        Package containing tools for monitoring ROS 2 topics.
+ii  ros-humble-tracetools                              4.1.1-1jammy.20250522.060149            amd64        Tracing wrapper for ROS 2.
+ii  ros-humble-trajectory-msgs                         4.9.0-1jammy.20250617.205008            amd64        A package containing some robot trajectory message definitions.
+ii  ros-humble-turtlesim                               1.4.2-1jammy.20250617.224330            amd64        turtlesim is a tool made for teaching ROS and ROS packages.
+ii  ros-humble-uncrustify-vendor                       2.0.2-2jammy.20250522.045520            amd64        Wrapper around uncrustify, providing nothing but a dependency on uncrustify, on some systems.
+ii  ros-humble-unique-identifier-msgs                  2.2.1-3jammy.20250607.025449            amd64        ROS messages for universally unique identifiers.
+ii  ros-humble-urdf                                    2.6.1-1jammy.20250607.024254            amd64        This package contains a C++ parser for the Unified Robot Description Format (URDF), which is an XML format for representing a robot model.
+ii  ros-humble-urdf-parser-plugin                      2.6.1-1jammy.20250522.060159            amd64        This package contains a C++ base class for URDF parsers.
+ii  ros-humble-urdfdom                                 3.0.2-2jammy.20250522.072431            amd64        A library to access URDFs using the DOM model.
+ii  ros-humble-urdfdom-headers                         1.0.6-2jammy.20250522.035247            amd64        C++ headers for URDF.
+ii  ros-humble-vision-msgs                             4.1.1-1jammy.20250617.205108            amd64        Messages for interfacing with various computer vision pipelines, such as object detectors.
+ii  ros-humble-visualization-msgs                      4.9.0-1jammy.20250617.205832            amd64        A package containing some visualization and interaction related message definitions.
+ii  ros-humble-xacro                                   2.0.13-1jammy.20250522.072847           amd64        Xacro (XML Macros) Xacro is an XML macro language.
+ii  ros-humble-yaml-cpp-vendor                         8.0.2-1jammy.20250522.045534            amd64        Wrapper around yaml-cpp, it provides a fixed CMake module and an ExternalProject build of it.
+ii  ros-humble-zed-msgs                                5.0.1-1jammy.20250617.212108            amd64        Contains message and service definitions used by the ZED ROS2 nodes.
+ii  ros-humble-zlib-point-cloud-transport              1.0.11-1jammy.20250617.225521           amd64        zlib_point_cloud_transport provides a plugin to point_cloud_transport for sending point clouds encoded with zlib
+ii  ros-humble-zstd-point-cloud-transport              1.0.11-1jammy.20250617.225528           amd64        zstd_point_cloud_transport provides a plugin to point_cloud_transport for sending point clouds encoded with lib
+ii  ros-humble-zstd-vendor                             0.15.14-1jammy.20250522.045542          amd64        Zstd compression vendor package, providing a dependency for Zstd.

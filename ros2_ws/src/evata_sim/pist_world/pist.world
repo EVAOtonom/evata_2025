@@ -4,7 +4,7 @@
 		<scene>
 			<grid>false</grid>
 			<ambient>0.4 0.4 0.4 1</ambient>
-			<background>0.274 0.353 1 0</background>
+			<background>0.286 0.322 0.969 1</background>
 			<shadows>0</shadows>
 		</scene>
 		<plugin

@@ -19,6 +19,7 @@ setup(
         (os.path.join('share', package_name, 'model'), ['evata_sim/best.pt']),    
         (os.path.join('share', package_name, 'waypoint'), ['evata_sim/waypoint.txt']),
         (os.path.join('share', package_name, 'json'), ['evata_sim/gps_targets.json']),
+        (os.path.join('share', package_name, 'model2'), ['evata_sim/train16best.pt']),
     ],
     install_requires=['setuptools'],
     zip_safe=False,
