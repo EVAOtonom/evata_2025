@@ -111,8 +111,9 @@ class ImageSaver(Node):
         self.last_process_time = current_time
         
         try:
-            self.latest_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
-            self.detect(self.latest_image)
+            cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
+            cv_image = cv2.cvtColor(cv_image, cv2.COLOR_RGB2BGR)
+            original_image = cv_image.copy()
         except Exception as e:
             self.get_logger().error(f'Failed to process image: {e}')
 
