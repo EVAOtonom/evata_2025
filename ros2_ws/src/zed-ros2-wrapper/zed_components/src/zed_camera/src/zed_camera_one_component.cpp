@@ -688,7 +688,7 @@ bool ZedCameraOne::startCamera()
   _initParams.coordinate_system = ROS_COORDINATE_SYSTEM;
   _initParams.coordinate_units = ROS_MEAS_UNITS;
   _initParams.enable_hdr = _enableHDR;
-  _initParams.open_timeout_sec = _openTimeout_sec;
+  //_initParams.open_timeout_sec = _openTimeout_sec;
   if (!_opencvCalibFile.empty()) {
     _initParams.optional_opencv_calibration_file = _opencvCalibFile.c_str();
   }
