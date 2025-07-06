@@ -52,7 +52,8 @@ class SignDetector(Node):
         self.last_detection_time = now
 
         try:
-            cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
+            cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
+            cv_image = cv2.cvtColor(cv_image, cv2.COLOR_RGB2BGR)
             original_image = cv_image.copy()
             
             # ↓ Görüntüyü küçült → inference hızlanır
