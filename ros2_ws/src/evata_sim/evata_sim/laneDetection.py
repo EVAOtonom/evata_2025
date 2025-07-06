@@ -60,7 +60,6 @@ class ImageSaver(Node):
             self.image_callback,
             10)
         self.create_subscription(PointCloud2, "/depth_camera/zed/points", self.point_cloud_callback, 10)
-
         self.bridge = CvBridge()
         dir_path = os.path.dirname(os.path.realpath(__file__))
         src_dir = dir_path.split('/install')[0]  # install kısmını çıkar
