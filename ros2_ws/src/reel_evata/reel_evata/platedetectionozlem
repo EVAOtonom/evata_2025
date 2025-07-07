@@ -23,7 +23,7 @@ class SignDetector(Node):
         self.device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
         self.get_logger().info(f"Using device: {self.device}")
 
-        self.model = YOLO("/home/ozlem/Downloads/best.pt").to(self.device)
+        self.model = YOLO("/home/otonom/Downloads/best.pt").to(self.device)
         self.model.fuse()
 
         self.bridge = CvBridge()
