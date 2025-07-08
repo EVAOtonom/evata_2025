@@ -27,6 +27,7 @@ setup(
             'cmd_vel = reel_evata.cmd_vel:main',
             "laneDetection=" + package_name + ".laneDetection:main",
             'toggle_brake= reel_evata.toggle_brake:main',
+            'gps_logger= reel_evata.gps_logger:main',
         
         ],
     },

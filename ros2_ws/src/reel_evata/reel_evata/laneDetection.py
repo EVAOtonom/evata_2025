@@ -64,7 +64,7 @@ class ImageSaver(Node):
         self.bridge = CvBridge()
         dir_path = os.path.dirname(os.path.realpath(__file__))
         src_dir = dir_path.split('/install')[0]  # install kısmını çıkar
-        weights = os.path.join(src_dir, 'src', 'evata_sim', 'evata_sim', 'utils', 'yolopv2.pt')
+        weights = os.path.join(src_dir, 'src', 'reel_evata', 'reel_evata', 'utils', 'yolopv2.pt')
         device = "0"
         model = torch.jit.load(weights)
         device = select_device(device)
@@ -179,14 +179,14 @@ class ImageSaver(Node):
         # Şerit çizgilerinin koordinatlarını bulma
         y_coords, x_coords = np.where(thinned_ll_mask_for_show == 1)
 
-        roi_y_start = 520
+        roi_y_start = 443
         roi_y_end = 720
         def get_roi_x_bounds(y):
             if y < roi_y_start or y > roi_y_end:
                 return None, None
             # Lineer interpolasyon ile x1 ve x2 değerlerini hesapla
-            x1 = int(430 + (y - roi_y_start) * (200 - 430) / (roi_y_end - roi_y_start))
-            x2 = int(870 + (y - roi_y_start) * (1100 - 870) / (roi_y_end - roi_y_start))
+            x1 = int(484 + (y - roi_y_start) * (10 - 484) / (roi_y_end - roi_y_start))
+            x2 = int(915 + (y - roi_y_start) * (1150 - 912) / (roi_y_end - roi_y_start))
             return x1, x2
 
         roi_mask = (y_coords >= roi_y_start) & (y_coords <= roi_y_end)
@@ -213,7 +213,7 @@ class ImageSaver(Node):
                 # Birbirinden en az 100 piksel uzak olan iki x değeri bulma
                 x_values_sorted = np.sort(x_values)
                 x_diff = np.diff(x_values_sorted)
-                valid_pairs = np.where(x_diff >= 50)[0]
+                valid_pairs = np.where(x_diff >= 144)[0]
                 if len(valid_pairs) > 0:
                     x1_pair = x_values_sorted[valid_pairs[0]]
                     x2_pair = x_values_sorted[valid_pairs[0] + 1]

@@ -23,7 +23,7 @@ def generate_launch_description():
     slam_params_file = os.path.join(src_dir, "src", "reel_nav", "config", "slam_toolbox_params.yaml")  # SLAM yapılandırması
     map_dir = LaunchConfiguration(
         'map',
-        default=os.path.join(src_dir,"src","reel_nav",'map', 'map 1.yaml')
+        default=os.path.join(src_dir,"src","reel_nav",'map', 'video.yaml')
     )
     param_dir = LaunchConfiguration(
         'params_file',
@@ -63,6 +63,13 @@ def generate_launch_description():
 		),
 
 
+        Node(
+   		 package='tf2_ros',
+    		executable='static_transform_publisher',
+    		name='static_tf_map_to_odom',
+    		output='log',
+    		arguments=['0', '0', '0', '0', '0', '0', 'odom', 'base_footprint']
+		),
 		
 		        #tekerlekler için
         Node(

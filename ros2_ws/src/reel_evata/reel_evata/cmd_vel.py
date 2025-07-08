@@ -3,7 +3,7 @@
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Int8
+from std_msgs.msg import Int8,Bool
 import math
 
 
@@ -13,6 +13,7 @@ class CmdVelSubscriber(Node):
 
         self.steering_angle_pub = self.create_publisher(Int8, '/stm/steering_angle', 10)
         self.motor_power_pub = self.create_publisher(Int8, '/stm/motor_power', 10)
+        self.brake_pub = self.create_publisher(Bool, '/stm/brake', 10)
 
         self.subscription = self.create_subscription(
             Twist,
@@ -31,38 +32,48 @@ class CmdVelSubscriber(Node):
         MAX_LEFT_DEG = 40
         MAX_RIGHT_DEG = -43
 
-        # Direksiyon açısını aracın geometrisine göre hesapla
+        # Direksiyon açısı hesapla
         if abs(linear_x) > 0.01:
             steering_rad = math.atan((WHEELBASE * angular_z) / linear_x)
         else:
             steering_rad = 0.0
 
         angle_deg = math.degrees(steering_rad)
-        steering_deg = max(MAX_RIGHT_DEG, min(MAX_LEFT_DEG, angle_deg))
+        steering_deg = max(MAX_RIGHT_DEG, min(MAX_LEFT_DEG, angle_deg)) * -1
 
         steering_msg = Int8()
-        steering_deg = steering_deg * -1
         steering_msg.data = int(steering_deg)
 
-        # Motor gücü 0, 1, 2 olacak şekilde belirlenir
+        # Motor gücü ve fren
         if linear_x <= 0:
             motor_value = 0
-        elif linear_x < 0.5:
-            motor_value = 1
-        else:
-            motor_value = 2
+            brake = True
+        elif linear_x < 0.03:
+            motor_value = 5
+            brake = False
+        elif linear_x < 0.06:
+            motor_value = 8
+            brake = False
+        elif linear_x < 0.08:
+            motor_value = 10
+            brake = False
 
         motor_msg = Int8()
         motor_msg.data = motor_value
 
+        brake_msg = Bool()
+        brake_msg.data = brake
+
         # Yayınla
         self.steering_angle_pub.publish(steering_msg)
         self.motor_power_pub.publish(motor_msg)
+        self.brake_pub.publish(brake_msg)
 
         self.get_logger().info(
             f'CMD_VEL: linear_x={linear_x:.2f} m/s, angular_z={angular_z:.2f} rad/s '
-            f'| Wheel Angle={steering_deg:.1f}°, Motor Power={motor_value}'
+            f'| Wheel Angle={steering_deg:.1f}°, Motor Power={motor_value}, Brake={brake}'
         )
+
 
 
 def main(args=None):

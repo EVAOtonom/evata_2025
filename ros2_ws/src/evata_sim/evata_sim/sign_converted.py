@@ -23,15 +23,16 @@ class SignDetector(Node):
         super().__init__('sign_detector_node')
         package_path = get_package_share_directory('evata_sim')
         model_path = os.path.join(package_path, 'model', 'sol300best.pt')
-
+        
         self.model = YOLO(model_path)
         self.bridge = CvBridge()
         self.fx = 277.0
         self.tracked_signs = {}
         self.latest_pointcloud = None
         self.last_detection_time = time.time()
-        self.detection_interval = 0.15
+        self.detection_interval = 0.15  # FPS boost (yaklaşık 6-7 FPS hedef)
 
+        # Subscribers
         self.create_subscription(Image, "/depth_camera/zed/image", self.color_image_callback, 10)
         self.create_subscription(CameraInfo, "/depth_camera/zed/camera_info", self.camera_info_callback, 10)
         self.create_subscription(PointCloud2, "/depth_camera/zed/points", self.point_cloud_callback, 10)
@@ -54,17 +55,14 @@ class SignDetector(Node):
             cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
             cv_image = cv2.cvtColor(cv_image, cv2.COLOR_RGB2BGR)
             original_image = cv_image.copy()
-
-            resized_image = cv2.resize(cv_image, (640, 360))
+            
+            # ↓ Görüntüyü küçült → inference hızlanır
+            resized_image = cv2.resize(cv_image, (640, 360))  # Daha düşük çözünürlük
             scale_x = cv_image.shape[1] / 640
             scale_y = cv_image.shape[0] / 360
 
             results = self.model(resized_image, verbose=False)
             self.annotated_image = original_image
-
-            # 🟡 Sol üst köşeye threshold bilgisi yaz
-            cv2.putText(self.annotated_image, "Threshold: 0.7m - 12.0m", (10, 30),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
 
             detected_signs = {}
             sign_data = {}
@@ -78,21 +76,20 @@ class SignDetector(Node):
                         x2 = int(x2 * scale_x)
                         y2 = int(y2 * scale_y)
                         class_name = self.model.names[int(box.cls)]
-                        confidence = float(box.conf)
-                        detected_signs[class_name] = (x1, y1, x2, y2, 0, confidence)
+                        detected_signs[class_name] = (x1, y1, x2, y2, 0)
 
             updated_tracked_signs = {}
-            for class_name, values in self.tracked_signs.items():
+            for class_name, (x1, y1, x2, y2, frame_count) in self.tracked_signs.items():
                 if class_name in detected_signs:
                     updated_tracked_signs[class_name] = detected_signs[class_name]
-                elif values[4] < 5:
-                    updated_tracked_signs[class_name] = (*values[:4], values[4] + 1, values[5])
+                elif frame_count < 5:
+                    updated_tracked_signs[class_name] = (x1, y1, x2, y2, frame_count + 1)
             for class_name, values in detected_signs.items():
                 if class_name not in updated_tracked_signs:
                     updated_tracked_signs[class_name] = values
             self.tracked_signs = updated_tracked_signs
 
-            for class_name, (x1, y1, x2, y2, _, confidence) in self.tracked_signs.items():
+            for class_name, (x1, y1, x2, y2, _) in self.tracked_signs.items():
                 center_x = (x1 + x2) // 2
                 center_y = (y1 + y2) // 2
                 distance = self.calculate_distance_pointcloud(center_x, center_y)
@@ -100,14 +97,8 @@ class SignDetector(Node):
                 if distance == -1:
                     distance = self.calculate_distance(x1, y1, x2, y2)
 
-                # 🟥 Mesafe threshold kontrolü
-                if distance < 0.7 or distance > 12.0:
-                    continue
-
-                self._draw_box(x1, y1, x2, y2, class_name, distance, confidence)
-
-                if distance <= 7.0:
-                    sign_data[class_name] = round(distance, 2)
+                self._draw_box(x1, y1, x2, y2, class_name, distance)
+                sign_data[class_name] = round(distance, 2)
 
             if sign_data:
                 msg = String()
@@ -115,6 +106,7 @@ class SignDetector(Node):
                 self.sign_publisher.publish(msg)
                 self.get_logger().info(f"Published: {msg.data}")
 
+            # Görüntü Gösterimi
             if self.annotated_image.shape[0] > 0:
                 cv2.imshow("Levha Tespiti", self.annotated_image)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -139,6 +131,7 @@ class SignDetector(Node):
                     x, y, z = pt
                     if math.isnan(z) or math.isinf(z):
                         return -1
+                    print(math.sqrt(x**2 + y**2 + z**2))
                     return math.sqrt(x**2 + y**2 + z**2)
             return -1
         except Exception as e:
@@ -150,10 +143,9 @@ class SignDetector(Node):
         bbox_width = max(x2 - x1, 1)
         return (real_width * self.fx) / bbox_width * 1.7
 
-    def _draw_box(self, x1, y1, x2, y2, class_name, distance, confidence):
+    def _draw_box(self, x1, y1, x2, y2, class_name, distance):
         cv2.rectangle(self.annotated_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        label = f"{class_name}: {distance:.2f}m ({confidence:.2f})"
-        cv2.putText(self.annotated_image, label, (x1, y1 - 10),
+        cv2.putText(self.annotated_image, f"{class_name}: {distance:.2f}m", (x1, y1 - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
 def main(args=None):
