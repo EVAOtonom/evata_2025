@@ -1,15 +1,40 @@
-# config/zedm_yaml
-# Parameters for Stereolabs ZED mini camera
+# config/zedm.yaml
+# Parameters for Stereolabs ZED Mini camera
+
 ---
 /**:
-    ros__parameters:
-        general:
-            camera_model: 'zedm'
-            camera_name: 'zedm' # usually overwritten by launch file
-            grab_resolution: 'HD1080' # The native camera grab resolution. 'HD2K', 'HD1080', 'HD720', 'VGA', 'AUTO'
-            grab_frame_rate: 30 # ZED SDK internal grabbing rate
+  ros__parameters:
+    general:
+      camera_model: 'zedm'
+      camera_name: 'zedm'
+      grab_resolution: 'HD720'   # HD1080 yerine HD720 seçmek performans açısından daha dengelidir
+      grab_frame_rate: 30
 
-        depth:
-            min_depth: 0.1 # Min: 0.1, Max: 3.0
-            max_depth: 10.0 # Max: 20.0
+    depth:
+      min_depth: 0.2             # çok yakın mesafelerde false depth olmasın diye 0.2 iyidir
+      max_depth: 10.0            # yeterli, istersen 15.0 yapabilirsin ama çok fark etmez
 
+    pos_tracking:
+      publish_tf: true
+      publish_map_tf: true
+      map_frame: "map"
+      odometry_frame: "odom"
+      path_pub_rate: 2.0
+      path_max_count: -1
+      two_d_mode: true        # eğer sadece düz zemin üzerinde takip yapıyorsan true yapılabilir
+      set_gravity_as_origin: true
+      floor_alignment: false
+      depth_min_range: 0.3       # aracın önü veya kaportası depth'e girip bozulmasın diye
+
+    region_of_interest:
+      automatic_roi: false
+      apply_to_depth: true
+      apply_to_positional_tracking: true
+      image_height_ratio_cutoff: 0.5
+      depth_far_threshold_meters: 3.0
+
+    stream_server:
+      stream_enabled: false
+
+    debug:
+      sdk_verbose: 1
