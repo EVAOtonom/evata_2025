@@ -13,7 +13,7 @@ from sensor_msgs_py import point_cloud2
 import torch
 from collections import defaultdict, deque
 from statistics import median
-
+import os
 logging.getLogger('ultralytics').setLevel(logging.ERROR)
 
 class SignDetector(Node):
@@ -22,10 +22,13 @@ class SignDetector(Node):
 
         self.device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
         self.get_logger().info(f"Using device: {self.device}")
-
-        self.model = YOLO("/home/otonom/Downloads/best.pt").to(self.device)
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        src_dir = dir_path.split('/install')[0]  # install dizininden öncesini al
+        src_dir = os.path.dirname(os.path.realpath(__file__)).split('/src/reel_evata')[0]
+        weights_path = os.path.join(src_dir, 'src', 'evata_sim', 'evata_sim', 'best.pt')
+        self.model = YOLO(weights_path).to(self.device)
         self.model.fuse()
-
+        
         self.bridge = CvBridge()
         self.process_width = 1280
         self.process_height = 720
@@ -163,23 +166,28 @@ class SignDetector(Node):
             center_x = int((x1 + x2) / 2 * scale_x)
             center_y = int((y1 + y2) / 2 * scale_y)
 
-            center_x = max(0, min(center_x, self.latest_pointcloud.width - 1))
-            center_y = max(0, min(center_y, self.latest_pointcloud.height - 1))
-
             distances = []
+            for dy in range(-2, 3):
+                for dx in range(-2, 3):
+                    px = np.clip(center_x + dx, 0, self.latest_pointcloud.width - 1)
+                    py = np.clip(center_y + dy, 0, self.latest_pointcloud.height - 1)
+                    point = pc_np[py, px, :]
+                    if np.all(np.isfinite(point)):
+                        dist = np.linalg.norm(point)
+                        if 0.3 < dist < 20.0:
+                            distances.append(dist)
 
-            for _ in range(5):
-                point = pc_np[center_y, center_x, :]
-                if np.all(np.isfinite(point)):
-                    dist = np.linalg.norm(point)
-                    if 0.3 < dist < 20.0:
-                        distances.append(dist)
-
-            if len(distances) == 0:
-                self.get_logger().warn("No valid single-point distances", throttle_duration_sec=5)
+            if len(distances) < 5:
+                self.get_logger().warn("Not enough valid points", throttle_duration_sec=5)
                 return -1
 
-            return float(np.mean(distances))
+            # Outlier filtrele
+            q1 = np.percentile(distances, 25)
+            q3 = np.percentile(distances, 75)
+            iqr = q3 - q1
+            filtered = [d for d in distances if q1 - 1.5 * iqr <= d <= q3 + 1.5 * iqr]
+
+            return float(np.median(filtered)) if filtered else float(np.median(distances))
 
         except Exception as e:
             self.get_logger().error(f"Distance calc error: {str(e)}", throttle_duration_sec=5)
@@ -198,7 +206,6 @@ class SignDetector(Node):
 
         cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
 
-        # Metin: class_name + distance + conf (0.00 formatında)
         text = f"{class_name}"
         if distance > 0:
             text += f" {distance:.1f}m"
@@ -234,3 +241,4 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
+
