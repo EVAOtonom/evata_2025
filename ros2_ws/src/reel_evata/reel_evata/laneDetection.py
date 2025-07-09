@@ -84,25 +84,25 @@ class ImageSaver(Node):
         self.process_interval = 1.0 / 5  # 5 FPS
 
 
-    def calculate_steering_angle(self, mid_points):
-        """Orta noktaların x koordinatlarının ortalamasına göre dönme açısını hesapla."""
-        if not mid_points:
-            return 0.0  # Orta nokta yoksa düz git
+    #def calculate_steering_angle(self, mid_points):
+        #"""Orta noktaların x koordinatlarının ortalamasına göre dönme açısını hesapla."""
+        #if not mid_points:
+           # return 0.0  # Orta nokta yoksa düz git
 
         # Tüm orta noktaların x koordinatlarını al
-        x_coords = [point[0] for point in mid_points]
+        #x_coords = [point[0] for point in mid_points]
 
         # X koordinatlarının ortalamasını hesapla
-        avg_x = sum(x_coords) / len(x_coords)
+       # avg_x = sum(x_coords) / len(x_coords)
 
         # Görselin orta noktasına göre sapma miktarını hesapla
-        deviation = avg_x - self.image_center_x
+       # deviation = avg_x - self.image_center_x
 
         # Sapma miktarını normalize et (örneğin, -1.0 ile 1.0 arasında)
-        max_deviation = self.image_center_x  # Maksimum sapma (640 piksel)
-        steering_angle = deviation / max_deviation  # -1.0 (sola) ile 1.0 (sağa) arasında
+       # max_deviation = self.image_center_x  # Maksimum sapma (640 piksel)
+        #steering_angle = deviation / max_deviation  # -1.0 (sola) ile 1.0 (sağa) arasında
 
-        return -steering_angle
+        #return -steering_angle
 
 
 
@@ -185,8 +185,8 @@ class ImageSaver(Node):
             if y < roi_y_start or y > roi_y_end:
                 return None, None
             # Lineer interpolasyon ile x1 ve x2 değerlerini hesapla
-            x1 = int(484 + (y - roi_y_start) * (10 - 484) / (roi_y_end - roi_y_start))
-            x2 = int(915 + (y - roi_y_start) * (1150 - 912) / (roi_y_end - roi_y_start))
+            x1 = int(0 + (y - roi_y_start) * (0) / (roi_y_end - roi_y_start))
+            x2 = int(1280 + (y - roi_y_start) * (1280) / (roi_y_end - roi_y_start))
             return x1, x2
 
         roi_mask = (y_coords >= roi_y_start) & (y_coords <= roi_y_end)
@@ -306,7 +306,7 @@ class ImageSaver(Node):
                 cv2.circle(im0s, point, radius=5, color=(0, 0, 255), thickness=-1)
 
             # Tekerlek açısını hesapla ve gönder
-            steering_angle = self.calculate_steering_angle(mid_points)
+            #steering_angle = self.calculate_steering_angle(mid_points)
             
         
 
