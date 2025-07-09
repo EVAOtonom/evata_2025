@@ -99,18 +99,18 @@ class ImageSaver(Node):
         max_deviation = self.image_center_x  # Maksimum sapma (640 piksel)
         steering_angle = deviation / max_deviation  # -1.0 (sola) ile 1.0 (sağa) arasında
         self.current_steering = steering_angle  # Dinamik ROI için kaydet
-        return steering_angle *120
+        return steering_angle *140
 
     def get_dynamic_roi_bounds(self, y):
         """Steering açısına göre dinamik ROI sınırlarını hesaplar"""
         # Statik ROI hesaplaması (orijinal kodunuzdaki gibi)
-        roi_y_start = 520
+        roi_y_start = 700
         roi_y_end = 720
-        static_x1 = int(240 + (y - roi_y_start) * (0 - 240) / (roi_y_end - roi_y_start))
-        static_x2 = int(1100 + (y - roi_y_start) * (1280 - 1100) / (roi_y_end - roi_y_start))
+        static_x1 = int(0 + (y - roi_y_start) * (0) / (roi_y_end - roi_y_start))
+        static_x2 = int(1280 + (y - roi_y_start) * (1280) / (roi_y_end - roi_y_start))
         
         # Dinamik kayma miktarı (300 katsayısı)
-        shift = int(self.current_steering * 500)
+        shift = int(self.current_steering * 1)
         return (max(0, static_x1 + shift), min(1280, static_x2 + shift))
 
     def publish_cmd_vel(self, steering_angle):
@@ -121,7 +121,7 @@ class ImageSaver(Node):
         # (oran * 120) olarak hesaplanmıştı.
         # Şimdi bunu Int8 sınırlarına (-128 ile 127) kırpalım.
         steering_value_raw = steering_angle # Bu zaten çarpılmış değer
-        steering_value_int = int(round(steering_value_raw))
+        steering_value_int = int(steering_value_raw)
         
         
         msg.data = steering_value_int# Python int'e çevir
@@ -187,14 +187,14 @@ class ImageSaver(Node):
 
        
 
-        roi_y_start = 520
+        roi_y_start = 500
         roi_y_end = 720
         def get_roi_x_bounds(y):
             if y < roi_y_start or y > roi_y_end:
                 return None, None
             # Lineer interpolasyon ile x1 ve x2 değerlerini hesapla
-            x1 = int(240 + (y - roi_y_start) * (0 - 240) / (roi_y_end - roi_y_start))
-            x2 = int(1100 + (y - roi_y_start) * (1280-1100) / (roi_y_end - roi_y_start))
+            x1 = int(215 + (y - roi_y_start) * (0-215) / (roi_y_end - roi_y_start))
+            x2 = int(1125 + (y - roi_y_start) * (1280-1125) / (roi_y_end - roi_y_start))
             return x1, x2
 
         roi_mask = (y_coords >= roi_y_start) & (y_coords <= roi_y_end)
@@ -224,7 +224,7 @@ class ImageSaver(Node):
                 # Birbirinden en az 500 piksel uzak olan iki x değeri bulma
                 x_values_sorted = np.sort(x_values)
                 x_diff = np.diff(x_values_sorted)
-                valid_pairs = np.where(x_diff >= 500)[0]
+                valid_pairs = np.where(x_diff >= 144)[0]
                 if len(valid_pairs) > 0:
                     x1_pair = x_values_sorted[valid_pairs[0]]
                     x2_pair = x_values_sorted[valid_pairs[0] + 1]
@@ -235,10 +235,10 @@ class ImageSaver(Node):
                     for x in x_values:
                         if x < self.image_center_x:
                             # Sol şerit ise: 335 pixel ekle
-                            adjusted_x = x + 335
+                            adjusted_x = x + 380
                         else:
                             # Sağ şerit ise: 335 pixel çıkar
-                            adjusted_x = x - 335
+                            adjusted_x = x - 380
 
                         # ROI sınırları içinde kalacak şekilde ayarla
                         adjusted_x = max(x1, min(x2, adjusted_x))
@@ -278,7 +278,7 @@ class ImageSaver(Node):
         ext_roi_x2 = 1160  # en sağ
 
         # ROI kutusunu çiz
-        cv2.rectangle(im0s, (ext_roi_x1, ext_roi_y1), (ext_roi_x2, ext_roi_y2), (0, 128, 255), 3)
+        #cv2.rectangle(im0s, (ext_roi_x1, ext_roi_y1), (ext_roi_x2, ext_roi_y2), (0, 128, 255), 3)
 
         # ROI içindeki ll_seg_mask verilerini filtrele
         roi_mask_extended = (y_coords >= ext_roi_y1) & (y_coords <= ext_roi_y2) & \
@@ -287,7 +287,7 @@ class ImageSaver(Node):
         x_vals_ext = x_coords[roi_mask_extended]
         x_vals_ext_sorted = np.sort(x_vals_ext)
         x_diffs_ext = np.diff(x_vals_ext_sorted)
-        threshold = 50  # çizgi arası minimum boşluk
+        threshold = 144  # çizgi arası minimum boşluk
 
         # Çizgi indekslerini bul (aralarındaki fark eşikten büyükse)
         lines_idx = np.where(x_diffs_ext > threshold)[0]
