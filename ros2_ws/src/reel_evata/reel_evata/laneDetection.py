@@ -1,4 +1,5 @@
 import rclpy
+from std_msgs.msg import Int8
 from rclpy.node import Node
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
@@ -82,30 +83,40 @@ class ImageSaver(Node):
 
         self.last_process_time = 0.0
         self.process_interval = 1.0 / 5  # 5 FPS
+        self.cmd_vel_publisher = self.create_publisher(Int8, "/stm/steering_angle", 10)
 
+#############
+    def calculate_steering_angle(self, mid_points):
+        """Orta noktaların x koordinatlarının ortalamasına göre dönme açısını hesapla."""
+        if not mid_points:
+            return 0.0  # Orta nokta yoksa düz git
 
-    #def calculate_steering_angle(self, mid_points):
-        #"""Orta noktaların x koordinatlarının ortalamasına göre dönme açısını hesapla."""
-        #if not mid_points:
-           # return 0.0  # Orta nokta yoksa düz git
-
-        # Tüm orta noktaların x koordinatlarını al
-        #x_coords = [point[0] for point in mid_points]
+        #Tüm orta noktaların x koordinatlarını al
+        x_coords = [point[0] for point in mid_points]
 
         # X koordinatlarının ortalamasını hesapla
-       # avg_x = sum(x_coords) / len(x_coords)
+        avg_x = sum(x_coords) / len(x_coords)
 
         # Görselin orta noktasına göre sapma miktarını hesapla
-       # deviation = avg_x - self.image_center_x
+        deviation = avg_x - self.image_center_x
 
         # Sapma miktarını normalize et (örneğin, -1.0 ile 1.0 arasında)
-       # max_deviation = self.image_center_x  # Maksimum sapma (640 piksel)
-        #steering_angle = deviation / max_deviation  # -1.0 (sola) ile 1.0 (sağa) arasında
+        max_deviation = self.image_center_x  # Maksimum sapma (640 piksel)
+        steering_angle = deviation / max_deviation  # -1.0 (sola) ile 1.0 (sağa) arasında
 
-        #return -steering_angle
+        return -steering_angle*140
+       
+    def publish_cmd_vel(self, steering_angle):
+        msg = Int8()
+        steering_value_int = int(steering_angle)
+        msg.data = steering_value_int
+        # Navigasyonla denenicekse alltaki satır yorum satırı. Sadece şerit takipse  yorumu kaldır. ****************************************************************
+        #self.cmd_vel_publisher.publish(msg)
+        self.get_logger().info(f"Publishing to /stm/steering_angle: {msg.data} (Calculated: {steering_angle:.2f})", throttle_duration_sec=0.5)
 
 
 
+##############
     def image_callback(self, msg):
         current_time = time.time()
         if current_time - self.last_process_time < self.process_interval:
@@ -179,14 +190,14 @@ class ImageSaver(Node):
         # Şerit çizgilerinin koordinatlarını bulma
         y_coords, x_coords = np.where(thinned_ll_mask_for_show == 1)
 
-        roi_y_start = 443
+        roi_y_start = 500
         roi_y_end = 720
         def get_roi_x_bounds(y):
             if y < roi_y_start or y > roi_y_end:
                 return None, None
             # Lineer interpolasyon ile x1 ve x2 değerlerini hesapla
-            x1 = int(0 + (y - roi_y_start) * (0) / (roi_y_end - roi_y_start))
-            x2 = int(1280 + (y - roi_y_start) * (1280) / (roi_y_end - roi_y_start))
+            x1 = int(215 + (y - roi_y_start) * (0-215) / (roi_y_end - roi_y_start))
+            x2 = int(1125 + (y - roi_y_start) * (1280-1125) / (roi_y_end - roi_y_start))
             return x1, x2
 
         roi_mask = (y_coords >= roi_y_start) & (y_coords <= roi_y_end)
@@ -222,7 +233,13 @@ class ImageSaver(Node):
                     #print(f"y = {y}, x1 = {x1_pair}, x2 = {x2_pair}, Orta Nokta = ({mid_x}, {y})")
                 else:
                     for x in x_values:
-                        adjusted_x = x - 275
+                        if x < self.image_center_x:
+                            # Sol şerit ise: 335 pixel ekle
+                            adjusted_x = x + 380
+                        else:
+                            # Sağ şerit ise: 335 pixel çıkar
+                            adjusted_x = x - 380
+
                         # ROI sınırları içinde kalacak şekilde ayarla
                         adjusted_x = max(x1, min(x2, adjusted_x))
                         if adjusted_x > x1:
@@ -306,7 +323,10 @@ class ImageSaver(Node):
                 cv2.circle(im0s, point, radius=5, color=(0, 0, 255), thickness=-1)
 
             # Tekerlek açısını hesapla ve gönder
-            #steering_angle = self.calculate_steering_angle(mid_points)
+            steering_angle = self.calculate_steering_angle(mid_points)
+            # Navigasyonla denenicekse alltaki satır yorum satırı. Sadece şerit takipse  yorumu kaldır. ****************************************************************
+            #self.publish_cmd_vel(steering_angle)
+
             
         
 
