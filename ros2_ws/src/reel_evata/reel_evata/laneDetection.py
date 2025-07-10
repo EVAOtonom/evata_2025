@@ -104,7 +104,7 @@ class ImageSaver(Node):
         max_deviation = self.image_center_x  # Maksimum sapma (640 piksel)
         steering_angle = deviation / max_deviation  # -1.0 (sola) ile 1.0 (sağa) arasında
 
-        return -steering_angle*140
+        return steering_angle*140
        
     def publish_cmd_vel(self, steering_angle):
         msg = Int8()
