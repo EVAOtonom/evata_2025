@@ -28,6 +28,8 @@ setup(
             "laneDetection=" + package_name + ".laneDetection:main",
             'toggle_brake= reel_evata.toggle_brake:main',
             'gps_logger= reel_evata.gps_logger:main',
+            "mid_lane=" + package_name + ".mid_lane:main",
+
         
         ],
     },
