@@ -180,14 +180,14 @@ class ImageSaver(Node):
         # Şerit çizgilerinin koordinatlarını bulma
         y_coords, x_coords = np.where(thinned_ll_mask_for_show == 1)
 
-        roi_y_start = 520
+        roi_y_start = 500
         roi_y_end = 720
         def get_roi_x_bounds(y):
             if y < roi_y_start or y > roi_y_end:
                 return None, None
             # Lineer interpolasyon ile x1 ve x2 değerlerini hesapla
-            x1 = int(430 + (y - roi_y_start) * (200 - 430) / (roi_y_end - roi_y_start))
-            x2 = int(870 + (y - roi_y_start) * (1100 - 870) / (roi_y_end - roi_y_start))
+            x1 = int(305 + (y - roi_y_start) * (55 - 305) / (roi_y_end - roi_y_start))
+            x2 = int(920 + (y - roi_y_start) * (1190 - 920) / (roi_y_end - roi_y_start))
             return x1, x2
 
         roi_mask = (y_coords >= roi_y_start) & (y_coords <= roi_y_end)
