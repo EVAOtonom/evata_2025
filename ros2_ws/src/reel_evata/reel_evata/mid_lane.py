@@ -67,7 +67,7 @@ class ImageSaver(Node):
         self.bridge = CvBridge()
         dir_path = os.path.dirname(os.path.realpath(__file__))
         src_dir = dir_path.split('/install')[0]  # install kısmını çıkar
-        weights = os.path.join(src_dir,'utils', 'yolopv2.pt')
+        weights = os.path.join(src_dir, 'src', 'reel_evata', 'reel_evata', 'utils', 'yolopv2.pt')
         device = "0"
         model = torch.jit.load(weights)
         device = select_device(device)

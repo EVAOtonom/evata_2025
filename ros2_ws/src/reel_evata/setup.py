@@ -28,9 +28,10 @@ setup(
             "laneDetection=" + package_name + ".laneDetection:main",
             'toggle_brake= reel_evata.toggle_brake:main',
             'gps_logger= reel_evata.gps_logger:main',
+            "serit=" + package_name + ".serit:main",		
             "mid_lane=" + package_name + ".mid_lane:main",
-
-        
+            "lidar_obstacle_detector_with_audio_text=" + package_name + ".lidar_obstacle_detector_with_audio_text:main",
+            "laneFollower=" + package_name + ".laneFollower:main",
         ],
     },
 )

@@ -1,22 +1,19 @@
 import rclpy
-from std_msgs.msg import Int8
 from rclpy.node import Node
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import cv2
-import cv2.ximgproc
-from sensor_msgs.msg import PointCloud2, PointField
-from sensor_msgs_py import point_cloud2
-import math
+from std_msgs.msg import Int8 
 import os
 import numpy as np
 import time
 import torch
-from reel_evata.utils.utils import \
+from evata_sim.utils.utils import \
     time_synchronized, select_device, increment_path, \
     scale_coords, xyxy2xywh, non_max_suppression, split_for_trace_model, \
     driving_area_mask, lane_line_mask, plot_one_box, show_seg_result, \
     AverageMeter, LoadImages
+
 
 def letterbox(img, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=True, stride=32):
     # Resize and pad image while meeting stride-multiple constraints
@@ -60,38 +57,36 @@ class ImageSaver(Node):
             '/zed/zed_node/rgb/image_rect_color',
             self.image_callback,
             10)
-        self.create_subscription(PointCloud2, "/zed/zed_node/point_cloud/cloud_registered", self.point_cloud_callback, 10)
-
+        
         self.bridge = CvBridge()
         dir_path = os.path.dirname(os.path.realpath(__file__))
         src_dir = dir_path.split('/install')[0]  # install kısmını çıkar
-        weights = os.path.join(src_dir, 'src', 'reel_evata', 'reel_evata', 'utils', 'yolopv2.pt')
+        weights = os.path.join(src_dir, 'src', 'evata_sim', 'evata_sim', 'utils', 'yolopv2.pt')
         device = "0"
         model = torch.jit.load(weights)
         device = select_device(device)
         half = device.type != 'cpu'  # half precision only supported on CUDA
         model = model.to(device)
-        self.latest_pointcloud = None
 
         if half:
             model.half()  # to FP16  
         model.eval()
         self.model = model
         self.device = device
-        self.filtered_pointcloud_pub = self.create_publisher(PointCloud2, '/lane_pointcloud', 10)
-        self.image_center_x = 640  # Görselin orta noktası (1280x720 için)
 
-        self.last_process_time = 0.0
-        self.process_interval = 1.0 / 5  # 5 FPS
+
         self.cmd_vel_publisher = self.create_publisher(Int8, "/stm/steering_angle", 10)
+        self.image_center_x = 640  # Görselin orta noktası (1280x720 için)
+        self.current_steering = 0.0  # Dinamik ROI için eklendi
+        self.serit=None
+        self.current_lane = None
 
-#############
     def calculate_steering_angle(self, mid_points):
         """Orta noktaların x koordinatlarının ortalamasına göre dönme açısını hesapla."""
         if not mid_points:
             return 0.0  # Orta nokta yoksa düz git
 
-        #Tüm orta noktaların x koordinatlarını al
+        # Tüm orta noktaların x koordinatlarını al
         x_coords = [point[0] for point in mid_points]
 
         # X koordinatlarının ortalamasını hesapla
@@ -103,37 +98,43 @@ class ImageSaver(Node):
         # Sapma miktarını normalize et (örneğin, -1.0 ile 1.0 arasında)
         max_deviation = self.image_center_x  # Maksimum sapma (640 piksel)
         steering_angle = deviation / max_deviation  # -1.0 (sola) ile 1.0 (sağa) arasında
+        self.current_steering = steering_angle  # Dinamik ROI için kaydet
+        return steering_angle *120
 
-        return steering_angle*140
-       
+    def get_dynamic_roi_bounds(self, y):
+        """Steering açısına göre dinamik ROI sınırlarını hesaplar"""
+        # Statik ROI hesaplaması (orijinal kodunuzdaki gibi)
+        roi_y_start = 520
+        roi_y_end = 720
+        static_x1 = int(240 + (y - roi_y_start) * (0 - 240) / (roi_y_end - roi_y_start))
+        static_x2 = int(1100 + (y - roi_y_start) * (1280 - 1100) / (roi_y_end - roi_y_start))
+        
+        # Dinamik kayma miktarı (300 katsayısı)
+        shift = int(self.current_steering * 500)
+        return (max(0, static_x1 + shift), min(1280, static_x2 + shift))
+
     def publish_cmd_vel(self, steering_angle):
+        """Tekerlek açısını Int8 olarak yayınlar."""
         msg = Int8()
-        steering_value_int = int(steering_angle)
-        msg.data = steering_value_int
-        # Navigasyonla denenicekse alltaki satır yorum satırı. Sadece şerit takipse  yorumu kaldır. ****************************************************************
-        self.cmd_vel_publisher.publish(msg)
-        self.get_logger().info(f"Publishing to /stm/steering_angle: {msg.data} (Calculated: {steering_angle:.2f})", throttle_duration_sec=0.5)
 
+        # steering_angle zaten calculate_steering_angle içinde
+        # (oran * 120) olarak hesaplanmıştı.
+        # Şimdi bunu Int8 sınırlarına (-128 ile 127) kırpalım.
+        steering_value_raw = steering_angle # Bu zaten çarpılmış değer
+        steering_value_int = int(round(steering_value_raw))
+        
+        
+        msg.data = steering_value_int# Python int'e çevir
 
+        self.cmd_vel_publisher.publish(msg) # Publisher adı orijinaldeki gibi cmd_vel_publisher
+        self.get_logger().info(f"Publishing to /stm/steering_angle: {msg.data} (Calculated: {steering_value_raw:.2f})", throttle_duration_sec=0.5)
 
-##############
     def image_callback(self, msg):
-        current_time = time.time()
-        if current_time - self.last_process_time < self.process_interval:
-            return
-        self.last_process_time = current_time
-
         try:
             self.latest_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
             self.detect(self.latest_image)
         except Exception as e:
             self.get_logger().error(f'Failed to process image: {e}')
-    
-    def point_cloud_callback(self, msg):
-        self.latest_pointcloud = msg
-        # Store camera info if available (you might need to subscribe to camera info topic)
-        if hasattr(msg, 'header'):
-            self.latest_pointcloud_header = msg.header
 
 
     def detect(self, source, imgsz=640, conf_thres=0.3, iou_thres=0.45, 
@@ -142,8 +143,9 @@ class ImageSaver(Node):
         model = self.model
         device = self.device
         half = device.type != 'cpu'
+        #height,width = source.shape[:2]
+        #source = source[:,:width//2]
         img0 = cv2.resize(source, (1280,720), interpolation=cv2.INTER_LINEAR)
-        #img0 = source
         img = letterbox(img0, imgsz, stride=stride)[0]
         
         # Convert
@@ -177,27 +179,22 @@ class ImageSaver(Node):
 
         da_seg_mask = driving_area_mask(seg)
         ll_seg_mask = lane_line_mask(ll)
-        
-        ll_seg_mask_for_thinning_uint8 = (ll_seg_mask.astype(np.uint8) * 255)
-        
-        thinned_ll_mask_255 = cv2.ximgproc.thinning(ll_seg_mask_for_thinning_uint8, thinningType=cv2.ximgproc.THINNING_ZHANGSUEN)
-        
-        thinned_ll_mask_for_show = (thinned_ll_mask_255 / 255).astype(ll_seg_mask.dtype)
-        
         # Kameranın orta noktasını belirleme
         mid_point = im0s.shape[1] // 2
 
         # Şerit çizgilerinin koordinatlarını bulma
-        y_coords, x_coords = np.where(thinned_ll_mask_for_show == 1)
+        y_coords, x_coords = np.where(ll_seg_mask == 1)
 
-        roi_y_start = 500
+       
+
+        roi_y_start = 520
         roi_y_end = 720
         def get_roi_x_bounds(y):
             if y < roi_y_start or y > roi_y_end:
                 return None, None
             # Lineer interpolasyon ile x1 ve x2 değerlerini hesapla
-            x1 = int(215 + (y - roi_y_start) * (0-215) / (roi_y_end - roi_y_start))
-            x2 = int(1125 + (y - roi_y_start) * (1280-1125) / (roi_y_end - roi_y_start))
+            x1 = int(240 + (y - roi_y_start) * (0 - 240) / (roi_y_end - roi_y_start))
+            x2 = int(1100 + (y - roi_y_start) * (1280-1100) / (roi_y_end - roi_y_start))
             return x1, x2
 
         roi_mask = (y_coords >= roi_y_start) & (y_coords <= roi_y_end)
@@ -206,25 +203,28 @@ class ImageSaver(Node):
 
         mid_points = []
         fallback_points = []  # Yedek noktalar için liste
-        all_points = [] # PointCloud paylaşımı için
 
         # Her 10 y değeri için işlem yapma
         for y in range(roi_y_start, roi_y_end + 1):
-            x1, x2 = get_roi_x_bounds(y)
-            if x1 is None or x2 is None:
+            x1_static, x2_static = get_roi_x_bounds(y)
+            if x1_static is None or x2_static is None:
                 continue
 
-            # Belirli bir y değeri için x sınırlarını uygula
+            # Dinamik ROI sınırlarını hesapla
+            x1_dynamic, x2_dynamic = self.get_dynamic_roi_bounds(y)
+            
+            # İki ROI'nin birleşimini al
+            x1 = min(x1_static, x1_dynamic)
+            x2 = max(x2_static, x2_dynamic)
+
             y_mask = roi_y_coords == y
             x_values = roi_x_coords[y_mask & (roi_x_coords >= x1) & (roi_x_coords <= x2)]
             
-            
             if len(x_values) >= 2:
-                all_points.extend([(x, y) for x in x_values])
-                # Birbirinden en az 100 piksel uzak olan iki x değeri bulma
+                # Birbirinden en az 500 piksel uzak olan iki x değeri bulma
                 x_values_sorted = np.sort(x_values)
                 x_diff = np.diff(x_values_sorted)
-                valid_pairs = np.where(x_diff >= 400)[0]
+                valid_pairs = np.where(x_diff >= 500)[0]
                 if len(valid_pairs) > 0:
                     x1_pair = x_values_sorted[valid_pairs[0]]
                     x2_pair = x_values_sorted[valid_pairs[0] + 1]
@@ -235,78 +235,23 @@ class ImageSaver(Node):
                     for x in x_values:
                         if x < self.image_center_x:
                             # Sol şerit ise: 335 pixel ekle
-                            adjusted_x = x - 380
-                            
+                            adjusted_x = x + 335
                         else:
                             # Sağ şerit ise: 335 pixel çıkar
-                            adjusted_x = x - 380
+                            adjusted_x = x - 335
 
                         # ROI sınırları içinde kalacak şekilde ayarla
                         adjusted_x = max(x1, min(x2, adjusted_x))
                         if adjusted_x > x1:
                             fallback_points.append((adjusted_x, y))
                             #print(f"Fallback: y = {y}, min_x = {adjusted_x}, adjusted_x = {adjusted_x}")
-        if all_points and self.latest_pointcloud is not None:
-            try:
-                matched_points = []
-                pc_height = self.latest_pointcloud.height
-                pc_width = self.latest_pointcloud.width
-
-                # Get point cloud data as numpy array
-                pc_data = point_cloud2.read_points_numpy(self.latest_pointcloud)
-
-                # Reshape to height x width x fields
-                pc_data = pc_data.reshape((pc_height, pc_width, -1))
-
-                # Camera intrinsic parameters (adjust these to match your camera)
-                fx = 700.0  # Focal length in pixels (x)
-                fy = 700.0  # Focal length in pixels (y)
-                cx = 640.0   # Principal point (x)
-                cy = 360.0   # Principal point (y)
-
-                for (x_pixel, y_pixel) in all_points:
-                    # Convert from image coordinates to normalized device coordinates
-                    u = x_pixel
-                    v = y_pixel
-
-                    # Skip if coordinates are out of bounds
-                    if u < 0 or u >= pc_width or v < 0 or v >= pc_height:
-                        continue
-
-                    # Get corresponding 3D point
-                    point = pc_data[int(v), int(u)]
-                    x, y, z = point[:3]
-
-                    # Filter invalid points
-                    if not math.isnan(x) and not (math.isnan(y)) and not (math.isnan(z)):
-                        # Transform to world coordinates if needed
-                        # (This depends on your coordinate frames)
-                        matched_points.append((x, y, z))
-
-                if matched_points:
-                    # Create PointCloud2 message
-                    header = self.latest_pointcloud_header
-                    header.frame_id = "zed_camera_link"  # Publish in camera frame
-
-                    fields = [
-                        PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
-                        PointField(name='y', offset=4, datatype=PointField.FLOAT32, count=1),
-                        PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1),
-                    ]
-
-                    pc2_msg = point_cloud2.create_cloud(header, fields, matched_points)
-                    self.filtered_pointcloud_pub.publish(pc2_msg)
-                    self.get_logger().info(f"Published filtered PointCloud2 with {len(matched_points)} points")
-
-            except Exception as e:
-                self.get_logger().error(f"Error creating filtered PointCloud: {str(e)}")
 
         # Eğer mid_points boşsa, fallback_points'i kullan
         if not mid_points and fallback_points:
             mid_points = fallback_points
-            print("Using fallback points")
+            #print("Using fallback points")
 
-        # ROI alanını ana görselde belirginleştirme (dikdörtgen çizme)
+        # Statik ROI çizimi (mavi)
         roi_top_left = (get_roi_x_bounds(roi_y_start)[0], roi_y_start)
         roi_top_right = (get_roi_x_bounds(roi_y_start)[1], roi_y_start)
         roi_bottom_left = (get_roi_x_bounds(roi_y_end)[0], roi_y_end)
@@ -314,6 +259,83 @@ class ImageSaver(Node):
         roi_pts = np.array([roi_top_left, roi_top_right, roi_bottom_right, roi_bottom_left], np.int32)
         roi_pts = roi_pts.reshape((-1, 1, 2))
         cv2.polylines(im0s, [roi_pts], isClosed=True, color=(255, 0, 0), thickness=2)
+
+        # Dinamik ROI çizimi (kırmızı)
+        dyn_top_left = (self.get_dynamic_roi_bounds(roi_y_start)[0], roi_y_start)
+        dyn_top_right = (self.get_dynamic_roi_bounds(roi_y_start)[1], roi_y_start)
+        dyn_bottom_left = (self.get_dynamic_roi_bounds(roi_y_end)[0], roi_y_end)
+        dyn_bottom_right = (self.get_dynamic_roi_bounds(roi_y_end)[1], roi_y_end)
+        dyn_pts = np.array([dyn_top_left, dyn_top_right, dyn_bottom_right, dyn_bottom_left], np.int32)
+        dyn_pts = dyn_pts.reshape((-1, 1, 2))
+        cv2.polylines(im0s, [dyn_pts], isClosed=True, color=(0, 0, 255), thickness=2)
+
+            ### GENİŞLETİLMİŞ ROI TANIMI ###
+        # Bu ROI, mevcut ROI'lerin biraz üstünde yer alır
+        # Hem sola hem sağa genişlemiş şekilde tanımlanır
+        ext_roi_y1 = 518  # üst
+        ext_roi_y2 = 520  # alt
+        ext_roi_x1 = 100  # en sol
+        ext_roi_x2 = 1160  # en sağ
+
+        # ROI kutusunu çiz
+        cv2.rectangle(im0s, (ext_roi_x1, ext_roi_y1), (ext_roi_x2, ext_roi_y2), (0, 128, 255), 3)
+
+        # ROI içindeki ll_seg_mask verilerini filtrele
+        roi_mask_extended = (y_coords >= ext_roi_y1) & (y_coords <= ext_roi_y2) & \
+                            (x_coords >= ext_roi_x1) & (x_coords <= ext_roi_x2)
+
+        x_vals_ext = x_coords[roi_mask_extended]
+        x_vals_ext_sorted = np.sort(x_vals_ext)
+        x_diffs_ext = np.diff(x_vals_ext_sorted)
+        threshold = 50  # çizgi arası minimum boşluk
+
+        # Çizgi indekslerini bul (aralarındaki fark eşikten büyükse)
+        lines_idx = np.where(x_diffs_ext > threshold)[0]
+
+        #print("ROI içindeki x koordinatları:", x_vals_ext)
+        #print("Çizgi indeksleri:", lines_idx)
+
+        # Eski şerit değerini koruma mekanizması
+        if not hasattr(self, 'last_valid_lane'):
+            self.last_valid_lane = "None"
+
+        # Genişletilmiş ROI'deki çizgilere göre şerit tespiti
+        if len(lines_idx) >= 2:  # En az 2 çizgi aralığı (3 çizgi)
+            # Çizgi pozisyonlarını al ve sırala
+            lines = []
+            for i in range(min(3, len(lines_idx)+1)):  # Maksimum 3 çizgi
+                lines.append(x_vals_ext_sorted[lines_idx[i]] if i < len(lines_idx) else x_vals_ext_sorted[-1])
+            lines = sorted(lines)
+            
+            # Arabanın x konumunu hesapla
+            car_x = int(np.mean([pt[0] for pt in mid_points])) if mid_points else self.image_center_x
+            
+            # Şerit durumunu belirle
+            if len(lines) >= 3:  # 3 çizgi varsa
+                if car_x < lines[0]:
+                    self.current_lane = "cok_sol"
+                elif lines[0] < car_x < lines[1]:
+                    self.current_lane = "sol"
+                elif lines[1] < car_x < lines[2]:
+                    self.current_lane = "sag"
+                else:
+                    self.current_lane = "cok_sag"
+            else:  # 2 çizgi varsa
+                lane_center = (lines[0] + lines[1]) / 2
+                if car_x < lane_center:
+                    self.current_lane = "sol"
+                else:
+                    self.current_lane = "sag"
+            
+            # Geçerli değeri kaydet
+            self.last_valid_lane = self.current_lane
+        else:
+            # Yeterli çizgi yoksa son geçerli değeri koru
+            self.current_lane = self.last_valid_lane if self.last_valid_lane else "sag"
+
+        # Görselleştirme (HER DURUMDA göster)
+        cv2.putText(im0s, f"Serit: {self.current_lane}", (20, 50), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 0, 131), 3, cv2.LINE_AA)
 
 
         if len(mid_points) >= 2:
@@ -325,13 +347,9 @@ class ImageSaver(Node):
 
             # Tekerlek açısını hesapla ve gönder
             steering_angle = self.calculate_steering_angle(mid_points)
-            # Navigasyonla denenicekse alltaki satır yorum satırı. Sadece şerit takipse  yorumu kaldır. ****************************************************************
             self.publish_cmd_vel(steering_angle)
 
-            
-        
-
-            # Process detections
+        # Process detections
         for i, det in enumerate(pred):  # detections per image
             if len(det):
                 # Rescale boxes from img_size to im0 size
@@ -340,18 +358,10 @@ class ImageSaver(Node):
                 for *xyxy, conf, cls in reversed(det):
                     plot_one_box(xyxy, im0s, line_thickness=3)
             # Show result
-            show_seg_result(im0s, (da_seg_mask, thinned_ll_mask_for_show), is_demo=True)
-            if len(mid_points) >= 2:
-                for i in range(1, len(mid_points)):
-                    cv2.line(im0s, mid_points[i - 1], mid_points[i], (0, 255, 0), thickness=2)
-                # Orta noktaları daire olarak çiz
-                for point in mid_points:
-                    cv2.circle(im0s, point, radius=5, color=(0, 0, 255), thickness=-1)
-            cv2.imshow("hasan",im0s)
-            #cv2.imshow("ROI", roi_im0s)
+            show_seg_result(im0s, (da_seg_mask, ll_seg_mask), is_demo=True)
+          
+            cv2.imshow("Static (Mavi) + Dynamic (Kirmizi) ROI", im0s)
             cv2.waitKey(1)
-        #print(f'Done. ({time.time() - t0:.3f}s)')
-
 
 def main(args=None):
     rclpy.init(args=args)
@@ -366,3 +376,4 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
+    

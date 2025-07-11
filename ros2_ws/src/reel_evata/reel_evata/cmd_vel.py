@@ -19,19 +19,30 @@ class CmdVelSubscriber(Node):
         self.cmd_vel_sub = self.create_subscription(Twist, '/cmd_vel', self.cmd_vel_callback, 10)
         self.odom_sub = self.create_subscription(Float32, '/stm/read_odometer', self.odom_callback, 10)
 
+        # Yeni: Engel algılama topiğine abone ol
+        self.obstacle_sub = self.create_subscription(Int8, '/obstacle_detected', self.obstacle_callback, 10)
+
         self.current_velocity = 0.0  # m/s
         self.target_velocity = 0.0   # m/s
         self.last_odom = None        # cm
         self.last_odom_time = None   # s
 
+        # Engel durumu
+        self.obstacle_detected = False
+
         # PID parametreleri
-        self.kp = 2.0 #kp yüksek olursa hızlı ama dengesiz tepkiler verir.
-        self.ki = 0.7 #ki artarsa hatalar zamanla toparlanır ama aşım olabilir.
-        self.kd = 0.8 #kd artarsa tepki yumuşar ama geç kalabilir.
+        self.kp = 2.0  # Kp yüksek olursa hızlı ama dengesiz tepkiler verir.
+        self.ki = 0.7  # Ki artarsa hatalar zamanla toparlanır ama aşım olabilir.
+        self.kd = 0.8  # Kd artarsa tepki yumuşar ama geç kalabilir.
         self.integral = 0.0
         self.last_error = 0.0
 
         self.get_logger().info('CmdVel Node başlatıldı.')
+
+    def obstacle_callback(self, msg: Int8):
+        self.obstacle_detected = (msg.data == 1)
+        if self.obstacle_detected:
+            self.get_logger().warn('[ENGEL] Engel algılandı! Araç durdurulacak.')
 
     def odom_callback(self, msg: Float32):
         current_odom = msg.data  # cm cinsinden
@@ -56,8 +67,16 @@ class CmdVelSubscriber(Node):
         self.last_odom_time = current_time
 
     def cmd_vel_callback(self, msg: Twist):
+        # Engel algılanmışsa hareket ettirme, fren uygula
+        if self.obstacle_detected:
+            self.target_velocity = 0.0
+            self.motor_power_pub.publish(Int8(data=0))
+            self.brake_pub.publish(Bool(data=True))
+            self.get_logger().warn('[ENGEL] Engel algılandı! Araç durduruluyor.')
+            return
+
         # Hedef hızı 10 ile çarp
-        self.target_velocity = msg.linear.x * 10
+        self.target_velocity = msg.linear.x * 7
         angular_z = msg.angular.z
 
         # Direksiyon açısı hesapla
@@ -83,7 +102,7 @@ class CmdVelSubscriber(Node):
         output = self.kp * error + self.ki * self.integral + self.kd * derivative
 
         # Motor gücünü sınırlıyoruz
-        motor_power = int(min(5, max(0, round(output))))
+        motor_power = int(min(7, max(0, round(output))))
 
         # Fren durumu
         brake = False
