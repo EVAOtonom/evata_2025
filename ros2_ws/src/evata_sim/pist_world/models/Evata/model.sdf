@@ -6,6 +6,8 @@
     <link name="base_footprint" />
 
     <link name="base_link">
+
+
       <inertial>
         <mass>150</mass>
         <inertia>
@@ -929,6 +931,131 @@
       <robot_base_frame>base_footprint</robot_base_frame>
       <tf_topic>/odom/tf</tf_topic>
     </plugin>
+    
+    <link name="top_view_camera_link">
+   <pose>0 0 10 0 1.5708 0</pose> <!-- Link pozisyonu, joint ile konumlandırılacak -->
+
+  <collision name="top_view_camera_collision">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box>
+        <size>0.001 0.001 0.001</size>
+      </box>
+    </geometry>
+  </collision>
+
+  <visual name="top_view_camera_visual">
+    <pose>0 0 0 0 0 0</pose>
+    <geometry>
+      <box>
+        <size>0.05 0.05 0.05</size>
+      </box>
+    </geometry>
+  </visual>
+
+  <inertial>
+    <mass>0.1</mass>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <inertia>
+      <ixx>0.0002</ixx>
+      <ixy>0</ixy>
+      <ixz>0</ixz>
+      <iyy>0.0002</iyy>
+      <iyz>0</iyz>
+      <izz>0.0002</izz>
+    </inertia>
+  </inertial>
+
+  <sensor name="top_view_camera" type="camera">
+    <always_on>1</always_on>
+    <update_rate>30</update_rate>
+    <visualize>true</visualize>
+    <camera>
+      <horizontal_fov>1.5708</horizontal_fov> <!-- 90 derece -->
+      <image>
+        <width>800</width>
+        <height>800</height> <!-- Kare görüntü -->
+        <format>R8G8B8</format>
+      </image>
+      <clip>
+        <near>0.1</near>
+        <far>100</far>
+      </clip>
+    </camera>
+    <plugin name="camera_plugin" filename="libignition-gazebo-camera-system.so"/>
+  </sensor>
+</link>
+
+<joint name="top_view_camera_joint" type="fixed">
+  <pose>0 0 10 0 0 0</pose>  <!-- Aracın üstünde 5m yukarıda -->
+  <parent>base_link</parent>  <!-- Aracın gövdesi -->
+  <child>top_view_camera_link</child>
+</joint>
+
+     <link name="back_view_camera_link">
+   <pose>-5 0 2 0 0 0</pose> <!-- Link pozisyonu, joint ile konumlandırılacak -->
+
+  <collision name="back_view_camera_collision">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box>
+        <size>0.001 0.001 0.001</size>
+      </box>
+    </geometry>
+  </collision>
+
+  <visual name="back_view_camera_visual">
+    <pose>0 0 0 0 0 0</pose>
+    <geometry>
+      <box>
+        <size>0.05 0.05 0.05</size>
+      </box>
+    </geometry>
+  </visual>
+
+  <inertial>
+    <mass>0.1</mass>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <inertia>
+      <ixx>0.0002</ixx>
+      <ixy>0</ixy>
+      <ixz>0</ixz>
+      <iyy>0.0002</iyy>
+      <iyz>0</iyz>
+      <izz>0.0002</izz>
+    </inertia>
+  </inertial>
+
+  <sensor name="back_view_camera" type="camera">
+    <always_on>1</always_on>
+    <update_rate>30</update_rate>
+    <visualize>true</visualize>
+    <camera>
+      <horizontal_fov>1.5708</horizontal_fov> <!-- 90 derece -->
+      <image>
+        <width>800</width>
+        <height>800</height> <!-- Kare görüntü -->
+        <format>R8G8B8</format>
+      </image>
+      <clip>
+        <near>0.1</near>
+        <far>100</far>
+      </clip>
+    </camera>
+    <plugin name="camera_plugin" filename="libignition-gazebo-camera-system.so"/>
+  </sensor>
+</link>
+
+<joint name="back_view_camera_joint" type="fixed">
+  <pose>-5 0 2 0 0 0</pose>  <!-- Aracın üstünde 5m yukarıda -->
+  <parent>base_link</parent>  <!-- Aracın gövdesi -->
+  <child>back_view_camera_link</child>
+</joint>
+
+    
+    
+    
+    
 
     <!-- Joint state publisher -->
     <plugin filename="libignition-gazebo-joint-state-publisher-system.so"

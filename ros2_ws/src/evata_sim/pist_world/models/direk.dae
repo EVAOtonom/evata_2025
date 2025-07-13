@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <asset>
+    <contributor>
+      <author>Blender User</author>
+      <authoring_tool>Blender 4.3.2 commit date:2024-12-16, commit time:21:10, hash:32f5fdce0a0a</authoring_tool>
+    </contributor>
+    <created>2025-07-09T14:14:00</created>
+    <modified>2025-07-09T14:14:00</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_effects>
+    <effect id="StopLight-effect">
+      <profile_COMMON>
+        <newparam sid="Untitled-surface">
+          <surface type="2D">
+            <init_from>Untitled</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="Untitled-sampler">
+          <sampler2D>
+            <source>Untitled-surface</source>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <lambert>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <diffuse>
+              <texture texture="Untitled-sampler" texcoord="stop_light_extension-mesh-map-0"/>
+            </diffuse>
+            <index_of_refraction>
+              <float sid="ior">1.5</float>
+            </index_of_refraction>
+          </lambert>
+        </technique>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_images>
+    <image id="Untitled" name="Untitled">
+      <init_from>Untitled.png</init_from>
+    </image>
+  </library_images>
+  <library_materials>
+    <material id="StopLight-material" name="StopLight">
+      <instance_effect url="#StopLight-effect"/>
+    </material>
+  </library_materials>
+  <library_geometries>
+    <geometry id="stop_light_extension-mesh" name="stop_light_extension">
+      <mesh>
+        <source id="stop_light_extension-mesh-positions">
+          <float_array id="stop_light_extension-mesh-positions-array" count="72">-364.8374 -10e-5 8.020503 -364.8374 -6.946 4.0102 -0.1217 -6.946 4.0102 -0.1217 -10e-5 8.020503 -364.8374 -6.946 -4.0102 -0.1217 -6.946 -4.0102 -364.8374 -10e-5 -8.020503 -0.1217 -10e-5 -8.020503 -364.8374 6.9459 -4.0102 -0.1217 6.9459 -4.0102 -364.8374 6.9459 4.0102 -0.1217 6.9459 4.0102 -378.8063 -6.946 -4.0102 -378.8063 -6.946 4.0102 -378.8063 -10e-5 8.020503 -378.8063 6.9459 -4.0102 -378.8063 -10e-5 -8.020503 -378.8063 6.9459 4.0102 -371.7188 -10e-5 14.4611 -371.7189 -12.5238 7.2306 -371.7189 -12.5238 -7.2306 -371.7189 -10e-5 -14.4611 -371.7189 12.5237 -7.2306 -371.7189 12.5237 7.2306</float_array>
+          <technique_common>
+            <accessor source="#stop_light_extension-mesh-positions-array" count="24" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="stop_light_extension-mesh-normals">
+          <float_array id="stop_light_extension-mesh-normals-array" count="120">0 -6.65997e-6 1 0 -0.8660295 0.4999929 0 -0.8660259 0.4999991 0 4.16248e-7 1 0 -0.866026 -0.4999992 0 -0.8660295 -0.4999929 0 3.72432e-7 -1 0 -6.68187e-6 -1 0 0.8660279 -0.4999957 0 0.8660245 -0.5000018 0 0.8660244 0.5000018 0 0.866028 0.4999956 -1 -8.76487e-6 0 -1 -4.38232e-6 0 -1 8.76476e-6 0 -1 1.75295e-5 0 0.6833379 -1.69501e-5 0.7301023 0.6833357 -0.6322985 0.3650357 0.6833373 -0.6322919 0.365044 0.6833375 -5.79604e-6 0.7301026 0.6833336 -0.6322831 -0.3650663 0.683337 -0.6322882 -0.3650512 0.683332 1.52035e-5 -0.7301078 0.6833327 5.34114e-6 -0.7301072 0.6833358 0.6322957 -0.3650402 0.6833362 0.6322909 -0.3650478 0.6833353 0.6322822 0.3650645 0.6833369 0.6322867 0.3650538 -0.6725271 1.03301e-5 0.7400726 -0.6725372 -0.640914 0.370031 -0.6725344 -0.6409063 0.3700497 -0.6725262 1.71038e-5 0.7400733 -0.6725351 -0.6409188 -0.3700268 -0.6725378 -0.6409195 -0.3700206 -0.6725318 -1.40388e-5 -0.7400683 -0.672532 -1.94133e-5 -0.740068 -0.6725372 0.6409125 -0.3700337 -0.6725361 0.6409054 -0.3700479 -0.6725339 0.6409178 0.3700305 -0.672537 0.6409181 0.3700243</float_array>
+          <technique_common>
+            <accessor source="#stop_light_extension-mesh-normals-array" count="40" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="stop_light_extension-mesh-map-0">
+          <float_array id="stop_light_extension-mesh-map-0-array" count="240">4.3839 0.9998 4.3839 0.9688 2.6857 0.9688 2.6857 0.9688 2.6857 0.9998 4.3839 0.9998 4.3839 0.9688 4.3838 0.9378 2.6857 0.9378 2.6857 0.9378 2.6857 0.9688 4.3839 0.9688 4.3838 0.9378 4.3837 0.9067 2.6857 0.9067 2.6857 0.9067 2.6857 0.9378 4.3838 0.9378 4.3837 0.9066 4.3838 0.9377 2.6857 0.9377 2.6857 0.9377 2.6857 0.9066 4.3837 0.9066 4.3838 0.9377 4.3839 0.9687 2.6857 0.9687 2.6857 0.9687 2.6857 0.9377 4.3838 0.9377 4.3839 0.9687 4.3839 0.9997 2.6857 0.9997 2.6857 0.9997 2.6857 0.9687 4.3839 0.9687 4e-4 0.9998 4e-4 0.9998 4e-4 0.9998 4e-4 0.9998 4e-4 0.9998 4e-4 0.9998 4e-4 0.9998 4e-4 0.9998 4e-4 0.9998 4e-4 0.9998 4e-4 0.9998 4e-4 0.9998 4.4132 0.9998 4.4132 0.9688 4.3839 0.9688 4.3839 0.9688 4.3839 0.9998 4.4132 0.9998 4.4132 0.9688 4.4131 0.9378 4.3838 0.9378 4.3838 0.9378 4.3839 0.9688 4.4132 0.9688 4.4131 0.9378 4.4131 0.9067 4.3837 0.9067 4.3837 0.9067 4.3838 0.9378 4.4131 0.9378 4.4131 0.9066 4.4131 0.9377 4.3838 0.9377 4.3838 0.9377 4.3837 0.9066 4.4131 0.9066 4.4131 0.9377 4.4132 0.9687 4.3839 0.9687 4.3839 0.9687 4.3838 0.9377 4.4131 0.9377 4.4132 0.9687 4.4132 0.9997 4.3839 0.9997 4.3839 0.9997 4.3839 0.9687 4.4132 0.9687 4.4433 0.9998 4.4433 0.9688 4.4132 0.9688 4.4132 0.9688 4.4132 0.9998 4.4433 0.9998 4.4433 0.9688 4.4433 0.9378 4.4131 0.9378 4.4131 0.9378 4.4132 0.9688 4.4433 0.9688 4.4433 0.9378 4.4433 0.9067 4.4131 0.9067 4.4131 0.9067 4.4131 0.9378 4.4433 0.9378 4.4433 0.9066 4.4433 0.9377 4.4131 0.9377 4.4131 0.9377 4.4131 0.9066 4.4433 0.9066 4.4433 0.9377 4.4433 0.9687 4.4132 0.9687 4.4132 0.9687 4.4131 0.9377 4.4433 0.9377 4.4433 0.9687 4.4433 0.9997 4.4132 0.9997 4.4132 0.9997 4.4132 0.9687 4.4433 0.9687</float_array>
+          <technique_common>
+            <accessor source="#stop_light_extension-mesh-map-0-array" count="120" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="stop_light_extension-mesh-vertices">
+          <input semantic="POSITION" source="#stop_light_extension-mesh-positions"/>
+        </vertices>
+        <triangles material="StopLight-material" count="40">
+          <input semantic="VERTEX" source="#stop_light_extension-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#stop_light_extension-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#stop_light_extension-mesh-map-0" offset="2" set="0"/>
+          <p>0 0 0 1 1 1 2 2 2 2 2 3 3 3 4 0 0 5 1 1 6 4 4 7 5 5 8 5 5 9 2 2 10 1 1 11 4 4 12 6 6 13 7 7 14 7 7 15 5 5 16 4 4 17 6 6 18 8 8 19 9 9 20 9 9 21 7 7 22 6 6 23 8 8 24 10 10 25 11 11 26 11 11 27 9 9 28 8 8 29 10 10 30 0 0 31 3 3 32 3 3 33 11 11 34 10 10 35 12 12 36 13 12 37 14 12 38 14 13 39 15 13 40 16 13 41 16 14 42 12 14 43 14 14 44 17 15 45 15 15 46 14 15 47 18 16 48 19 17 49 1 18 50 1 18 51 0 19 52 18 16 53 19 17 54 20 20 55 4 21 56 4 21 57 1 18 58 19 17 59 20 20 60 21 22 61 6 23 62 6 23 63 4 21 64 20 20 65 21 22 66 22 24 67 8 25 68 8 25 69 6 23 70 21 22 71 22 24 72 23 26 73 10 27 74 10 27 75 8 25 76 22 24 77 23 26 78 18 16 79 0 19 80 0 19 81 10 27 82 23 26 83 14 28 84 13 29 85 19 30 86 19 30 87 18 31 88 14 28 89 13 29 90 12 32 91 20 33 92 20 33 93 19 30 94 13 29 95 12 32 96 16 34 97 21 35 98 21 35 99 20 33 100 12 32 101 16 34 102 15 36 103 22 37 104 22 37 105 21 35 106 16 34 107 15 36 108 17 38 109 23 39 110 23 39 111 22 37 112 15 36 113 17 38 114 14 28 115 18 31 116 18 31 117 23 39 118 17 38 119</p>
+        </triangles>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="Scene" name="Scene">
+      <node id="stop_light_extension" name="stop_light_extension" type="NODE">
+        <matrix sid="transform">6.79481e-10 0 0.009 0 0 0.009 0 0 -0.009 0 6.79481e-10 0 0 0 0 1</matrix>
+        <instance_geometry url="#stop_light_extension-mesh" name="stop_light_extension">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="StopLight-material" target="#StopLight-material">
+                <bind_vertex_input semantic="stop_light_extension-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#Scene"/>
+  </scene>
+</COLLADA>

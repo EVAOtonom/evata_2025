@@ -1,14 +1,17 @@
 <?xml version="1.0"?>
-<sdf version='1.7'>
-	<world name='PIST'>
+<sdf version="1.7">
+  <world name="PIST">
 
-
-		<scene>
+<scene>
 		  <grid>false</grid>
 		  <ambient>0.4 0.4 0.4 1</ambient>
 		  <background>0.26 0.40 1.0 1</background>
 		  <shadows>0</shadows>
 		</scene>
+
+
+
+
 		<plugin
 			filename="ignition-gazebo-physics-system"
 			name="gz::sim::systems::Physics">
@@ -630,8 +633,8 @@
 			</link>
 		</model>
 
-		<model name="trafficLight">
-			<pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+<model name="trafficLight">
+			<pose>3.9118 49.0775 3 0 0 1.5799</pose>
 			<include>
 				<uri>
 					model://stop_light
@@ -639,6 +642,53 @@
 			</include>
 		</model>
 
+
+                  <model name="trafficLight2">
+			<pose>18.4849 31.4220 3.1309 0 0 -1.5799</pose>
+			<include>
+				<uri>
+					model://stop_light
+				</uri>
+			</include>
+		</model>
+
+                <model name="trafficLight3">
+			<pose>3.9511 44.7580 4.4278 0 0 1.5799</pose>
+			<include>
+				<uri>
+					model://stop_light
+				</uri>
+			</include>
+		</model>
+		 <model name="trafficLight4">
+			<pose>3.8508 41.5740 2.8711 0 0 1.5799</pose>
+			<include>
+				<uri>
+					model://stop_light
+				</uri>
+			</include>
+		</model>
+		
+                  <model name="trafficLight5">
+			<pose>18.4158 23.8371 3 0 0 -1.5799</pose>
+			<include>
+				<uri>
+					model://stop_light
+				</uri>
+			</include>
+		</model>
+
+                  <model name="trafficLight6">
+			<pose>18.3496 28.2876 4.3667 0 0 -1.5799</pose>
+			<include>
+				<uri>
+					model://stop_light
+				</uri>
+			</include>
+		</model>
+
+		
+		
 
 		<model name="asfalt">
 			<static>true</static>
@@ -669,6 +719,78 @@
 				</visual>
 			</link>
 		</model>
+		
+	<model name="direk">
+			<static>true</static>
+			<pose>18.4388 31.4475 0 0 0 -1.5407</pose>
+			<link name="link24">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+
+							<uri>model://direk.dae</uri>
+
+						<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+		
+		
+			<model name="L_direk">
+			<static>true</static>
+			<pose>18.4388 23.8395 0 0 0 -1.5799</pose>
+			<link name="link24">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+
+							<uri>model://direk2.dae</uri>
+
+						<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+		
+		<model name="direk2">
+			<static>true</static>
+			<pose>3.9118 41.5818 0 0 0 -1.5407</pose>
+			<link name="link24">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+
+							<uri>model://direk.dae</uri>
+
+						<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+		
+			<model name="L_direk2">
+			<static>true</static>
+			<pose>3.9118 49.0775 0 0 0 1.5799</pose>
+			<link name="link24">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+
+							<uri>model://direk2.dae</uri>
+
+						<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+		
+		
+		
 
 
 		<model name="table">
