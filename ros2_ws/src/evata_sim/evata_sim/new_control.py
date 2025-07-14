@@ -158,11 +158,11 @@ class ControlNode(Node):
             self.get_logger().info("🛑 Dönülmez levhası 6m içinde - İşlem yapılmıyor")
             return
         
-        self.get_logger().info("➡️ Dönülmez levhası algılandı, 20 metre ilerleniyor.")
+        self.get_logger().info("➡️ Dönülmez levhası algılandı, 15 metre ilerleniyor.")
         self._execute_forward_movement()
 
     def _handle_straight_sign(self):
-        self.get_logger().info("➡️ Düz git levhası algılandı, 20 metre ilerleniyor.")
+        self.get_logger().info("➡️ Düz git levhası algılandı, 15 metre ilerleniyor.")
         self._execute_forward_movement()
 
     def _execute_forward_movement(self):
@@ -177,7 +177,7 @@ class ControlNode(Node):
         else:
             self._go_forward_and_return()
 
-    def _go_forward_and_return(self, distance=20.0):
+    def _go_forward_and_return(self, distance=15.0):
         if not self.current_pose:
             self.get_logger().warn("❌ Geçerli pozisyon yok. Hareket iptal edildi.")
             return
@@ -337,7 +337,7 @@ class ControlNode(Node):
             self.get_logger().info("⏹ Hedef iptal edildi")
 
     def _handle_forward_completion(self):
-        self.get_logger().info("⏳ 20 metre ileri gidildi, orijinal hedefe dönülüyor...")
+        self.get_logger().info("⏳ 15 metre ileri gidildi, orijinal hedefe dönülüyor...")
         
         if self.original_goal:
             self.get_logger().info("↩️ Orijinal hedefe geri dönülüyor...")

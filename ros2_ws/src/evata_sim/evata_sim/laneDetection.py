@@ -6,6 +6,8 @@ import cv2
 import cv2.ximgproc
 from sensor_msgs.msg import PointCloud2, PointField
 from sensor_msgs_py import point_cloud2
+from std_msgs.msg import String
+import json
 import math
 import os
 import numpy as np
@@ -78,6 +80,11 @@ class ImageSaver(Node):
         self.device = device
         self.filtered_pointcloud_pub = self.create_publisher(PointCloud2, '/lane_pointcloud', 10)
         self.image_center_x = 640  # Görselin orta noktası (1280x720 için)
+        self.create_subscription(String, "/detected_signs", self.sign_callback, 10)
+        self.durak_var = False
+        self.durak_timeout = 20.0  # tabelayı görmemeye başladıktan sonra kaç saniye daha verilerin yayınlanmaması falan fistan ne uzun uzun yazdım aq anla işte
+        self.last_durak_seen_time = 0.0
+
 
         self.last_process_time = 0.0
         self.process_interval = 1.0 / 5  # 5 FPS
@@ -117,17 +124,33 @@ class ImageSaver(Node):
             self.get_logger().error(f'Failed to process image: {e}')
 
         
-    
     def point_cloud_callback(self, msg):
         self.latest_pointcloud = msg
         # Store camera info if available (you might need to subscribe to camera info topic)
         if hasattr(msg, 'header'):
             self.latest_pointcloud_header = msg.header
 
+    def sign_callback(self, msg):
+        try:
+            data = json.loads(msg.data)
+            self.get_logger().info(f"Levha Mesajı Alındı: {data}")
+
+            if "durak" in data:
+                self.durak_var = True
+                self.last_durak_seen_time = time.time()
+                self.get_logger().info("Durak algılandı!")
+        except Exception as e:
+            self.get_logger().warn(f"Levha mesajı ayrıştırılamadı: {e}")
+
 
 
     def detect(self, source, imgsz=640, conf_thres=0.3, iou_thres=0.45, 
                device='0', classes=None, agnostic_nms=False,):
+        # Durak zaman aşımı kontrolü
+        if self.durak_var and (time.time() - self.last_durak_seen_time > self.durak_timeout):
+            self.durak_var = False
+            self.get_logger().info("Durak süresi doldu, sıfırlandı.")
+
         stride = 32
         model = self.model
         device = self.device
@@ -266,6 +289,12 @@ class ImageSaver(Node):
                         # (This depends on your coordinate frames)
                         matched_points.append((x, y, z))
 
+                if self.durak_var:
+                    self.get_logger().info("DURAK VAR! Yayın yapılmayacak.")
+                    return
+                else:
+                    self.get_logger().info("Durak YOK, yayın yapılıyor...")
+
                 if matched_points:
                     # Create PointCloud2 message
                     header = self.latest_pointcloud_header
@@ -278,6 +307,7 @@ class ImageSaver(Node):
                     ]
 
                     pc2_msg = point_cloud2.create_cloud(header, fields, matched_points)
+
                     self.filtered_pointcloud_pub.publish(pc2_msg)
                     #self.get_logger().info(f"Published filtered PointCloud2 with {len(matched_points)} points")
 

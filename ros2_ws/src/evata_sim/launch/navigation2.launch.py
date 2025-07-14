@@ -19,7 +19,7 @@ def generate_launch_description():
     src_dir = dir_path.split('/install')[0]  
     map_dir = LaunchConfiguration(
         'map',
-        default=os.path.join(src_dir,"src","evata_sim","navigasyon", 'map', 'map.yaml')
+        default=os.path.join(src_dir,"src","evata_sim","navigasyon", 'map', 'harita.yaml')
     )
     param_dir = LaunchConfiguration(
         'params_file',

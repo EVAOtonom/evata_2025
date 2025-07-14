@@ -25,14 +25,14 @@ def generate_launch_description():
         package='scanmatcher',
         executable='scanmatcher_node',
         parameters=[main_param_dir],
-        remappings=[('/input_cloud','/rslidar_points')],
+        remappings=[('/input_cloud','/helios/points')],
         output='screen'
         )
 
     tf = launch_ros.actions.Node(
         package='tf2_ros',
         executable='static_transform_publisher',
-        arguments=['0','0','0','0','0','0','1','base_link','rslidar']
+        arguments=['0','0','0','0','0','0','1','base_link','helios']
         )
 
 

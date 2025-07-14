@@ -815,7 +815,7 @@
 	<sensor name="helios_32_sim" type="gpu_lidar">
 	  <topic>helios</topic>
 	  <pose>0.0 0 0 0 0 0</pose>
-	  <ignition_frame_id>lidar_link</ignition_frame_id>
+	  <ignition_frame_id>lidar_link_3d</ignition_frame_id>
 	  <ray>
 	    <scan>
 	      <horizontal>
@@ -832,8 +832,8 @@
 	      </vertical>
 	    </scan>
 	    <range>
-	      <min>0.5</min>
-	      <max>30</max>
+	      <min>3.0</min>
+	      <max>150.0</max>
 	      <resolution>0.01</resolution>
 	    </range>
 	    <noise>
