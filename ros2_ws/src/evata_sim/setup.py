@@ -16,10 +16,10 @@ setup(
         (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
         (os.path.join('share', package_name, 'gps_data'), ['evata_sim/gps_map.txt']),
         (os.path.join('share', package_name, 'model'), ['evata_sim/sol300best.pt']),
-        (os.path.join('share', package_name, 'model'), ['evata_sim/best.pt']),    
+        (os.path.join('share', package_name, 'model2'), ['evata_sim/best.pt']),    
         (os.path.join('share', package_name, 'waypoint'), ['evata_sim/waypoint.txt']),
         (os.path.join('share', package_name, 'json'), ['evata_sim/gps_targets.json']),
-        (os.path.join('share', package_name, 'model2'), ['evata_sim/train16best.pt']),
+        (os.path.join('share', package_name, 'model3'), ['evata_sim/train16best.pt']),
     ],
     install_requires=['setuptools'],
     zip_safe=False,
@@ -40,8 +40,7 @@ setup(
             "sign_converted=" + package_name + ".sign_converted:main",
             "live_gps=" + package_name + ".live_gps:main",
             "new_control=" + package_name + ".new_control:main",
-            "keyboard_publisher=" + package_name + ".keyboard_publisher:main",
-            "isikhareket=" + package_name + ".isikhareket:main"
+            "information=" + package_name + ".information:main"
         ],
     },
 )

@@ -22,6 +22,7 @@ class ControlNode(Node):
         self._setup_communication()
         self._setup_navigation()
         self.create_timer(0.5, self._check_waypoint_distance)
+        self.traffic_light_state = None
 
     def _init_state_variables(self):
         self.current_pose = None
@@ -58,13 +59,11 @@ class ControlNode(Node):
         return points
 
     def _setup_communication(self):
-        # Subscribers
         self.create_subscription(String, '/detected_signs', self._sign_callback, 10)
         self.create_subscription(Odometry, '/odom', self._odom_callback, 10)
         self.create_subscription(Twist, '/cmd_vel', self._vel_callback, 10)
         self.create_subscription(Imu, '/imu', self._imu_callback, 10)
         
-        # Publishers
         self.vel_pub = self.create_publisher(Twist, '/cmd_vel', 10)
         self.command_pub = self.create_publisher(String, 'nav_cmd', 10)
 
@@ -104,6 +103,10 @@ class ControlNode(Node):
                 data.pop('durak')
                 if not data:
                     return
+                
+            if 'kirmizi' in data or 'yesil' in data:
+                self._process_traffic_light(data)
+                return
 
             if self.sign_processing or (self.last_sign_processed == data):
                 return
@@ -111,17 +114,55 @@ class ControlNode(Node):
             if not (self.current_pose and self.mode == 'normal'):
                 return
 
-            # Tüm modlar için aktif hedefi kaydet (forward/waypoint farketmez)
             if self.active_goal_handle:
                 self.original_goal = self._get_goal_from_handle(self.active_goal_handle)
-                self.get_logger().info(f"💾 Orijinal hedef kaydedildi: {self.original_goal.pose.pose.position}")
+                self.get_logger().info(f"Orijinal hedef kaydedildi: {self.original_goal.pose.pose.position}")
 
             self.sign_processing = True
             self.last_sign_processed = data
             self._process_sign(data)
 
         except Exception as e:
-            self.get_logger().error(f"❌ JSON parse hatası: {e}")
+            self.get_logger().error(f"JSON parse hatası: {e}")
+
+    def _process_traffic_light(self, data):
+        if 'kirmizi' in data:
+            self.get_logger().info("KIRMIZI IŞIK ALGILANDI! DURUYOR...")
+            self._handle_red_light()
+        elif 'yesil' in data:
+            self.get_logger().info("YEŞİL IŞIK ALGILANDI! DEVAM EDİYOR...")
+            self._handle_green_light()
+
+    def _handle_red_light(self):
+        if self.mode == 'traffic_light_wait':
+            return
+        # 1. Mevcut hareketi durdur
+        self.motion_enabled = False
+        stop_msg = Twist()
+        self.vel_pub.publish(stop_msg)
+        
+        # 2. Aktif navigasyon varsa duraklat
+        if self.active_goal_handle:
+            self.original_goal = self._get_goal_from_handle(self.active_goal_handle)
+            self.active_goal_handle.cancel_goal_async()
+        
+        # 3. Durum güncelle
+        self.mode = 'traffic_light_wait'
+        self.last_sign_processed = {'kirmizi': True}
+
+    def _handle_green_light(self):
+        # 1. Hareketi tekrar aktif et
+        self.motion_enabled = True
+        
+        # 2. Bekleme modundaysak ve orijinal hedef varsa devam et
+        if self.mode == 'traffic_light_wait' and self.original_goal:
+            self.get_logger().info("Orijinal rotaya devam ediliyor...")
+            send_goal_future = self.nav_client.send_goal_async(self.original_goal)
+            send_goal_future.add_done_callback(self._goal_response_callback)
+        
+        # 3. Durum güncelle
+        self.mode = 'normal'
+        self.last_sign_processed = {'yesil': True}
 
     def _process_sign(self, data):
         if any(sign in data for sign in ['sag', 'ileriden_saga']):
@@ -136,33 +177,23 @@ class ControlNode(Node):
             self._handle_straight_sign()
 
     def _handle_direction_sign(self, sign_type, waypoint_function):
-        self.get_logger().info(f"🛑 '{sign_type}' levhası algılandı.")
         self.command_pub.publish(String(data='red'))
         time.sleep(0.2)
         self.mode = 'waypoint'
         waypoint_function()
 
     def _handle_no_entry_sign(self, data):
-        if hasattr(data, 'distance') and data['distance'] <= 5.0:
-            self.get_logger().info("🛑 Girilmez levhası 5m içinde - İşlem yapılmıyor")
-            return
-        
-        self.get_logger().info("🛑 Girilmez türü levha algılandı.")
         self.command_pub.publish(String(data='red'))
         time.sleep(0.2)
         self.mode = 'waypoint'
         self._send_nearest_noentry_waypoint()
 
     def _handle_no_turn_sign(self, data):
-        if hasattr(data, 'distance') and data['distance'] <= 6.0:
-            self.get_logger().info("🛑 Dönülmez levhası 6m içinde - İşlem yapılmıyor")
-            return
-        
-        self.get_logger().info("➡️ Dönülmez levhası algılandı, 15 metre ilerleniyor.")
+        self.get_logger().info("Dönülmez levhası algılandı, 15 metre ilerleniyor.")
         self._execute_forward_movement()
 
     def _handle_straight_sign(self):
-        self.get_logger().info("➡️ Düz git levhası algılandı, 15 metre ilerleniyor.")
+        self.get_logger().info("Düz git levhası algılandı, 15 metre ilerleniyor.")
         self._execute_forward_movement()
 
     def _execute_forward_movement(self):
@@ -179,7 +210,7 @@ class ControlNode(Node):
 
     def _go_forward_and_return(self, distance=15.0):
         if not self.current_pose:
-            self.get_logger().warn("❌ Geçerli pozisyon yok. Hareket iptal edildi.")
+            self.get_logger().warn("Geçerli pozisyon yok. Hareket iptal edildi.")
             return
 
         x = self.current_pose.position.x
@@ -190,7 +221,7 @@ class ControlNode(Node):
         forward_y = y + distance * math.sin(yaw)
         self.forward_goal = (forward_x, forward_y)
 
-        self.get_logger().info(f"➡️ {distance} metre ileri hedef: ({forward_x:.2f}, {forward_y:.2f})")
+        self.get_logger().info(f"{distance} metre ileri hedef: ({forward_x:.2f}, {forward_y:.2f})")
 
         goal_msg = self._create_navigation_goal(forward_x, forward_y)
         send_goal_future = self.nav_client.send_goal_async(goal_msg)
@@ -208,10 +239,8 @@ class ControlNode(Node):
     def _forward_goal_response_callback(self, future):
         goal_handle = future.result()
         if not goal_handle.accepted:
-            self.get_logger().warn("❌ İleri hedef reddedildi.")
             return
 
-        self.get_logger().info("🚗 İleri hedefe gidiliyor...")
         self.active_goal_handle = goal_handle
         result_future = goal_handle.get_result_async()
         result_future.add_done_callback(self._goal_result_callback)
@@ -240,11 +269,11 @@ class ControlNode(Node):
                 side_waypoints.append((wp_x, wp_y))
 
         if not side_waypoints:
-            self.get_logger().warn(f"⚠️ {side_name} bölgede waypoint yok!")
+            self.get_logger().warn(f"{side_name} bölgede waypoint yok!")
             return
 
         self.nearest_waypoint = min(side_waypoints, key=lambda p: math.hypot(p[0]-x, p[1]-y))
-        self.get_logger().info(f"📍 En yakın {side_name} waypoint: {self.nearest_waypoint}")
+        self.get_logger().info(f"En yakın {side_name} waypoint: {self.nearest_waypoint}")
 
         goal_msg = self._create_navigation_goal(self.nearest_waypoint[0], self.nearest_waypoint[1])
         send_goal_future = self.nav_client.send_goal_async(goal_msg)
@@ -262,19 +291,15 @@ class ControlNode(Node):
 
         x, y = self.current_pose.position.x, self.current_pose.position.y
         
-        # Tüm uygun waypoint'leri bul (hem sağ hem sol)
         waypoints = self._get_side_waypoints((-100, -20)) + self._get_side_waypoints((20, 100))
         
         if not waypoints:
-            self.get_logger().warn("❌ Girilmez bölge için waypoint yok!")
             return
 
         # En yakın waypoint'i seç
         nearest = min(waypoints, key=lambda p: math.hypot(p[0]-x, p[1]-y))
-        self.nearest_waypoint = nearest  # Bunu ekledik (diğer yön işaretleriyle tutarlılık için)
-        
-        self.get_logger().info(f"📍 En yakın GİRİLMEZ waypoint: {nearest}")
-        
+        self.nearest_waypoint = nearest
+                
         goal_msg = self._create_navigation_goal(nearest[0], nearest[1])
         send_goal_future = self.nav_client.send_goal_async(goal_msg)
         send_goal_future.add_done_callback(self._goal_response_callback)
@@ -307,11 +332,10 @@ class ControlNode(Node):
     def _goal_response_callback(self, future):
         goal_handle = future.result()
         if not goal_handle.accepted:
-            self.get_logger().warn("❌ Waypoint hedefi reddedildi.")
+            self.get_logger().warn("Waypoint hedefi reddedildi.")
             self._restore_previous_goal()
             return
 
-        self.get_logger().info("🚗 Waypoint'e gidiliyor...")
         self.active_goal_handle = goal_handle
         result_future = goal_handle.get_result_async()
         result_future.add_done_callback(self._goal_result_callback)
@@ -321,31 +345,29 @@ class ControlNode(Node):
         self.sign_processing = False
         
         if result.status == GoalStatus.STATUS_SUCCEEDED:
-            self.get_logger().info("✅ Hedef başarıyla tamamlandı")
+            self.get_logger().info("Hedef başarıyla tamamlandı")
             # Yeni işlemler burada
             if self.mode == 'forward':
                 self._handle_forward_completion()
             else:
                 self._handle_waypoint_completion()
                 
-            # ÖNEMLİ KISIM: Yeni rotayı başlat
-            self.command_pub.publish(String(data='green'))  # GPS navigasyonunu tekrar aktif et
-            self.mode = 'normal'  # Modu resetle
-            self.last_sign_processed = None  # İşlenen işareti temizle
+            self.command_pub.publish(String(data='green'))
+            self.mode = 'normal'
+            self.last_sign_processed = None 
             
         elif result.status == GoalStatus.STATUS_CANCELED:
-            self.get_logger().info("⏹ Hedef iptal edildi")
+            self.get_logger().info("Hedef iptal edildi")
 
     def _handle_forward_completion(self):
-        self.get_logger().info("⏳ 15 metre ileri gidildi, orijinal hedefe dönülüyor...")
+        self.get_logger().info("15 metre ileri gidildi, orijinal hedefe dönülüyor...")
         
         if self.original_goal:
-            self.get_logger().info("↩️ Orijinal hedefe geri dönülüyor...")
             send_goal_future = self.nav_client.send_goal_async(self.original_goal)
             send_goal_future.add_done_callback(self._original_goal_response_callback)
             self.original_goal = None
         else:
-            self.get_logger().info("ℹ️ live_gps'e devam ediliyor...")
+            self.get_logger().info("live_gps'e devam ediliyor...")
             self.command_pub.publish(String(data='green'))
             self.mode = 'normal'
             self.sign_processing = False
@@ -354,12 +376,12 @@ class ControlNode(Node):
     def _original_goal_response_callback(self, future):
         goal_handle = future.result()
         if goal_handle.accepted:
-            self.get_logger().info("✅ Orijinal hedef kabul edildi.")
+            self.get_logger().info("Orijinal hedef kabul edildi.")
             self.active_goal_handle = goal_handle
             result_future = goal_handle.get_result_async()
             result_future.add_done_callback(self._original_goal_result_callback)
         else:
-            self.get_logger().warn("❌ Orijinal hedef reddedildi, live_gps'e devam ediliyor.")
+            self.get_logger().warn("Orijinal hedef reddedildi, live_gps'e devam ediliyor.")
             self.command_pub.publish(String(data='green'))
         
         self.mode = 'normal'
@@ -369,19 +391,21 @@ class ControlNode(Node):
     def _original_goal_result_callback(self, future):
         result = future.result()
         if result.status == GoalStatus.STATUS_SUCCEEDED:
-            self.get_logger().info("✅ Orijinal hedefe ulaşıldı.")
+            self.get_logger().info("Orijinal hedefe ulaşıldı.")
         elif result.status == GoalStatus.STATUS_CANCELED:
-            self.get_logger().info("⏸️ Hedef iptal edildi.")
+            self.get_logger().info("Hedef iptal edildi.")
         
         self.active_goal_handle = None
         self.mode = 'normal'
 
     def _handle_waypoint_completion(self):
-        self.get_logger().info("⏳ Önceki hedefe geri dönülüyor...")
+        self.get_logger().info("Önceki hedefe geri dönülüyor...")
         self.command_pub.publish(String(data='green'))
         self.mode = 'normal'
 
     def _check_waypoint_distance(self):
+        if self.mode == 'traffic_light_wait':
+            return
         if (self.mode not in ['waypoint', 'forward']) or not self.current_pose:
             return
 
@@ -394,18 +418,14 @@ class ControlNode(Node):
 
         distance_remaining = math.hypot(target[0] - current_x, target[1] - current_y)
         
-        if distance_remaining < self.distance_threshold:
-            self.get_logger().info(f"✅ Hedefe {distance_remaining:.2f}m kala tamamlandı sayılıyor")
-            
+        if distance_remaining < self.distance_threshold:            
             if self.active_goal_handle:
                 self.active_goal_handle.cancel_goal_async()  # Nav2 uyumlu iptal
             
             self._handle_goal_completion()  # TEK ÇAĞRI
 
     def _handle_goal_completion(self):
-        self.get_logger().info("🔄 Hedef tamamlandı, yeni rotaya geçiliyor...")
-        
-        # 1 saniye bekle (nav2'nin stabilize olması için)
+        self.get_logger().info("Hedef tamamlandı, yeni rotaya geçiliyor...")
         time.sleep(1.0)
         
         # GPS modunu yeniden başlat
@@ -424,16 +444,15 @@ class ControlNode(Node):
         return None
 
     def _handle_cancel_complete(self, _):
-        self.get_logger().info("✅ Hedef iptal edildi")
+        self.get_logger().info("Hedef iptal edildi")
         self.active_goal_handle = None
         
         if self.original_goal:
-            self.get_logger().info("↩️ Orijinal hedefe geri dönülüyor...")
             send_goal_future = self.nav_client.send_goal_async(self.original_goal)
             send_goal_future.add_done_callback(self._goal_response_callback)
             self.original_goal = None
         else:
-            self.get_logger().info("ℹ️ live_gps'e devam ediliyor...")
+            self.get_logger().info("live_gps'e devam ediliyor...")
             self.command_pub.publish(String(data='green'))
         
         self.mode = 'normal'
@@ -442,7 +461,6 @@ class ControlNode(Node):
 
     def _restore_previous_goal(self):
         if self.original_goal:
-            self.get_logger().info("Önceki hedef geri yükleniyor...")
             self.nav_client.send_goal_async(self.original_goal)
 
     def _get_goal_from_handle(self, goal_handle):

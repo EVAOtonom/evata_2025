@@ -290,10 +290,8 @@ class ImageSaver(Node):
                         matched_points.append((x, y, z))
 
                 if self.durak_var:
-                    self.get_logger().info("DURAK VAR! Yayın yapılmayacak.")
+                    #self.get_logger().info("DURAK VAR! Yayın yapılmayacak.")
                     return
-                else:
-                    self.get_logger().info("Durak YOK, yayın yapılıyor...")
 
                 if matched_points:
                     # Create PointCloud2 message

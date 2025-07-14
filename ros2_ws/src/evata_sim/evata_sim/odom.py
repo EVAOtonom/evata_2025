@@ -14,15 +14,18 @@ class OdomSubscriber(Node):
         self.subscription  # Abonelik değişkeni kullanılmazsa uyarı alabilirsiniz
 
     def listener_callback(self, msg):
-        # Gelen odometry mesajını terminalde göster
         position = msg.pose.pose.position
         orientation = msg.pose.pose.orientation
-        
+        velocity = msg.twist.twist.linear
+
         self.get_logger().info(
             f'Position -> x: {position.x:.2f}, y: {position.y:.2f}, z: {position.z:.2f}'
         )
         self.get_logger().info(
             f'Orientation -> x: {orientation.x:.2f}, y: {orientation.y:.2f}, z: {orientation.z:.2f}, w: {orientation.w:.2f}'
+        )
+        self.get_logger().info(
+            f'Velocity -> x: {velocity.x:.2f} m/s, y: {velocity.y:.2f} m/s, z: {velocity.z:.2f} m/s'
         )
 
 def main(args=None):
