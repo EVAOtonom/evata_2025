@@ -22,7 +22,7 @@ class SignDetector(Node):
     def __init__(self):
         super().__init__('sign_detector_node')
         package_path = get_package_share_directory('evata_sim')
-        model_path = os.path.join(package_path, 'model2', 'best.pt')
+        model_path = os.path.join(package_path, 'model', 'sol300best.pt')
 
         self.model = YOLO(model_path)
         self.bridge = CvBridge()
@@ -62,15 +62,13 @@ class SignDetector(Node):
             results = self.model(resized_image, verbose=False)
             self.annotated_image = original_image
 
-            cv2.putText(self.annotated_image, "Threshold: 0.7m - 12.0m", (10, 30),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
 
             detected_signs = {}
             sign_data = {}
 
             for r in results:
                 for box in r.boxes:
-                    if box.conf > 0.6:
+                    if box.conf > 0.9:
                         x1, y1, x2, y2 = map(int, box.xyxy[0])
                         x1 = int(x1 * scale_x)
                         y1 = int(y1 * scale_y)
@@ -106,7 +104,7 @@ class SignDetector(Node):
 
                 sign_data[class_name] = round(distance, 2)
 
-                if (class_name.lower() == "durak" and distance <= 10.0) or (class_name.lower() != "durak" and distance <= 7.0):
+                if (class_name.lower() == "durak" and distance <= 12.0) or (class_name.lower() != "durak" and distance <= 7.0):
                     publish_data = {class_name: round(distance, 2)}
                     msg = String()
                     msg.data = json.dumps(publish_data)
