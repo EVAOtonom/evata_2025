@@ -255,9 +255,9 @@
 			</link>
 		</model>
 
-		<!--<model name="ileri_sol">
+		<model name="ileri_sol">
 			<static>true</static>
-			<pose>-16.0518 40.5145 0 0 0 1.5295</pose> 
+			<pose>3.6488 40.7530 0 0 0 1.5295</pose> 
 			<link name="link10">
 				<visual name="visual">
 					<geometry>
@@ -268,7 +268,7 @@
 					</geometry>
 				</visual>
 			</link>
-		</model>-->
+		</model>
 
 		<model name="kavsak">
 			<static>true</static>
@@ -455,6 +455,21 @@
 					<geometry>
 						<mesh>
 							<uri>model://tabelalar/meshes/soladonus.dae</uri>
+							<scale>1 1 1</scale>
+						</mesh>
+					</geometry>
+				</visual>
+			</link>
+		</model>
+
+		<model name="sola_donus_yasak">
+			<static>true</static>
+			<pose>25.9380 41.7933 0 0 0 1.5829</pose> <!-- Konumu değiştirebilirsin -->
+			<link name="link33">
+				<visual name="visual">
+					<geometry>
+						<mesh>
+							<uri>model://tabelalar/meshes/soldonusyasak.dae</uri>
 							<scale>1 1 1</scale>
 						</mesh>
 					</geometry>

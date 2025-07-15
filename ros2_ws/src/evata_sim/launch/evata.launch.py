@@ -14,18 +14,6 @@ def generate_launch_description():
             executable='sign_converted',
             name='sign_converted_node',
             output='screen'
-        ),
-        Node(
-            package='evata_sim',
-            executable='live_gps',
-            name='live_gps_node',
-            output='screen'
-        ),
-        Node(
-            package='evata_sim',
-            executable='new_control',
-            name='new_control_node',
-            output='screen'
-        ),
+        )
     ])
 
