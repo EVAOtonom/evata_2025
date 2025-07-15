@@ -62,7 +62,6 @@ class SignDetector(Node):
             results = self.model(resized_image, verbose=False)
             self.annotated_image = original_image
 
-            # 🟡 Sol üst köşeye threshold bilgisi yaz
             cv2.putText(self.annotated_image, "Threshold: 0.7m - 12.0m", (10, 30),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
 
@@ -100,14 +99,19 @@ class SignDetector(Node):
                 if distance == -1:
                     distance = self.calculate_distance(x1, y1, x2, y2)
 
-                # 🟥 Mesafe threshold kontrolü
-                if distance < 0.7 or distance > 12.0:
+                if distance < 0.7 or distance > 7.0:
                     continue
 
                 self._draw_box(x1, y1, x2, y2, class_name, distance, confidence)
 
-                if distance <= 7.0:
-                    sign_data[class_name] = round(distance, 2)
+                sign_data[class_name] = round(distance, 2)
+
+                if (class_name.lower() == "durak" and distance <= 10.0) or (class_name.lower() != "durak" and distance <= 7.0):
+                    publish_data = {class_name: round(distance, 2)}
+                    msg = String()
+                    msg.data = json.dumps(publish_data)
+                    self.sign_publisher.publish(msg)
+                    self.get_logger().info(f"Published: {msg.data}")
 
             if sign_data:
                 msg = String()
@@ -116,7 +120,8 @@ class SignDetector(Node):
                 self.get_logger().info(f"Published: {msg.data}")
 
             if self.annotated_image.shape[0] > 0:
-                cv2.imshow("Levha Tespiti", self.annotated_image)
+                small_image = cv2.resize(self.annotated_image, (self.annotated_image.shape[1]//2, self.annotated_image.shape[0]//2))
+                cv2.imshow("Levha Tespiti", small_image)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     rclpy.shutdown()
 

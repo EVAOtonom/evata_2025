@@ -72,6 +72,8 @@ class ImageSaver(Node):
         half = device.type != 'cpu'  # half precision only supported on CUDA
         model = model.to(device)
         self.latest_pointcloud = None
+        self.create_subscription(String, '/gps_cmd', self.gps_command_callback, 10)
+        self.pause_lane = False
 
         if half:
             model.half()  # to FP16  
@@ -82,7 +84,7 @@ class ImageSaver(Node):
         self.image_center_x = 640  # Görselin orta noktası (1280x720 için)
         self.create_subscription(String, "/detected_signs", self.sign_callback, 10)
         self.durak_var = False
-        self.durak_timeout = 20.0  # tabelayı görmemeye başladıktan sonra kaç saniye daha verilerin yayınlanmaması falan fistan ne uzun uzun yazdım aq anla işte
+        self.durak_timeout = 30.0  # tabelayı görmemeye başladıktan sonra kaç saniye daha verilerin yayınlanmaması falan fistan ne uzun uzun yazdım aq anla işte
         self.last_durak_seen_time = 0.0
 
 
@@ -108,6 +110,10 @@ class ImageSaver(Node):
         steering_angle = deviation / max_deviation  # -1.0 (sola) ile 1.0 (sağa) arasında
 
         return -steering_angle"""
+    def gps_command_callback(self, msg):
+        if msg.data == "pause_lane_detection":
+            self.pause_lane = True
+            self.get_logger().info("GPS tarafından yayını durdurma komutu alındı.")
 
     def image_callback(self, msg):
         current_time = time.time()
@@ -147,6 +153,8 @@ class ImageSaver(Node):
     def detect(self, source, imgsz=640, conf_thres=0.3, iou_thres=0.45, 
                device='0', classes=None, agnostic_nms=False,):
         # Durak zaman aşımı kontrolü
+        if self.pause_lane:
+            return
         if self.durak_var and (time.time() - self.last_durak_seen_time > self.durak_timeout):
             self.durak_var = False
             self.get_logger().info("Durak süresi doldu, sıfırlandı.")
@@ -355,7 +363,8 @@ class ImageSaver(Node):
                 # Orta noktaları daire olarak çiz
                 for point in mid_points:
                     cv2.circle(im0s, point, radius=5, color=(0, 0, 255), thickness=-1)
-            cv2.imshow("hasan",im0s)
+            im0s_resized = cv2.resize(im0s, (0, 0), fx=0.5, fy=0.5)
+            cv2.imshow("Serit Tespiti", im0s_resized)
             #cv2.imshow("ROI", roi_im0s)
             cv2.waitKey(1)
         #print(f'Done. ({time.time() - t0:.3f}s)')
