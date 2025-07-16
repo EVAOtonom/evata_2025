@@ -32,6 +32,7 @@ setup(
             "mid_lane=" + package_name + ".mid_lane:main",
             "lidar_obstacle_detector_with_audio_text=" + package_name + ".lidar_obstacle_detector_with_audio_text:main",
             "laneFollower=" + package_name + ".laneFollower:main",
+            "sign_detector=" + package_name + ".sign_detector:main",
         ],
     },
 )

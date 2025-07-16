@@ -1,4 +1,4 @@
-image: yol1.pgm
+image: bos.pgm
 free_thresh: 0.25
 mode: trinary
 negate: 0

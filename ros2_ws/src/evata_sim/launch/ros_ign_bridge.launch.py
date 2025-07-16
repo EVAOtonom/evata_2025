@@ -15,7 +15,7 @@ def generate_launch_description():
         arguments=[
 		'/cmd_vel@geometry_msgs/msg/Twist@ignition.msgs.Twist',
 		'/model/Evata/pose@tf2_msgs/msg/TFMessage@ignition.msgs.Pose_V',
-		'/clock@rosgraph_msgs/msg/Clock@ignition.msgs.Clock',
+                '/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock',
 		'/camera/rgb@sensor_msgs/msg/Image@ignition.msgs.Image',
 		'/scan@sensor_msgs/msg/LaserScan@ignition.msgs.LaserScan',
 		'/odom@nav_msgs/msg/Odometry@ignition.msgs.Odometry',

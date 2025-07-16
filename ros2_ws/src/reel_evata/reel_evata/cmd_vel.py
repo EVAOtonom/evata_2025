@@ -91,6 +91,7 @@ class CmdVelSubscriber(Node):
 
         angle_deg = math.degrees(steering_rad)
         steering_deg = max(MAX_RIGHT_DEG, min(MAX_LEFT_DEG, angle_deg)) * -1
+        steering_deg = steering_deg * 5
         self.steering_angle_pub.publish(Int8(data=int(steering_deg)))
 
         # PID kontrol
