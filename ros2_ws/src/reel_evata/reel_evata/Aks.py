@@ -28,8 +28,13 @@ class Register(Enum):
     GPS_LONGITUDE_2 = 17
     GPS_SPEED = 18
     GPS_ALTITUDE = 19
-    GPS_IS_LAVID = 20
+    GPS_IS_VALID = 20
     DRIVING_OTONOM = 21
+    GPS_HOURS = 22
+    GPS_MINUTES = 23
+    GPS_SECONDS = 24
+    GPS_COURSE = 25
+
 
 class STMCommunication(Node):
     def __init__(self, port, slave_address=1, baudrate=38400):
@@ -62,6 +67,11 @@ class STMCommunication(Node):
         self.check_otonom_pub = self.create_publisher(Bool, '/stm/check_otonom', 10)
         self.brake_status_pub = self.create_publisher(Bool, '/stm/brake_status', 10)
         self.read_wheel_angle_pub = self.create_publisher(Int32, '/stm/read_wheel_angle', 10)
+        self.gps_is_valid_pub = self.create_publisher(Bool, '/stm/gps_is_valid', 10)
+        self.gps_hours_pub = self.create_publisher(Int8, '/stm/gps_hours', 10)
+        self.gps_minutes_pub = self.create_publisher(Int8, '/stm/gps_minutes', 10)
+        self.gps_seconds_pub = self.create_publisher(Int8, '/stm/gps_seconds', 10)
+        self.gps_course_pub = self.create_publisher(Float32, '/stm/gps_course', 10)
 
 
         # Subscribers
@@ -139,6 +149,36 @@ class STMCommunication(Node):
             self.gps_longitude_2 = self.read_data(Register.GPS_LONGITUDE_2)
             self.read_odometer = self.read_data(Register.READ_ODOMETER)
             self.read_wheel_angle = self.read_data(Register.READ_WHEEL_ANGLE)
+            self.gps_is_valid = self.read_data(Register.GPS_IS_VALID)
+            self.check_otonom = self.read_data(Register.DRIVING_OTONOM)
+            self.gps_hours = self.read_data(Register.GPS_HOURS)
+            self.gps_minutes = self.read_data(Register.GPS_MINUTES)
+            self.gps_seconds = self.read_data(Register.GPS_SECONDS)
+            self.gps_course = self.read_data(Register.GPS_COURSE)
+
+        # gps_is_valid yayını
+        if self.gps_is_valid is not None:
+            is_valid_bool = bool(self.gps_is_valid)
+            self.gps_is_valid_pub.publish(Bool(data=is_valid_bool))
+
+        # gps saat bilgileri
+        if self.gps_hours is not None and 0 <= self.gps_hours < 24:
+            self.gps_hours_pub.publish(Int8(data=int(self.gps_hours)))
+
+        if self.gps_minutes is not None and 0 <= self.gps_minutes < 60:
+            self.gps_minutes_pub.publish(Int8(data=int(self.gps_minutes)))
+
+        if self.gps_seconds is not None and 0 <= self.gps_seconds < 60:
+            self.gps_seconds_pub.publish(Int8(data=int(self.gps_seconds)))
+
+        # gps yön (course)
+        if self.gps_course is not None:
+            try:
+                course_float = float(self.gps_course)
+                self.gps_course_pub.publish(Float32(data=course_float))
+            except ValueError:
+                self.get_logger().warn("Geçersiz GPS yön değeri.")
+        
             
         if self.read_wheel_angle is not None:
             try:
