@@ -18,24 +18,21 @@ class CmdVelSubscriber(Node):
 
         self.cmd_vel_sub = self.create_subscription(Twist, '/cmd_vel', self.cmd_vel_callback, 10)
         self.odom_sub = self.create_subscription(Float32, '/stm/read_odometer', self.odom_callback, 10)
-
-        # Yeni: Engel algılama topiğine abone ol
         self.obstacle_sub = self.create_subscription(Int8, '/obstacle_detected', self.obstacle_callback, 10)
 
         self.current_velocity = 0.0  # m/s
         self.target_velocity = 0.0   # m/s
-        self.last_odom = None        # cm
-        self.last_odom_time = None   # s
+        self.last_odom = None
+        self.last_odom_time = None
 
-        # Engel durumu
         self.obstacle_detected = False
 
-        # PID parametreleri
-        self.kp = 2.0  # Kp yüksek olursa hızlı ama dengesiz tepkiler verir.
-        self.ki = 0.7  # Ki artarsa hatalar zamanla toparlanır ama aşım olabilir.
-        self.kd = 0.8  # Kd artarsa tepki yumuşar ama geç kalabilir.
-        self.integral = 0.0
-        self.last_error = 0.0
+        # Direksiyon hassasiyet çarpanı
+        self.steering_gain = 1 # İstersen runtime parametre olarak ayarla
+
+        # Motor power scale
+        self.max_motor_power = 20  # Motor güç limiti
+        self.max_velocity = 1.5    # Navigasyondaki max hız (vx_max)
 
         self.get_logger().info('CmdVel Node başlatıldı.')
 
@@ -67,19 +64,18 @@ class CmdVelSubscriber(Node):
         self.last_odom_time = current_time
 
     def cmd_vel_callback(self, msg: Twist):
-        # Engel algılanmışsa hareket ettirme, fren uygula
         if self.obstacle_detected:
+            # Engel varsa durdur
             self.target_velocity = 0.0
             self.motor_power_pub.publish(Int8(data=0))
             self.brake_pub.publish(Bool(data=True))
             self.get_logger().warn('[ENGEL] Engel algılandı! Araç durduruluyor.')
             return
 
-        # Hedef hızı 10 ile çarp
-        self.target_velocity = msg.linear.x * 7
+        self.target_velocity = msg.linear.x * 2
         angular_z = msg.angular.z
 
-        # Direksiyon açısı hesapla
+        # === Steering Angle Hesaplama ===
         WHEELBASE = 1.55
         MAX_LEFT_DEG = 40
         MAX_RIGHT_DEG = -43
@@ -89,36 +85,43 @@ class CmdVelSubscriber(Node):
         else:
             steering_rad = 0.0
 
-        angle_deg = math.degrees(steering_rad)
+        angle_deg = math.degrees(steering_rad) * self.steering_gain
         steering_deg = max(MAX_RIGHT_DEG, min(MAX_LEFT_DEG, angle_deg)) * -1
-        steering_deg = steering_deg * 5
-        self.steering_angle_pub.publish(Int8(data=int(steering_deg)))
+        steering_deg = int(steering_deg)
 
-        # PID kontrol
-        error = self.target_velocity - self.current_velocity
-        self.integral += error
-        derivative = error - self.last_error
-        self.last_error = error
+        self.steering_angle_pub.publish(Int8(data=steering_deg))
 
-        output = self.kp * error + self.ki * self.integral + self.kd * derivative
-
-        # Motor gücünü sınırlıyoruz
-        motor_power = int(min(7, max(0, round(output))))
-
-        # Fren durumu
+        # === Motor Power Hesaplama ===
+        speed_error = abs(self.target_velocity - self.current_velocity)
         brake = False
-        if self.target_velocity == 0.0:
+
+        # Eğer gerçek hız hedef hızdan 1 m/s fazla ise fren yap
+        if self.current_velocity >= self.target_velocity + 1.0:
             motor_power = 0
             brake = True
+        else:
+            power_scale = speed_error / self.max_velocity
+            motor_power = int(power_scale * self.max_motor_power)
+            motor_power = motor_power * 1.5
+            
+            # Fark çok küçükse motor gücü 0 yap
+            if speed_error < 0.3:
+                motor_power = 0
 
-        # Yayınla
+            motor_power = max(0, min(self.max_motor_power, motor_power))
+
+            # Hedef hız 0 ise motoru kapat ve frenle
+            if self.target_velocity == 0.0:
+                motor_power = 0
+                brake = True
+
         self.motor_power_pub.publish(Int8(data=motor_power))
         self.brake_pub.publish(Bool(data=brake))
 
         self.get_logger().info(
-            f'[CMD_VEL] Hedef: {self.target_velocity:.2f} m/s | '
-            f'Anlık: {self.current_velocity:.2f} m/s | '
-            f'Motor Power: {motor_power}, Fren: {brake}'
+            f'[CMD_VEL] Hedef Hız: {self.target_velocity:.2f} m/s | '
+            f'Anlık Hız: {self.current_velocity:.2f} m/s | '
+            f'Motor Gücü: {motor_power} | Fren: {brake} | Direksiyon Açısı: {steering_deg}'
         )
 
 

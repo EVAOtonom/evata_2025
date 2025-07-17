@@ -190,7 +190,7 @@ class ImageSaver(Node):
         # Şerit çizgilerinin koordinatlarını bulma
         y_coords, x_coords = np.where(thinned_ll_mask_for_show == 1)
 
-        roi_y_start = 500
+        roi_y_start = 450
         roi_y_end = 720
         def get_roi_x_bounds(y):
             if y < roi_y_start or y > roi_y_end:

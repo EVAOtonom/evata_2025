@@ -22,7 +22,7 @@ class SignDetector(Node):
 
         self.device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
         self.get_logger().info(f"Using device: {self.device}")
-        weights_path = "/home/oguzcan/evata_2025/ros2_ws/src/evata_sim/evata_sim/bestcihan.pt"
+        weights_path = "/home/akif/evata_2025/ros2_ws/src/evata_sim/evata_sim/bestcihan.pt"
         self.model = YOLO(weights_path).to(self.device)
         self.model.fuse()
         
@@ -38,8 +38,8 @@ class SignDetector(Node):
         self.smoothing_alpha = 0.3
 
         self.MIN_VISUAL_DIST = 0.7
-        self.MAX_VISUAL_DIST = 10.0
-        self.MAX_PUBLISH_DIST = 6.0
+        self.MAX_VISUAL_DIST = 30.0
+        self.MAX_PUBLISH_DIST = 8.0
 
         self.setup_ros()
 
