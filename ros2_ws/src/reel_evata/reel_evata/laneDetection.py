@@ -192,13 +192,20 @@ class ImageSaver(Node):
 
         roi_y_start = 450
         roi_y_end = 720
+                   
+        sol_ust=215
+        sag_ust=1125	
+        sol_alt=0	
+        sag_alt=1280
+        
         def get_roi_x_bounds(y):
             if y < roi_y_start or y > roi_y_end:
                 return None, None
             # Lineer interpolasyon ile x1 ve x2 değerlerini hesapla
-            x1 = int(215 + (y - roi_y_start) * (0-215) / (roi_y_end - roi_y_start))
-            x2 = int(1125 + (y - roi_y_start) * (1280-1125) / (roi_y_end - roi_y_start))
+            x1 = int(sol_ust + (y - roi_y_start) * (sol_alt - sol_ust) / (roi_y_end - roi_y_start))
+            x2 = int(sag_ust + (y - roi_y_start) * (sag_alt - sag_ust) / (roi_y_end - roi_y_start))
             return x1, x2
+                   
 
         roi_mask = (y_coords >= roi_y_start) & (y_coords <= roi_y_end)
         roi_y_coords = y_coords[roi_mask]
