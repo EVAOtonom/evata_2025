@@ -6,12 +6,13 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Quaternion, TransformStamped, PoseWithCovarianceStamped
 from tf2_ros import TransformBroadcaster
 from tf_transformations import quaternion_from_euler, euler_from_quaternion
+from sensor_msgs.msg import Imu  # IMU mesajı için
 
 class OdometryPublisher(Node):
     def __init__(self):
         super().__init__('odometry_publisher')
 
-        # Parametre: 
+        # Parametreler
         self.declare_parameter('wheel_base_cm', 155.0)
         self.declare_parameter('steering_scale_factor', 0.45)
         self.wheel_base = self.get_parameter('wheel_base_cm').value
@@ -25,14 +26,16 @@ class OdometryPublisher(Node):
         self.create_subscription(Float32, '/stm/read_odometer', self.odom_callback, 10)
         self.create_subscription(Int32, '/stm/read_wheel_angle', self.angle_callback, 10)
         self.create_subscription(PoseWithCovarianceStamped, '/initialpose', self.initialpose_callback, 10)
+        self.create_subscription(Imu, '/zed2i/zed_node/imu/data', self.imu_callback, 10)  # IMU aboneliği
 
         # Değişkenler
         self.last_odom = None
         self.last_time = self.get_clock().now()
         self.current_angle_deg = 0.0
+        self.imu_yaw = None  # IMU'dan alınan yönelim
+        self.yaw = 0.0
         self.x = 0.0  # cm
         self.y = 0.0  # cm
-        self.yaw = 0.0  # rad
 
         self.timer = self.create_timer(0.05, self.publish_odometry)  # 20 Hz yayın
 
@@ -40,6 +43,11 @@ class OdometryPublisher(Node):
         raw_value = msg.data
         self.current_angle_deg = raw_value * self.steering_scale
         self.get_logger().debug(f"Raw steering: {raw_value} -> Angle(deg): {self.current_angle_deg}")
+
+    def imu_callback(self, msg: Imu):
+        q = msg.orientation
+        _, _, yaw = euler_from_quaternion([q.x, q.y, q.z, q.w])
+        self.imu_yaw = yaw
 
     def odom_callback(self, msg: Float32):
         current_odom = msg.data
@@ -52,21 +60,19 @@ class OdometryPublisher(Node):
             return
 
         delta_s = current_odom - self.last_odom
-        steering_angle_rad = -math.radians(self.current_angle_deg)
 
-        if abs(steering_angle_rad) < 1e-3:
-            dx = delta_s * math.cos(self.yaw)
-            dy = delta_s * math.sin(self.yaw)
-            delta_yaw = 0.0
+        # IMU'dan gelen yaw kullanılıyor
+        if self.imu_yaw is not None:
+            yaw = self.imu_yaw
         else:
-            R = self.wheel_base / math.tan(steering_angle_rad)
-            delta_yaw = delta_s / R
-            dx = R * (math.sin(self.yaw + delta_yaw) - math.sin(self.yaw))
-            dy = R * (-math.cos(self.yaw + delta_yaw) + math.cos(self.yaw))
+            yaw = self.yaw  # IMU verisi yoksa önceki yönelimle devam et
+
+        dx = delta_s * math.cos(yaw)
+        dy = delta_s * math.sin(yaw)
 
         self.x += dx
         self.y += dy
-        self.yaw += delta_yaw
+        self.yaw = yaw
 
         self.last_odom = current_odom
         self.last_time = now
@@ -80,6 +86,7 @@ class OdometryPublisher(Node):
                                            pose.orientation.z,
                                            pose.orientation.w])
         self.yaw = yaw
+        self.imu_yaw = yaw  # Başlangıç için IMU yaw da ayarlanıyor
 
         self.last_odom = None
         self.last_time = self.get_clock().now()
@@ -124,3 +131,4 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
+

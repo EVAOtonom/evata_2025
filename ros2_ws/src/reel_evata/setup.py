@@ -23,7 +23,7 @@ setup(
             'AKS_communication = reel_evata.AKS_communication:main',
             'Aks = reel_evata.Aks:main',
             'stabilThrottle = reel_evata.stabilThrottle:main',
-            'velocity_plotter = reel_evata.velocity_plotter:main',
+            'FakeGps = reel_evata.FakeGps:main',
             'cmd_vel = reel_evata.cmd_vel:main',
             "laneDetection=" + package_name + ".laneDetection:main",
             'toggle_brake= reel_evata.toggle_brake:main',
@@ -33,6 +33,7 @@ setup(
             "lidar_obstacle_detector_with_audio_text=" + package_name + ".lidar_obstacle_detector_with_audio_text:main",
             "laneFollower=" + package_name + ".laneFollower:main",
             "sign_detector=" + package_name + ".sign_detector:main",
+            "reel_gps=" + package_name + ".reel_gps:main",
         ],
     },
 )

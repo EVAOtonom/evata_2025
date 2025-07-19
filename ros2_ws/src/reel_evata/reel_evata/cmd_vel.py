@@ -31,7 +31,7 @@ class CmdVelSubscriber(Node):
         self.steering_gain = 1 # İstersen runtime parametre olarak ayarla
 
         # Motor power scale
-        self.max_motor_power = 20  # Motor güç limiti
+        self.max_motor_power = 10  # Motor güç limiti
         self.max_velocity = 1.5    # Navigasyondaki max hız (vx_max)
 
         self.get_logger().info('CmdVel Node başlatıldı.')
@@ -62,12 +62,13 @@ class CmdVelSubscriber(Node):
         self.current_velocity = velocity_mps
         self.last_odom = current_odom
         self.last_odom_time = current_time
-
+        
     def cmd_vel_callback(self, msg: Twist):
         if self.obstacle_detected:
             # Engel varsa durdur
             self.target_velocity = 0.0
-            self.motor_power_pub.publish(Int8(data=0))
+            motor_power = 0  # ✅ motor_power tanımlanmalı
+            self.motor_power_pub.publish(Int8(data=motor_power))
             self.brake_pub.publish(Bool(data=True))
             self.get_logger().warn('[ENGEL] Engel algılandı! Araç durduruluyor.')
             return
@@ -95,27 +96,30 @@ class CmdVelSubscriber(Node):
         speed_error = abs(self.target_velocity - self.current_velocity)
         brake = False
 
-        # Eğer gerçek hız hedef hızdan 1 m/s fazla ise fren yap
         if self.current_velocity >= self.target_velocity + 1.0:
             motor_power = 0
             brake = True
         else:
-            power_scale = speed_error / self.max_velocity
-            motor_power = int(power_scale * self.max_motor_power)
-            motor_power = motor_power * 1.5
-            
-            # Fark çok küçükse motor gücü 0 yap
-            if speed_error < 0.3:
-                motor_power = 0
-
-            motor_power = max(0, min(self.max_motor_power, motor_power))
+            # Kademeli motor gücü ayarı
+            if speed_error > 0.7:
+                motor_power = self.max_motor_power  # Yüksek güç
+            elif speed_error > 0.5:
+                motor_power = int(self.max_motor_power * 0.7)  # Orta güç
+            elif speed_error > 0.3:
+                motor_power = int(self.max_motor_power * 0.5)  # Az güç
+            elif speed_error > 0.1:
+                motor_power = int(self.max_motor_power * 0.3)  # Daha az güç
+            else:
+                motor_power = 0  # Hemen hemen eşit, güç verme
 
             # Hedef hız 0 ise motoru kapat ve frenle
             if self.target_velocity == 0.0:
                 motor_power = 0
                 brake = True
 
-        self.motor_power_pub.publish(Int8(data=motor_power))
+        # motor_power sınırla
+        motor_power = max(0, min(self.max_motor_power, int(motor_power)))
+        self.motor_power_pub.publish(Int8(data=int(motor_power)))
         self.brake_pub.publish(Bool(data=brake))
 
         self.get_logger().info(

@@ -22,7 +22,9 @@ class SignDetector(Node):
 
         self.device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
         self.get_logger().info(f"Using device: {self.device}")
-        weights_path = "/home/akif/evata_2025/ros2_ws/src/evata_sim/evata_sim/bestcihan.pt"
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        src_dir = dir_path.split('/install')[0]  # install kısmını çıkar
+        weights_path = os.path.join(src_dir, 'src', 'evata_sim', 'evata_sim', 'bestcihan.pt')
         self.model = YOLO(weights_path).to(self.device)
         self.model.fuse()
         
@@ -44,8 +46,8 @@ class SignDetector(Node):
         self.setup_ros()
 
     def setup_ros(self):
-        self.create_subscription(PointCloud2, "/zed/zed_node/point_cloud/cloud_registered", self.point_cloud_callback, 10)
-        self.create_subscription(Image, "/zed/zed_node/rgb/image_rect_color", self.color_image_callback, 10)
+        self.create_subscription(PointCloud2, "/zed2i/zed_node/point_cloud/cloud_registered", self.point_cloud_callback, 10)
+        self.create_subscription(Image, "/zed2i/zed_node/rgb/image_rect_color", self.color_image_callback, 10)
 
         self.sign_info_pub = self.create_publisher(String, '/sign_detector/sign_info', 10)
         self.position_pub = self.create_publisher(Float32MultiArray, '/sign_detector/position', 10)

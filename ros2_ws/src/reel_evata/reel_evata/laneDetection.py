@@ -57,10 +57,10 @@ class ImageSaver(Node):
         super().__init__('image_saver')
         self.subscription = self.create_subscription(
             Image,
-            '/zed/zed_node/rgb/image_rect_color',
+            '/zedm/zed_node/rgb/image_rect_color',
             self.image_callback,
             10)
-        self.create_subscription(PointCloud2, "/zed/zed_node/point_cloud/cloud_registered", self.point_cloud_callback, 10)
+        self.create_subscription(PointCloud2, "/zedm/zed_node/point_cloud/cloud_registered", self.point_cloud_callback, 10)
 
         self.bridge = CvBridge()
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -111,7 +111,7 @@ class ImageSaver(Node):
         steering_value_int = int(steering_angle)
         msg.data = steering_value_int
         # Navigasyonla denenicekse alltaki satır yorum satırı. Sadece şerit takipse  yorumu kaldır. ****************************************************************
-        self.cmd_vel_publisher.publish(msg)
+        #self.cmd_vel_publisher.publish(msg)
         self.get_logger().info(f"Publishing to /stm/steering_angle: {msg.data} (Calculated: {steering_angle:.2f})", throttle_duration_sec=0.5)
 
 
