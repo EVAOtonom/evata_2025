@@ -17,8 +17,8 @@ class GPSPublisher(Node):
         lat_msg = Float64()
         long_msg = Float64()
 
-        lat_msg.data = 41.056603
-        long_msg.data = 28.819899
+        lat_msg.data = 41.056660
+        long_msg.data = 28.819996
 
         self.publisher_lat.publish(lat_msg)
         self.get_logger().info(f'Latitude published: {lat_msg.data}')
