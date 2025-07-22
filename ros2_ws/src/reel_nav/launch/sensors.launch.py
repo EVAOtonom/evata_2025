@@ -12,27 +12,40 @@ def generate_launch_description():
             output='screen'
         )
 
-    # === İlk aşamada açılacaklar ===
-    zed2i = gnome_tab(
-        'ZED2i',
-        'ros2 launch zed_wrapper zed_camera.launch.py camera_name:=zed2i camera_model:=zed2i'
-    )
+    # 1. Hemen başlat: ZEDm
     zedm = gnome_tab(
         'ZEDm',
         'ros2 launch zed_wrapper zed_camera.launch.py camera_name:=zedm camera_model:=zedm'
     )
 
-    # === 5 saniye gecikmeli açılacaklar ===
-    delayed_nodes = TimerAction(
+    # 2. 5s sonra: laneDetection
+    lane_detection = TimerAction(
         period=5.0,
         actions=[
-            gnome_tab('Sign Detector', 'ros2 run reel_evata sign_detector'),
-            gnome_tab('Lane Detection', 'ros2 run reel_evata laneDetection')
+            gnome_tab('Lane Detection', 'ros2 run reel_evata laneDetection'),
+
+            # 3. 5s sonra: zed2i
+            TimerAction(
+                period=5.0,
+                actions=[
+                    gnome_tab(
+                        'ZED2i',
+                        'ros2 launch zed_wrapper zed_camera.launch.py camera_name:=zed2i camera_model:=zed2i'
+                    ),
+
+                    # 4. 5s sonra: sign_detector
+                    TimerAction(
+                        period=5.0,
+                        actions=[
+                            gnome_tab('Sign Detector', 'ros2 run reel_evata sign_detector')
+                        ]
+                    )
+                ]
+            )
         ]
     )
 
     return LaunchDescription([
-        zed2i,
         zedm,
-        delayed_nodes
+        lane_detection
     ])
