@@ -9,7 +9,7 @@ from geometry_msgs.msg import PoseStamped
 import json
 import math
 import os
-from std_msgs.msg import Float64
+from std_msgs.msg import Float32
 from ament_index_python.packages import get_package_share_directory
 
 
@@ -36,8 +36,8 @@ class ReelGPS(Node):
         self.current_index = 0
         self.gps_map = self.load_gps_map(self.gps_map_file)
 
-        self.create_subscription(Float64, '/stm/gps_latitude', self.lat_callback, 10)
-        self.create_subscription(Float64, '/stm/gps_longitude', self.lon_callback, 10)
+        self.create_subscription(Float32, '/stm/gps_latitude', self.lat_callback, 10)
+        self.create_subscription(Float32, '/stm/gps_longitude', self.lon_callback, 10)
 
         self.init_pose_pub = self.create_publisher(PoseWithCovarianceStamped, '/initialpose', 10)
 
@@ -204,6 +204,13 @@ class ReelGPS(Node):
             
         self.goal_sent = False
         self.goal_handle = None
+
+    def send_next_goal(self):
+        if self.current_index < len(self.gps_targets):
+            lat, lon = self.gps_targets[self.current_index]
+            goal_x, goal_y = self.gps_to_xy(lat, lon)
+            self.send_goal(goal_x, goal_y)
+            self.goal_sent = True
 
 
 def main(args=None):
