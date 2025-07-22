@@ -131,7 +131,7 @@ class SignDetectorWithNavigation(Node):
         """Navigate to parking sign location using the same format as your example"""
         # Create goal dictionary in the same format as your example
         goal = {
-            'x': map_x - 1.0,  # Stop 1m before the parking sign
+            'x': map_x - 4.75,  # Stop 1m before the parking sign
             'y': map_y,
             'z': 0.0,
             'ox': 0.0,
