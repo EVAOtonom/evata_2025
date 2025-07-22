@@ -23,7 +23,7 @@ def generate_launch_description():
     slam_params_file = os.path.join(src_dir, "src", "reel_nav", "config", "slam_toolbox_params.yaml")  # SLAM yapılandırması
     map_dir = LaunchConfiguration(
         'map',
-        default=os.path.join(src_dir,"src","reel_nav",'map', 'otopark.yaml')
+        default=os.path.join(src_dir,"src","reel_nav",'map', 'bahce.yaml')
     )
     param_dir = LaunchConfiguration(
         'params_file',
