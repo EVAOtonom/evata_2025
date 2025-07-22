@@ -1,243 +1,224 @@
-#!/usr/bin/env python3.10
-
 import rclpy
 from rclpy.node import Node
-from sensor_msgs.msg import Image, PointCloud2
-from std_msgs.msg import String, Float32MultiArray
-from cv_bridge import CvBridge, CvBridgeError
-import cv2
-import numpy as np
-from ultralytics import YOLO
-import logging
-from sensor_msgs_py import point_cloud2
-import torch
-from collections import defaultdict, deque
-from statistics import median
+from sensor_msgs.msg import NavSatFix
+from geometry_msgs.msg import PoseWithCovarianceStamped
+from nav2_msgs.action import NavigateToPose
+from rclpy.action import ActionClient
+from action_msgs.msg import GoalStatus
+from geometry_msgs.msg import PoseStamped
+import json
+import math
 import os
-logging.getLogger('ultralytics').setLevel(logging.ERROR)
+from std_msgs.msg import Float32
+from ament_index_python.packages import get_package_share_directory
 
-class SignDetector(Node):
+
+class ReelGPS(Node):
     def __init__(self):
-        super().__init__('sign_detector_node')
+        super().__init__('reel_gps')
 
-        self.device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
-        self.get_logger().info(f"Using device: {self.device}")
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        src_dir = dir_path.split('/install')[0]  # install kısmını çıkar
-        weights_path = os.path.join(src_dir, 'src', 'evata_sim', 'evata_sim', 'bestcihan.pt')
-        self.model = YOLO(weights_path).to(self.device)
-        self.model.fuse()
-        
-        self.bridge = CvBridge()
-        self.process_width = 1280
-        self.process_height = 720
+        src_dir = dir_path.split('/install')[0]
+        self.target_file = os.path.join(src_dir, 'src', 'reel_evata', 'reel_evata', 'gps_reel.json')
+        self.gps_map_file = os.path.join(src_dir, 'src', 'reel_evata', 'reel_evata', 'rgps.txt')
 
-        self.tracked_signs = {}
-        self.latest_pointcloud = None
+        self.current_lat = None
+        self.current_lon = None
+        self.current_pose = None
+        self.goal_sent = False
+        self.goal_handle = None
+        self.goal_cancelling = False
+        self.distance_threshold = 2.0  # metre
+        self.motion_enabled = True
+        self.paused = False
 
-        self.distance_history = defaultdict(lambda: deque(maxlen=7))
-        self.smoothed_distance = {}
-        self.smoothing_alpha = 0.3
+        self.gps_targets = self.load_gps_targets(self.target_file)
+        self.current_index = 0
+        self.gps_map = self.load_gps_map(self.gps_map_file)
 
-        self.MIN_VISUAL_DIST = 0.7
-        self.MAX_VISUAL_DIST = 30.0
-        self.MAX_PUBLISH_DIST = 8.0
+        self.create_subscription(Float32, '/stm/gps_latitude', self.lat_callback, 10)
+        self.create_subscription(Float32, '/stm/gps_longitude', self.lon_callback, 10)
 
-        self.setup_ros()
+        self.init_pose_pub = self.create_publisher(PoseWithCovarianceStamped, '/initialpose', 10)
 
-    def setup_ros(self):
-        self.create_subscription(PointCloud2, "/zed2i/zed_node/point_cloud/cloud_registered", self.point_cloud_callback, 10)
-        self.create_subscription(Image, "/zed2i/zed_node/rgb/image_rect_color", self.color_image_callback, 10)
+        self._client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
+        self._client.wait_for_server()
 
-        self.sign_info_pub = self.create_publisher(String, '/sign_detector/sign_info', 10)
-        self.position_pub = self.create_publisher(Float32MultiArray, '/sign_detector/position', 10)
+        self.timer_counter = 0
+        self.create_timer(1.0, self.timer_callback)
+        self.init_pose_published = False
 
-        cv2.namedWindow("Sign Detection", cv2.WINDOW_NORMAL)
-        cv2.resizeWindow("Sign Detection", self.process_width, self.process_height)
+    def load_gps_targets(self, path):
+        with open(path, 'r') as f:
+            data = json.load(f)
+            return [(p['lat'], p['lon']) for p in data]
 
-    def point_cloud_callback(self, msg):
-        self.latest_pointcloud = msg
+    def load_gps_map(self, path):
+        points = []
+        with open(path, 'r') as f:
+            for line in f:
+                if line.strip().startswith("#") or not line.strip():
+                    continue
+                parts = line.strip().replace(',', ' ').split()
+                if len(parts) < 4:
+                    continue
+                x, y, lat, lon = map(float, parts[:4])
+                points.append((x, y, lat, lon))
+        return points
 
-    def color_image_callback(self, msg):
-        if not msg.data or len(msg.data) == 0:
-            self.get_logger().warn("Received empty image data!")
+    def gps_to_xy(self, lat, lon):
+        nearest = sorted(self.gps_map, key=lambda p: (p[2] - lat) ** 2 + (p[3] - lon) ** 2)[:3]
+        x_sum = y_sum = total_weight = 0.0
+        for x, y, plat, plon in nearest:
+            dist = math.hypot(plat - lat, plon - lon) + 1e-6
+            weight = 1.0 / dist
+            x_sum += x * weight
+            y_sum += y * weight
+            total_weight += weight
+        return x_sum / total_weight, y_sum / total_weight
+
+    def lat_callback(self, msg):
+        self.current_lat = msg.data
+
+    def lon_callback(self, msg):
+        self.current_lon = msg.data
+
+    def timer_callback(self):
+        if self.current_lat is None or self.current_lon is None:
             return
 
-        try:
-            encoding = msg.encoding
-            cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
+        self.timer_counter += 1
 
-            if encoding == 'bgra8':
-                cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGRA2BGR)
-            elif encoding == 'bgr8':
-                pass
-            elif encoding == 'rgb8':
-                cv_image = cv2.cvtColor(cv_image, cv2.COLOR_RGB2BGR)
+        # İlk 5 saniye boyunca bekle (AMCL başlasın)
+        if not self.init_pose_published and self.timer_counter >= 5:
+            x, y = self.gps_to_xy(self.current_lat, self.current_lon)
+
+            pose = PoseWithCovarianceStamped()
+            pose.header.stamp = self.get_clock().now().to_msg()
+            pose.header.frame_id = 'map'
+            pose.pose.pose.position.x = x
+            pose.pose.pose.position.y = y
+            pose.pose.pose.position.z = 0.0
+
+            pose.pose.pose.orientation.x = 0.0
+            pose.pose.pose.orientation.y = 0.0
+            pose.pose.pose.orientation.z = 0.0
+            pose.pose.pose.orientation.w = 1.0
+
+            pose.pose.covariance = [
+                0.25, 0.0, 0.0, 0.0, 0.0, 0.0,
+                0.0, 0.25, 0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0685
+            ]
+
+            self.init_pose_pub.publish(pose)
+            self.init_pose_published = True
+            self.get_logger().info(f"[✓] Initial pose yayınlandı → x: {x:.2f}, y: {y:.2f}")
+
+            return
+
+        if not self.init_pose_published or self.current_index >= len(self.gps_targets):
+            return
+        if not self.motion_enabled or self.paused:
+            return
+
+        x, y = self.gps_to_xy(self.current_lat, self.current_lon)
+        self.current_pose = PoseStamped().pose
+        self.current_pose.position.x = x
+        self.current_pose.position.y = y
+
+        self.check_goal_distance()
+
+        if not self.goal_sent:
+            lat, lon = self.gps_targets[self.current_index]
+            goal_x, goal_y = self.gps_to_xy(lat, lon)
+            self.send_goal(goal_x, goal_y)
+            self.goal_sent = True
+
+
+    def check_goal_distance(self):
+        if (self.paused or not self.motion_enabled or not self.current_pose or 
+    self.goal_cancelling or self.current_index >= len(self.gps_targets)):
+            return
+
+        target_lat, target_lon = self.gps_targets[self.current_index]
+        target_x, target_y = self.gps_to_xy(target_lat, target_lon)
+
+        cur_x = self.current_pose.position.x
+        cur_y = self.current_pose.position.y
+        distance = math.hypot(target_x - cur_x, target_y - cur_y)
+
+
+        if distance <= 2.0:
+            self.get_logger().info(f"✅ {self.current_index+1}. hedefe 2m'den fazla yaklaşılmış. Geçiliyor...")
+            self.goal_cancelling = True
+            if self.goal_handle:
+                cancel_future = self.goal_handle.cancel_goal_async()
+                cancel_future.add_done_callback(self._handle_distance_cancel)
             else:
-                self.get_logger().warn(f"Unexpected encoding '{encoding}', assuming BGR8")
+                self._proceed_to_next()
 
-            resized_img = cv2.resize(cv_image, (self.process_width, self.process_height))
+    def _handle_distance_cancel(self, future):
+        self.get_logger().info("🛑 Hedef iptal edildi.")
+        self.goal_handle = None
+        self.goal_cancelling = False
+        self._proceed_to_next()
 
-            results = self.model(resized_img, imgsz=(self.process_width, self.process_height),
-                                 device=self.device, conf=0.5, iou=0.45)
+    def _proceed_to_next(self):
+        self.current_index += 1
+        self.goal_handle = None
+        if self.current_index < len(self.gps_targets):
+            self.send_next_goal()
+        self.get_logger().info(f"➡️ Sonraki hedefe geçildi. Index: {self.current_index}")
 
-            self.process_detections(results, resized_img)
 
-            cv2.putText(resized_img, f"Threshold: {self.MIN_VISUAL_DIST:.1f}m - {self.MAX_VISUAL_DIST:.1f}m",
-                        (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
+    def send_goal(self, x, y):
+        goal_msg = NavigateToPose.Goal()
+        goal_msg.pose.header.frame_id = 'map'
+        goal_msg.pose.header.stamp = self.get_clock().now().to_msg()
+        goal_msg.pose.pose.position.x = x
+        goal_msg.pose.pose.position.y = y
+        goal_msg.pose.pose.orientation.w = 1.0
 
-            cv2.imshow("Sign Detection", resized_img)
-            cv2.waitKey(1)
+        self.get_logger().info(f"[→] Hedef gönderiliyor: x={x:.2f}, y={y:.2f}")
+        send_future = self._client.send_goal_async(goal_msg)
+        send_future.add_done_callback(self.goal_response_callback)
 
-        except CvBridgeError as cve:
-            self.get_logger().error(f"CvBridge error: {str(cve)}")
-        except Exception as e:
-            self.get_logger().error(f"Image processing error: {str(e)}")
+    def goal_response_callback(self, future):
+        self.goal_handle = future.result()
+        if not self.goal_handle.accepted:
+            self.get_logger().warn(" Hedef reddedildi!")
+            return
+        self.get_logger().info("✅ Hedef kabul edildi.")
+        self.goal_handle.get_result_async().add_done_callback(self.goal_result_callback)
 
-    def process_detections(self, results, image):
-        current_detections = defaultdict(list)
-
-        for r in results:
-            for box in r.boxes:
-                if box.conf > 0.5:
-                    x1, y1, x2, y2 = map(int, box.xyxy[0])
-                    class_id = int(box.cls)
-                    class_name = self.model.names[class_id]
-                    conf = box.conf.item() if hasattr(box.conf, 'item') else float(box.conf)
-                    current_detections[class_id].append((x1, y1, x2, y2, class_name, conf))
-
-        self.tracked_signs.clear()
-
-        for class_id, detections in current_detections.items():
-            for idx, det in enumerate(detections):
-                x1, y1, x2, y2, class_name, conf = det
-                unique_id = f"{class_id}_{idx}"
-
-                dist_raw = self.calculate_pointcloud_distance(x1, y1, x2, y2)
-                if dist_raw > 0:
-                    self.distance_history[unique_id].append(dist_raw)
-                else:
-                    if len(self.distance_history[unique_id]) == 0:
-                        self.distance_history[unique_id].append(-1)
-
-                valid_distances = [d for d in self.distance_history[unique_id] if d > 0]
-
-                if len(valid_distances) >= 3:
-                    q1 = np.percentile(valid_distances, 25)
-                    q3 = np.percentile(valid_distances, 75)
-                    iqr = q3 - q1
-                    filtered = [d for d in valid_distances if q1 - 1.5 * iqr <= d <= q3 + 1.5 * iqr]
-                    median_dist = median(filtered) if filtered else median(valid_distances)
-                else:
-                    median_dist = median(valid_distances) if valid_distances else -1
-
-                prev_smooth = self.smoothed_distance.get(unique_id, median_dist if median_dist > 0 else -1)
-                if median_dist > 0 and prev_smooth > 0:
-                    smooth_dist = self.smoothing_alpha * median_dist + (1 - self.smoothing_alpha) * prev_smooth
-                else:
-                    smooth_dist = median_dist
-
-                self.smoothed_distance[unique_id] = smooth_dist
-
-                self.tracked_signs[unique_id] = (x1, y1, x2, y2, class_name, conf, smooth_dist)
-
-        for unique_id, (x1, y1, x2, y2, class_name, conf, distance) in self.tracked_signs.items():
-            if self.MIN_VISUAL_DIST <= distance <= self.MAX_VISUAL_DIST:
-                self.visualize_detection(image, x1, y1, x2, y2, class_name, distance, conf)
-
-                if distance <= self.MAX_PUBLISH_DIST:
-                    self.publish_sign_info(class_name, distance, x1, y1, x2, y2)
-            else:
-                self.visualize_detection(image, x1, y1, x2, y2, class_name, -1, conf)
-
-    def calculate_pointcloud_distance(self, x1, y1, x2, y2):
-        if self.latest_pointcloud is None:
-            self.get_logger().warn("No pointcloud data received yet", throttle_duration_sec=5)
-            return -1
-
-        try:
-            pc_np = point_cloud2.read_points_numpy(self.latest_pointcloud, field_names=("x", "y", "z"))
-            pc_np = np.reshape(pc_np, (self.latest_pointcloud.height, self.latest_pointcloud.width, 3))
-
-            scale_x = self.latest_pointcloud.width / self.process_width
-            scale_y = self.latest_pointcloud.height / self.process_height
-
-            center_x = int((x1 + x2) / 2 * scale_x)
-            center_y = int((y1 + y2) / 2 * scale_y)
-
-            distances = []
-            for dy in range(-2, 3):
-                for dx in range(-2, 3):
-                    px = np.clip(center_x + dx, 0, self.latest_pointcloud.width - 1)
-                    py = np.clip(center_y + dy, 0, self.latest_pointcloud.height - 1)
-                    point = pc_np[py, px, :]
-                    if np.all(np.isfinite(point)):
-                        dist = np.linalg.norm(point)
-                        if 0.3 < dist < 20.0:
-                            distances.append(dist)
-
-            if len(distances) < 5:
-                self.get_logger().warn("Not enough valid points", throttle_duration_sec=5)
-                return -1
-
-            # Outlier filtrele
-            q1 = np.percentile(distances, 25)
-            q3 = np.percentile(distances, 75)
-            iqr = q3 - q1
-            filtered = [d for d in distances if q1 - 1.5 * iqr <= d <= q3 + 1.5 * iqr]
-
-            return float(np.median(filtered)) if filtered else float(np.median(distances))
-
-        except Exception as e:
-            self.get_logger().error(f"Distance calc error: {str(e)}", throttle_duration_sec=5)
-            return -1
-
-    def visualize_detection(self, image, x1, y1, x2, y2, class_name, distance, conf):
-        if distance > 0:
-            if distance < 5.0:
-                color = (0, 0, 255)
-            elif distance < 10.0:
-                color = (0, 165, 255)
-            else:
-                color = (0, 255, 0)
+    def goal_result_callback(self, future):
+        result = future.result()
+        if result.status == GoalStatus.STATUS_SUCCEEDED:
+            self.get_logger().info(" Hedefe ulaşıldı.")
         else:
-            color = (255, 0, 0)
+            self.get_logger().warn(f"🚫 Hedefe ulaşılamadı! Status: {result.status}")
+            
+        self.goal_sent = False
+        self.goal_handle = None
 
-        cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
+    def send_next_goal(self):
+        if self.current_index < len(self.gps_targets):
+            lat, lon = self.gps_targets[self.current_index]
+            goal_x, goal_y = self.gps_to_xy(lat, lon)
+            self.send_goal(goal_x, goal_y)
+            self.goal_sent = True
 
-        text = f"{class_name}"
-        if distance > 0:
-            text += f" {distance:.1f}m"
-        text += f" ({conf:.2f})"
-
-        (tw, th), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
-        cv2.rectangle(image, (x1, y1 - th - 10), (x1 + tw, y1), color, -1)
-        cv2.putText(image, text, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-
-    def publish_sign_info(self, class_name, distance, x1, y1, x2, y2):
-        sign_info_msg = String()
-        sign_info_msg.data = f"{class_name}:{distance:.2f}" if distance > 0 else f"{class_name}:nan"
-        self.sign_info_pub.publish(sign_info_msg)
-
-        if class_name in ['park', 'engellipark', 'engellipark_ters']:
-            position_msg = Float32MultiArray()
-            position_msg.data = [float(x1), float(y1), float(x2), float(y2), float(self.process_width)]
-            self.position_pub.publish(position_msg)
-
-        self.get_logger().info(f"Published: {class_name} at {distance:.2f}m")
 
 def main(args=None):
     rclpy.init(args=args)
-    node = SignDetector()
-    try:
-        rclpy.spin(node)
-    except KeyboardInterrupt:
-        node.get_logger().info("Node stopped cleanly")
-    finally:
-        cv2.destroyAllWindows()
-        node.destroy_node()
-        rclpy.shutdown()
+    node = ReelGPS()
+    rclpy.spin(node)
+    node.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
-
