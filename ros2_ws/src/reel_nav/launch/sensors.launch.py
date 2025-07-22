@@ -1,38 +1,51 @@
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess
+from launch.actions import ExecuteProcess, TimerAction
 
 def generate_launch_description():
+    def gnome_tab(title, command):
+        return ExecuteProcess(
+            cmd=[
+                'gnome-terminal',
+                '--tab', '-t', title,
+                '--', 'bash', '-c', f'{command}; exec bash'
+            ],
+            output='screen'
+        )
+
+    # 1. Hemen başlat: ZEDm
+    zedm = gnome_tab(
+        'ZEDm',
+        'ros2 launch zed_wrapper zed_camera.launch.py camera_name:=zedm camera_model:=zedm'
+    )
+
+    # 2. 5s sonra: laneDetection
+    lane_detection = TimerAction(
+        period=5.0,
+        actions=[
+            gnome_tab('Lane Detection', 'ros2 run reel_evata laneDetection'),
+
+            # 3. 5s sonra: zed2i
+            TimerAction(
+                period=8.0,
+                actions=[
+                    gnome_tab(
+                        'ZED2i',
+                        'ros2 launch zed_wrapper zed_camera.launch.py camera_name:=zed2i camera_model:=zed2i'
+                    ),
+
+                    # 4. 5s sonra: sign_detector
+                    TimerAction(
+                        period=5.0,
+                        actions=[
+                            gnome_tab('Sign Detector', 'ros2 run reel_evata bettersigndetector.py')
+                        ]
+                    )
+                ]
+            )
+        ]
+    )
+
     return LaunchDescription([
-        # usb_settings + Aks aynı sekmede
-        ExecuteProcess(
-            cmd=[
-                'gnome-terminal',
-                '--tab', '-t', 'USB & Aks',
-                '--', 'bash', '-c',
-                'ros2 run reel_nav usb_settings && ros2 run reel_evata Aks; exec bash'
-            ],
-            output='screen'
-        ),
-
-        # cmd_vel ayrı sekmede
-        ExecuteProcess(
-            cmd=[
-                'gnome-terminal',
-                '--tab', '-t', 'cmd_vel',
-                '--', 'bash', '-c',
-                'ros2 run reel_evata cmd_vel; exec bash'
-            ],
-            output='screen'
-        ),
-
-        # nav2 ayrı sekmede
-        ExecuteProcess(
-            cmd=[
-                'gnome-terminal',
-                '--tab', '-t', 'Nav2',
-                '--', 'bash', '-c',
-                'ros2 launch reel_nav navReel.launch.py; exec bash'
-            ],
-            output='screen'
-        ),
+        zedm,
+        lane_detection
     ])
