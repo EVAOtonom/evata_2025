@@ -26,7 +26,7 @@ def generate_launch_description():
 
             # 3. 5s sonra: zed2i
             TimerAction(
-                period=5.0,
+                period=8.0,
                 actions=[
                     gnome_tab(
                         'ZED2i',
