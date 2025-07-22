@@ -26,16 +26,17 @@ class OdometryPublisher(Node):
         self.create_subscription(Float32, '/stm/read_odometer', self.odom_callback, 10)
         self.create_subscription(Int32, '/stm/read_wheel_angle', self.angle_callback, 10)
         self.create_subscription(PoseWithCovarianceStamped, '/initialpose', self.initialpose_callback, 10)
-        self.create_subscription(Imu, '/zed2i/zed_node/imu/data', self.imu_callback, 10)  # IMU aboneliği
+        self.create_subscription(Imu, '/zed2i/zed_node/imu/data', self.imu_callback, 10)
 
         # Değişkenler
         self.last_odom = None
         self.last_time = self.get_clock().now()
         self.current_angle_deg = 0.0
-        self.imu_yaw = None  # IMU'dan alınan yönelim
+        self.imu_yaw = None
+        self.imu_yaw_offset = 0.0
         self.yaw = 0.0
-        self.x = 0.0  # cm
-        self.y = 0.0  # cm
+        self.x = 0.0
+        self.y = 0.0
 
         self.timer = self.create_timer(0.05, self.publish_odometry)  # 20 Hz yayın
 
@@ -46,8 +47,8 @@ class OdometryPublisher(Node):
 
     def imu_callback(self, msg: Imu):
         q = msg.orientation
-        _, _, yaw = euler_from_quaternion([q.x, q.y, q.z, q.w])
-        self.imu_yaw = yaw
+        _, _, raw_yaw = euler_from_quaternion([q.x, q.y, q.z, q.w])
+        self.imu_yaw = raw_yaw + self.imu_yaw_offset  # çalışmazsa bu hesaba bir de initialpose_callback'e bak
 
     def odom_callback(self, msg: Float32):
         current_odom = msg.data
@@ -61,11 +62,10 @@ class OdometryPublisher(Node):
 
         delta_s = current_odom - self.last_odom
 
-        # IMU'dan gelen yaw kullanılıyor
         if self.imu_yaw is not None:
             yaw = self.imu_yaw
         else:
-            yaw = self.yaw  # IMU verisi yoksa önceki yönelimle devam et
+            yaw = self.yaw
 
         dx = delta_s * math.cos(yaw)
         dy = delta_s * math.sin(yaw)
@@ -81,13 +81,21 @@ class OdometryPublisher(Node):
         pose = msg.pose.pose
         self.x = pose.position.x * 100.0  # metre -> cm
         self.y = pose.position.y * 100.0
-        _, _, yaw = euler_from_quaternion([pose.orientation.x,
-                                           pose.orientation.y,
-                                           pose.orientation.z,
-                                           pose.orientation.w])
-        self.yaw = yaw
-        self.imu_yaw = yaw  # Başlangıç için IMU yaw da ayarlanıyor
 
+        _, _, initial_yaw = euler_from_quaternion([
+            pose.orientation.x,
+            pose.orientation.y,
+            pose.orientation.z,
+            pose.orientation.w
+        ])
+
+        self.yaw = initial_yaw
+        if self.imu_yaw is not None:
+            self.imu_yaw_offset = initial_yaw - (self.imu_yaw - self.imu_yaw_offset)  # çalışmazsa burayı değiştir
+        else:
+            self.imu_yaw_offset = 0.0
+
+        self.imu_yaw = self.yaw  # Doğrulama için güncelle
         self.last_odom = None
         self.last_time = self.get_clock().now()
 
@@ -131,4 +139,3 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
-
