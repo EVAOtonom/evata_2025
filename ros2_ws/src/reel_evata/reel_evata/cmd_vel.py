@@ -15,6 +15,8 @@ class CmdVelSubscriber(Node):
         self.steering_angle_pub = self.create_publisher(Int8, '/stm/steering_angle', 10)
         self.motor_power_pub = self.create_publisher(Int8, '/stm/motor_power', 10)
         self.brake_pub = self.create_publisher(Bool, '/stm/brake', 10)
+        self.reverse_pub = self.create_publisher(Bool, '/stm/reverse_command', 10)
+
 
         self.cmd_vel_sub = self.create_subscription(Twist, '/cmd_vel', self.cmd_vel_callback, 10)
         self.odom_sub = self.create_subscription(Float32, '/stm/read_odometer', self.odom_callback, 10)
@@ -31,9 +33,8 @@ class CmdVelSubscriber(Node):
         self.steering_gain = 1 # İstersen runtime parametre olarak ayarla
 
         # Motor power scale
-        self.max_motor_power = 10  # Motor güç limiti
+        self.max_motor_power = 20  # Motor güç limiti
         self.max_velocity = 1.5    # Navigasyondaki max hız (vx_max)
-
         self.get_logger().info('CmdVel Node başlatıldı.')
 
     def obstacle_callback(self, msg: Int8):
@@ -75,7 +76,9 @@ class CmdVelSubscriber(Node):
 
         self.target_velocity = msg.linear.x * 2
         angular_z = msg.angular.z
-
+        is_reverse = self.target_velocity < 0
+        self.reverse_pub.publish(Bool(data=is_reverse))
+        
         # === Steering Angle Hesaplama ===
         WHEELBASE = 1.55
         MAX_LEFT_DEG = 40
@@ -95,20 +98,24 @@ class CmdVelSubscriber(Node):
         # === Motor Power Hesaplama ===
         speed_error = abs(self.target_velocity - self.current_velocity)
         brake = False
-
-        if self.current_velocity >= self.target_velocity + 1.0:
+        if is_reverse:
+            motor_power = 3
+            brake = False
+        elif self.current_velocity >= self.target_velocity + 1.0:
             motor_power = 0
             brake = True
         else:
             # Kademeli motor gücü ayarı
-            if speed_error > 0.7:
+            if speed_error > 1.0:
                 motor_power = self.max_motor_power  # Yüksek güç
+            elif speed_error > 0.7:
+                motor_power = int(self.max_motor_power * 0.8)  # Orta güç
             elif speed_error > 0.5:
-                motor_power = int(self.max_motor_power * 0.7)  # Orta güç
+                motor_power = int(self.max_motor_power * 0.6)  # Orta güç
             elif speed_error > 0.3:
-                motor_power = int(self.max_motor_power * 0.5)  # Az güç
-            elif speed_error > 0.1:
-                motor_power = int(self.max_motor_power * 0.3)  # Daha az güç
+                motor_power = int(self.max_motor_power * 0.4)  # Az güç
+            elif speed_error > 0.2:
+                motor_power = int(self.max_motor_power * 0.2)  # Daha az güç
             else:
                 motor_power = 0  # Hemen hemen eşit, güç verme
 

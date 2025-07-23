@@ -190,11 +190,11 @@ class ImageSaver(Node):
         # Şerit çizgilerinin koordinatlarını bulma
         y_coords, x_coords = np.where(thinned_ll_mask_for_show == 1)
 
-        roi_y_start = 450
+        roi_y_start = 250
         roi_y_end = 720
                    
-        sol_ust=215
-        sag_ust=1125	
+        sol_ust=0
+        sag_ust=1280	
         sol_alt=0	
         sag_alt=1280
         

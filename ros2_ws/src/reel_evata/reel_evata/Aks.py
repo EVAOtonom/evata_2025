@@ -81,6 +81,8 @@ class STMCommunication(Node):
         self.create_subscription(Bool, '/stm/brake', self.brake_callback, 10)
         self.create_subscription(Int8, '/stm/left_signal', self.l_signal_callback, 10)
         self.create_subscription(Int8, '/stm/right_signal', self.r_signal_callback, 10)
+        self.create_subscription(Bool, '/stm/reverse_command', self.reverse_command_callback, 10)
+
 
         self.create_timer(1.0 / 3.0, self.publish_data)  # 3 Hz
 
@@ -136,6 +138,9 @@ class STMCommunication(Node):
 
     def l_signal_callback(self, msg):
         self.left_signal(msg.data)
+    def reverse_command_callback(self, msg):
+        self.send_command(Register.REVERSE_COMMAND, int(msg.data))
+
 
     def publish_data(self):
         if not self.encoder_reset_done:

@@ -211,15 +211,15 @@ local_costmap:
       robot_base_frame: base_footprint
       use_sim_time: False
       rolling_window: true
-      width: 12
-      height: 12
+      width: 20
+      height: 20
       resolution: 0.05
       footprint: "[[-0.96, -0.58], [0.96, -0.58], [0.96, 0.58], [-0.96, 0.58]]"
       plugins: ["voxel_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 1.0
+        inflation_radius: 3.0
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: True
@@ -242,7 +242,7 @@ local_costmap:
           obstacle_min_range: 0.0
         lane_pointcloud:
           topic: /lane_pointcloud
-          max_obstacle_height: 2.0
+          max_obstacle_height: 5.0
           clearing: False
           marking: True
           data_type: "PointCloud2"
@@ -280,7 +280,7 @@ global_costmap:
         always_send_full_costmap: True
         lane_pointcloud:
           topic: /lane_pointcloud
-          max_obstacle_height: 2.0
+          max_obstacle_height: 5.0
           clearing: False
           marking: True
           data_type: "PointCloud2"
