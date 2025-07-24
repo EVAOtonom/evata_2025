@@ -35,6 +35,7 @@ setup(
             "sign_detector=" + package_name + ".sign_detector:main",
             "reel_gps=" + package_name + ".reel_gps:main",
             "bettersigndetector=" + package_name + ".bettersigndetector:main",
+            'movement = reel_evata.movement:main',
 
         ],
     },
