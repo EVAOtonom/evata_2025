@@ -33,7 +33,7 @@ class CmdVelSubscriber(Node):
         self.steering_gain = 1 # İstersen runtime parametre olarak ayarla
 
         # Motor power scale
-        self.max_motor_power = 20  # Motor güç limiti
+        self.max_motor_power = 17  # Motor güç limiti
         self.max_velocity = 1.5    # Navigasyondaki max hız (vx_max)
         self.get_logger().info('CmdVel Node başlatıldı.')
 
@@ -74,13 +74,13 @@ class CmdVelSubscriber(Node):
             self.get_logger().warn('[ENGEL] Engel algılandı! Araç durduruluyor.')
             return
 
-        self.target_velocity = msg.linear.x * 2
-        angular_z = msg.angular.z
+        self.target_velocity = msg.linear.x * 2.5
+        angular_z = msg.angular.z * 2
         is_reverse = self.target_velocity < 0
-        self.reverse_pub.publish(Bool(data=is_reverse))
+        #self.reverse_pub.publish(Bool(data=is_reverse))
         
         # === Steering Angle Hesaplama ===
-        WHEELBASE = 1.55
+        WHEELBASE = 1.75
         MAX_LEFT_DEG = 40
         MAX_RIGHT_DEG = -43
 

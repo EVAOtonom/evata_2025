@@ -89,7 +89,7 @@ class ImageSaver(Node):
 
 
         self.last_process_time = 0.0
-        self.process_interval = 1.0 / 5  # 5 FPS
+        self.process_interval = 1.0 / 30  # 5 FPS
 
     """def calculate_steering_angle(self, mid_points):
         "Orta noktaların x koordinatlarının ortalamasına göre dönme açısını hesapla."

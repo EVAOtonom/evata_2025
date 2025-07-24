@@ -16,7 +16,7 @@ amcl:
     transform_tolerance: 0.1
 
     ### Lazer modeli ###
-    scan_topic: scan
+    scan_topic: scan 
     laser_model_type: "beam"
     laser_max_range: 30.0
     laser_min_range: 0.1
@@ -205,16 +205,16 @@ controller_server:
 local_costmap:
   local_costmap:
     ros__parameters:
-      update_frequency: 30.0
-      publish_frequency: 10.0
+      update_frequency: 9.0
+      publish_frequency: 9.0
       global_frame: odom
       robot_base_frame: base_footprint
       use_sim_time: False
       rolling_window: true
-      width: 20
-      height: 20
+      width: 12
+      height: 12
       resolution: 0.05
-      footprint: "[[-0.96, -0.58], [0.96, -0.58], [0.96, 0.58], [-0.96, 0.58]]"
+      footprint: "[[-1.05, -0.585], [1.05, -0.585], [1.05, 0.585], [-1.05, 0.585]]"
       plugins: ["voxel_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
@@ -232,7 +232,7 @@ local_costmap:
         observation_sources: scan lane_pointcloud
         scan:
           topic: /rslidar_points
-          max_obstacle_height: 2.5
+          max_obstacle_height: 2.0
           clearing: True
           marking: True
           data_type: "PointCloud2"
@@ -242,7 +242,7 @@ local_costmap:
           obstacle_min_range: 0.0
         lane_pointcloud:
           topic: /lane_pointcloud
-          max_obstacle_height: 5.0
+          max_obstacle_height: 2.0
           clearing: False
           marking: True
           data_type: "PointCloud2"
@@ -254,12 +254,12 @@ local_costmap:
 global_costmap:
   global_costmap:
     ros__parameters:
-      update_frequency: 30.0
-      publish_frequency: 10.0
+      update_frequency: 9.0
+      publish_frequency: 9.0
       global_frame: map
       robot_base_frame: base_footprint
       use_sim_time: False
-      footprint: "[[-0.96, -0.58], [0.96, -0.58], [0.96, 0.58], [-0.96, 0.58]]"
+      footprint: "[[-1.05, -0.585], [1.05, -0.585], [1.05, 0.585], [-1.05, 0.585]]"
       resolution: 0.05
       track_unknown_space: true
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
@@ -269,7 +269,7 @@ global_costmap:
         observation_sources: scan lane_pointcloud
         scan:
           topic: /rslidar_points
-          max_obstacle_height: 2.5
+          max_obstacle_height: 2.0
           clearing: True
           marking: True
           data_type: "PointCloud2"
@@ -277,10 +277,9 @@ global_costmap:
           raytrace_min_range: 0.0
           obstacle_max_range: 7.5
           obstacle_min_range: 0.0
-        always_send_full_costmap: True
         lane_pointcloud:
           topic: /lane_pointcloud
-          max_obstacle_height: 5.0
+          max_obstacle_height: 2.0
           clearing: False
           marking: True
           data_type: "PointCloud2"

@@ -82,7 +82,7 @@ class ImageSaver(Node):
         self.image_center_x = 640  # Görselin orta noktası (1280x720 için)
 
         self.last_process_time = 0.0
-        self.process_interval = 1.0 / 5  # 5 FPS
+        self.process_interval = 1.0 / 50  # 5 FPS
         self.cmd_vel_publisher = self.create_publisher(Int8, "/stm/steering_angle", 10)
 
 #############
