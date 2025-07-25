@@ -17,7 +17,6 @@ class CmdVelSubscriber(Node):
         self.brake_pub = self.create_publisher(Bool, '/stm/brake', 10)
         self.reverse_pub = self.create_publisher(Bool, '/stm/reverse_command', 10)
 
-
         self.cmd_vel_sub = self.create_subscription(Twist, '/cmd_vel', self.cmd_vel_callback, 10)
         self.odom_sub = self.create_subscription(Float32, '/stm/read_odometer', self.odom_callback, 10)
         self.obstacle_sub = self.create_subscription(Int8, '/obstacle_detected', self.obstacle_callback, 10)
@@ -29,12 +28,18 @@ class CmdVelSubscriber(Node):
 
         self.obstacle_detected = False
 
-        # Direksiyon hassasiyet çarpanı
-        self.steering_gain = 1 # İstersen runtime parametre olarak ayarla
+        self.steering_gain = 1
+        self.max_motor_power = 15
+        self.max_velocity = 1.5
 
-        # Motor power scale
-        self.max_motor_power = 17  # Motor güç limiti
-        self.max_velocity = 1.5    # Navigasyondaki max hız (vx_max)
+        # Son değerleri saklayacak değişkenler
+        self.last_motor_power = 0
+        self.last_brake = False
+        self.last_steering_deg = 0
+
+        # Timer ile sabit frekansta yayın (50 Hz)
+        self.timer = self.create_timer(0.02, self.timer_callback)
+
         self.get_logger().info('CmdVel Node başlatıldı.')
 
     def obstacle_callback(self, msg: Int8):
@@ -43,7 +48,7 @@ class CmdVelSubscriber(Node):
             self.get_logger().warn('[ENGEL] Engel algılandı! Araç durdurulacak.')
 
     def odom_callback(self, msg: Float32):
-        current_odom = msg.data  # cm cinsinden
+        current_odom = msg.data
         current_time = time()
 
         if self.last_odom is None or self.last_odom_time is None:
@@ -66,20 +71,16 @@ class CmdVelSubscriber(Node):
         
     def cmd_vel_callback(self, msg: Twist):
         if self.obstacle_detected:
-            # Engel varsa durdur
             self.target_velocity = 0.0
-            motor_power = 0  # ✅ motor_power tanımlanmalı
-            self.motor_power_pub.publish(Int8(data=motor_power))
-            self.brake_pub.publish(Bool(data=True))
-            self.get_logger().warn('[ENGEL] Engel algılandı! Araç durduruluyor.')
+            self.last_motor_power = 0
+            self.last_brake = True
+            self.last_steering_deg = 0
             return
 
-        self.target_velocity = msg.linear.x * 2.5
+        self.target_velocity = msg.linear.x * 2
         angular_z = msg.angular.z * 2
         is_reverse = self.target_velocity < 0
-        #self.reverse_pub.publish(Bool(data=is_reverse))
-        
-        # === Steering Angle Hesaplama ===
+
         WHEELBASE = 1.75
         MAX_LEFT_DEG = 40
         MAX_RIGHT_DEG = -43
@@ -92,12 +93,12 @@ class CmdVelSubscriber(Node):
         angle_deg = math.degrees(steering_rad) * self.steering_gain
         steering_deg = max(MAX_RIGHT_DEG, min(MAX_LEFT_DEG, angle_deg)) * -1
         steering_deg = int(steering_deg)
+        self.last_steering_deg = steering_deg
 
-        self.steering_angle_pub.publish(Int8(data=steering_deg))
-
-        # === Motor Power Hesaplama ===
+        # === Motor Gücü Hesabı ===
         speed_error = abs(self.target_velocity - self.current_velocity)
         brake = False
+
         if is_reverse:
             motor_power = 3
             brake = False
@@ -105,34 +106,50 @@ class CmdVelSubscriber(Node):
             motor_power = 0
             brake = True
         else:
-            # Kademeli motor gücü ayarı
-            if speed_error > 1.0:
-                motor_power = self.max_motor_power  # Yüksek güç
-            elif speed_error > 0.7:
-                motor_power = int(self.max_motor_power * 0.8)  # Orta güç
+            if speed_error > 0.7:
+                motor_power = self.max_motor_power
             elif speed_error > 0.5:
-                motor_power = int(self.max_motor_power * 0.6)  # Orta güç
+                motor_power = int(self.max_motor_power * 0.8)
             elif speed_error > 0.3:
-                motor_power = int(self.max_motor_power * 0.4)  # Az güç
+                motor_power = int(self.max_motor_power * 0.6)
             elif speed_error > 0.2:
-                motor_power = int(self.max_motor_power * 0.2)  # Daha az güç
+                motor_power = int(self.max_motor_power * 0.4)
+            elif speed_error > 0.1:
+                motor_power = int(self.max_motor_power * 0.2)
             else:
-                motor_power = 0  # Hemen hemen eşit, güç verme
+                motor_power = 0
 
-            # Hedef hız 0 ise motoru kapat ve frenle
+            # Keskin direksiyon açıları için +5 güç ver
+            if abs(self.last_steering_deg) >= 25:
+                motor_power += 5
+
+
+            # Eğer hedef hız sıfırsa tamamen dur
             if self.target_velocity == 0.0:
                 motor_power = 0
                 brake = True
 
-        # motor_power sınırla
         motor_power = max(0, min(self.max_motor_power, int(motor_power)))
-        self.motor_power_pub.publish(Int8(data=int(motor_power)))
-        self.brake_pub.publish(Bool(data=brake))
+        self.last_motor_power = motor_power
+        self.last_brake = brake
+
+    def timer_callback(self):
+        # Engel varsa her zaman fren uygula
+        if self.obstacle_detected:
+            self.motor_power_pub.publish(Int8(data=0))
+            self.brake_pub.publish(Bool(data=True))
+            self.steering_angle_pub.publish(Int8(data=0))
+            return
+
+        self.motor_power_pub.publish(Int8(data=self.last_motor_power))
+        self.brake_pub.publish(Bool(data=self.last_brake))
+        self.steering_angle_pub.publish(Int8(data=self.last_steering_deg))
 
         self.get_logger().info(
-            f'[CMD_VEL] Hedef Hız: {self.target_velocity:.2f} m/s | '
+            f'[YAYIN] Hedef Hız: {self.target_velocity:.2f} m/s | '
             f'Anlık Hız: {self.current_velocity:.2f} m/s | '
-            f'Motor Gücü: {motor_power} | Fren: {brake} | Direksiyon Açısı: {steering_deg}'
+            f'Motor Gücü: {self.last_motor_power} | Fren: {self.last_brake} | '
+            f'Direksiyon Açısı: {self.last_steering_deg}'
         )
 
 
@@ -150,3 +167,4 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
+

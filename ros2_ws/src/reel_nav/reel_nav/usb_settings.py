@@ -18,7 +18,7 @@ class UsbSettingsNode(Node):
             self.get_logger().info("Sudo işlemi başlatılıyor... Şifre otomatik giriliyor.")
             child = pexpect.spawn('sudo chmod 777 /dev/ttyUSB0')
             child.expect('password', timeout=5)
-            child.sendline('eva123')  # Buraya kendi şifrenizi yazın
+            child.sendline('123')  # Buraya kendi şifrenizi yazın
             child.expect(pexpect.EOF, timeout=5)
             return 0
         except pexpect.exceptions.TIMEOUT:
