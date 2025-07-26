@@ -6,6 +6,7 @@ from nav2_msgs.action import NavigateToPose
 from rclpy.action import ActionClient
 from tf_transformations import euler_from_quaternion
 from geometry_msgs.msg import PoseStamped
+import json  # <-- JSON verisi için eklendi
 
 
 class SignHandler(Node):
@@ -16,7 +17,6 @@ class SignHandler(Node):
         self._imu_yaw = None
         self._original_goal = None
 
-        # Waypoint'ler (senin verdiğin net konumlar)
         self.sol_waypoint = {
             'x': -12.48508358001709,
             'y': 7.337078094482422,
@@ -37,7 +37,6 @@ class SignHandler(Node):
             'ow': 0.05900224141610121
         }
 
-        # Abonelikler
         self.create_subscription(String, '/detected_signs', self.sign_callback, 10)
         self.create_subscription(Imu, '/zed2i/zed_node/imu/data', self.imu_callback, 10)
 
@@ -52,27 +51,31 @@ class SignHandler(Node):
         self._imu_yaw = yaw
 
     def sign_callback(self, msg):
-        levha = msg.data.lower()
-        if levha == "sol":
-            self.get_logger().info("🪧 Levha tespit edildi: SOL")
-            self.handle_diversion(self.sol_waypoint)
-        elif levha == "sag":
-            self.get_logger().info("🪧 Levha tespit edildi: SAĞ")
-            self.handle_diversion(self.sag_waypoint)
-        else:
-            self.get_logger().info(f"⚠️ Bilinmeyen levha: {levha}")
+        try:
+            levha_dict = json.loads(msg.data)
+
+            if "sol" in levha_dict:
+                confidence = levha_dict["sol"]
+                self.get_logger().info(f"🪧 SOL levhası tespit edildi (Güven: {confidence})")
+                self.handle_diversion(self.sol_waypoint)
+            elif "sag" in levha_dict:
+                confidence = levha_dict["sag"]
+                self.get_logger().info(f"🪧 SAĞ levhası tespit edildi (Güven: {confidence})")
+                self.handle_diversion(self.sag_waypoint)
+            else:
+                self.get_logger().info(f"⚠️ Bilinmeyen levha anahtarı: {levha_dict}")
+        except json.JSONDecodeError:
+            self.get_logger().error(f"❌ Geçersiz JSON formatı: {msg.data}")
 
     def handle_diversion(self, waypoint):
         if not self._action_client.wait_for_server(timeout_sec=3.0):
             self.get_logger().error("❌ Action server hazır değil.")
             return
 
-        # Önce mevcut hedefi iptal et
         if self._original_goal:
             self.get_logger().info("🛑 Mevcut hedef iptal ediliyor...")
             self._original_goal.cancel_goal_async()
 
-        # Waypoint'e git
         self.get_logger().info("➡️ Waypoint'e yöneliniyor...")
         goal_msg = self.create_pose_msg(waypoint)
         send_goal_future = self._action_client.send_goal_async(goal_msg)
@@ -118,5 +121,7 @@ def main(args=None):
     node.destroy_node()
     rclpy.shutdown()
 
+
 if __name__ == '__main__':
     main()
+
