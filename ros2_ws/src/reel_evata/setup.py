@@ -36,6 +36,8 @@ setup(
             "reel_gps=" + package_name + ".reel_gps:main",
             "bettersigndetector=" + package_name + ".bettersigndetector:main",
             "new2_control=" + package_name + ".new2_control:main",
+            "levha_control=" + package_name + "levha_control:main",
+            "sign_handler=" + package_name + "sign_handler:main",
             'movement = reel_evata.movement:main',
 
         ],
