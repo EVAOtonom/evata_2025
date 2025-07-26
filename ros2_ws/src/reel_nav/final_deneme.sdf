@@ -4,8 +4,7 @@
   <model name="Evata">
     <pose>0 0 0 0 0 0</pose>
     <link name="base_footprint" />
-    
-    <link name="front_control_point" />
+
    
     <link name="base_link">
       <inertial>
@@ -24,16 +23,11 @@
     </link>
 
     <joint name="base_joint" type="fixed">
-      <pose>0.96 0 0 0 0 0</pose>
+      <pose>0 0 0 0 0 0</pose>
       <parent>base_footprint</parent>
-      <child>front_control_point</child>
-    </joint>
-
-    <joint name="anan_joint" type="fixed">
-      <pose>0 0 0.01 0 0 0</pose>
-      <parent>front_control_point</parent>
       <child>base_link</child>
     </joint>
+
 
     <link name="new_front_right_wheel">
       <pose>0.76 -0.48 0.04 0 0 1.57</pose>

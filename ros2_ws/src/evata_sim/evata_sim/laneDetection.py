@@ -89,7 +89,7 @@ class ImageSaver(Node):
 
 
         self.last_process_time = 0.0
-        self.process_interval = 1.0 / 30  # 5 FPS
+        #self.process_interval = 1.0 / 30  # 5 FPS
 
     """def calculate_steering_angle(self, mid_points):
         "Orta noktaların x koordinatlarının ortalamasına göre dönme açısını hesapla."
@@ -117,8 +117,8 @@ class ImageSaver(Node):
 
     def image_callback(self, msg):
         current_time = time.time()
-        if current_time - self.last_process_time < self.process_interval:
-            return  # Henüz işleme zamanı değil, fonksiyondan çık
+        #if current_time - self.last_process_time < self.process_interval:
+            #return  # Henüz işleme zamanı değil, fonksiyondan çık
 
         self.last_process_time = current_time
         

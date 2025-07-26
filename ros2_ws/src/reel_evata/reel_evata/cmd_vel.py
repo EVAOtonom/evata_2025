@@ -29,7 +29,7 @@ class CmdVelSubscriber(Node):
         self.obstacle_detected = False
 
         self.steering_gain = 1
-        self.max_motor_power = 15
+        self.max_motor_power = 10
         self.max_velocity = 1.5
 
         # Son değerleri saklayacak değişkenler
@@ -77,8 +77,8 @@ class CmdVelSubscriber(Node):
             self.last_steering_deg = 0
             return
 
-        self.target_velocity = msg.linear.x * 2
-        angular_z = msg.angular.z * 2
+        self.target_velocity = msg.linear.x 
+        angular_z = msg.angular.z * 1.25
         is_reverse = self.target_velocity < 0
 
         WHEELBASE = 1.75
@@ -127,8 +127,7 @@ class CmdVelSubscriber(Node):
             # Eğer hedef hız sıfırsa tamamen dur
             if self.target_velocity == 0.0:
                 motor_power = 0
-                brake = True
-
+                brake = False
         motor_power = max(0, min(self.max_motor_power, int(motor_power)))
         self.last_motor_power = motor_power
         self.last_brake = brake

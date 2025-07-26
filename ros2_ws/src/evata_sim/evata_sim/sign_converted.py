@@ -38,7 +38,7 @@ class SignDetectorWithNavigation(Node):
         self.tracked_signs = {}
         self.latest_pointcloud = None
         self.last_detection_time = time.time()
-        self.detection_interval = 0.15
+        #self.detection_interval = 0.15
         
         # Park levhası tespit sayacı ve kontrol değişkenleri
         self.consecutive_parking_detections = 0
@@ -193,8 +193,8 @@ class SignDetectorWithNavigation(Node):
             return
             
         now = time.time()
-        if now - self.last_detection_time < self.detection_interval:
-            return
+        #if now - self.last_detection_time < self.detection_interval:
+            #return
         self.last_detection_time = now
 
         try:
