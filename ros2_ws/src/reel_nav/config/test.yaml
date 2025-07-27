@@ -123,8 +123,8 @@ controller_server:
     goal_checker_plugins: ["general_goal_checker"]
     general_goal_checker:
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.35
-      yaw_goal_tolerance: 0.35
+      xy_goal_tolerance: 2.0
+      yaw_goal_tolerance: 1.5
       stateful: True
     FollowPath:
       plugin: "nav2_mppi_controller::MPPIController"
@@ -331,7 +331,7 @@ planner_server:
       analytic_expansion_max_length: 3.0
       analytic_expansion_max_cost: 200.0
       analytic_expansion_max_cost_override: false
-      minimum_turning_radius: 1.5
+      minimum_turning_radius: 2.4
       reverse_penalty: 31.0
       change_penalty: 0.0
       non_straight_penalty: 5.0

@@ -150,7 +150,7 @@
     </link>
     
     <joint name="zed_camera_joint" type="fixed">
-      <pose>0 0 0 0 0 0</pose> 
+      <pose>-0.10 0 0.90 0 0 0</pose> 
       <parent>base_link</parent>
       <child>zed_camera_link</child>
     </joint>

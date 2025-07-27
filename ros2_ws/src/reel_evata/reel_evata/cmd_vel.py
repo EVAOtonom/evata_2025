@@ -76,8 +76,15 @@ class CmdVelSubscriber(Node):
             self.last_brake = True
             self.last_steering_deg = 0
             return
-
-        self.target_velocity = msg.linear.x 
+            
+        linear_x = msg.linear.x
+        if linear_x > 0:
+            self.target_velocity = 0.533 
+        else:
+            self.target_velocity = 0.0
+            self.last_motor_power = 0
+            self.last_brake = True
+            return
         angular_z = msg.angular.z * 1.25
         is_reverse = self.target_velocity < 0
 
@@ -121,7 +128,7 @@ class CmdVelSubscriber(Node):
 
             # Keskin direksiyon açıları için +5 güç ver
             if abs(self.last_steering_deg) >= 25:
-                motor_power += 5
+                motor_power += 2
 
 
             # Eğer hedef hız sıfırsa tamamen dur
