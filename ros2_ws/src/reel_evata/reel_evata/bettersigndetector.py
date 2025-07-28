@@ -203,9 +203,9 @@ class SignDetectorWithNavigation(Node):
             cv_image = cv2.cvtColor(cv_image, cv2.COLOR_RGB2BGR)
             original_image = cv_image.copy()
 
-            resized_image = cv2.resize(cv_image, (640, 360))
-            scale_x = cv_image.shape[1] / 640
-            scale_y = cv_image.shape[0] / 360
+            resized_image = cv2.resize(cv_image, (416, 416))
+            scale_x = cv_image.shape[1] / 416
+            scale_y = cv_image.shape[0] / 416
 
             results = self.model(resized_image, verbose=False)
             self.annotated_image = original_image
@@ -216,7 +216,7 @@ class SignDetectorWithNavigation(Node):
 
             for r in results:
                 for box in r.boxes:
-                    if box.conf > 0.9:
+                    if box.conf > 0.6:
                         x1, y1, x2, y2 = map(int, box.xyxy[0])
                         x1 = int(x1 * scale_x)
                         y1 = int(y1 * scale_y)
@@ -245,7 +245,7 @@ class SignDetectorWithNavigation(Node):
                 if distance == -1:
                     distance = self.calculate_distance(x1, y1, x2, y2)
 
-                if distance < 0.7 or distance > 7.0:
+                if distance < 0.7 or distance > 25.0:
                     continue
 
                 self._draw_box(x1, y1, x2, y2, class_name, distance, confidence)
