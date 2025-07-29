@@ -29,7 +29,8 @@ logging.getLogger('ultralytics').setLevel(logging.ERROR)
 class SignDetectorWithNavigation(Node):
     def __init__(self):
         super().__init__('sign_detector_navigation_node')
-        model_path = ("/home/otonom/evata_2025/ros2_ws/src/evata_sim/sol300best.pt")
+        package_path = get_package_share_directory('evata_sim')
+        model_path = os.path.join(package_path, 'model', 'sol300best.pt')
 
         self.model = YOLO(model_path)
         self.bridge = CvBridge()
@@ -56,10 +57,9 @@ class SignDetectorWithNavigation(Node):
         self.tf_listener = TransformListener(self.tf_buffer, self)
         
         # Subscribers
-        self.create_subscription(Image, "/zed2i/zed_node/rgb/image_rect_color", self.color_image_callback, 10)
-        self.create_subscription(CameraInfo, "/zed2i/zed_node/rgb/camera_info", self.camera_info_callback, 10)
-        self.create_subscription(PointCloud2, "/zed2i/zed_node/point_cloud/cloud_registered", self.point_cloud_callback, 10)
-
+        self.create_subscription(Image, "/depth_camera/zed/image", self.color_image_callback, 10)
+        self.create_subscription(CameraInfo, "/depth_camera/zed/camera_info", self.camera_info_callback, 10)
+        self.create_subscription(PointCloud2, "/depth_camera/zed/points", self.point_cloud_callback, 10)
         
         # Publishers
         self.sign_publisher = self.create_publisher(String, "/detected_signs", 10)
@@ -130,7 +130,7 @@ class SignDetectorWithNavigation(Node):
         """Navigate to parking sign location using the same format as your example"""
         # Create goal dictionary in the same format as your example
         goal = {
-            'x': map_x ,  # Stop 1m before the parking sign
+            'x': map_x - 1.0,  # Stop 1m before the parking sign
             'y': map_y,
             'z': 0.0,
             'ox': 0.0,
@@ -198,7 +198,7 @@ class SignDetectorWithNavigation(Node):
         self.last_detection_time = now
 
         try:
-            cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='rgb8')
+            cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
             cv_image = cv2.cvtColor(cv_image, cv2.COLOR_RGB2BGR)
             original_image = cv_image.copy()
 
@@ -215,7 +215,7 @@ class SignDetectorWithNavigation(Node):
 
             for r in results:
                 for box in r.boxes:
-                    if box.conf > 0.6:
+                    if box.conf > 0.9:
                         x1, y1, x2, y2 = map(int, box.xyxy[0])
                         x1 = int(x1 * scale_x)
                         y1 = int(y1 * scale_y)
@@ -244,7 +244,7 @@ class SignDetectorWithNavigation(Node):
                 if distance == -1:
                     distance = self.calculate_distance(x1, y1, x2, y2)
 
-                if distance < 0.7 or distance > 25.0:
+                if distance < 0.7 or distance > 7.0:
                     continue
 
                 self._draw_box(x1, y1, x2, y2, class_name, distance, confidence)

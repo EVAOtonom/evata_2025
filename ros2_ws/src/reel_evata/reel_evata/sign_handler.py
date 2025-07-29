@@ -190,7 +190,7 @@ class FullMissionNode(Node):
                 self.processed_signs.add("sol")
                 self.send_nearest_left_waypoint()
 
-            if "kirmizi" in detected and "kirmizi" not in self.processed_signs:
+            if "soladonulmez" in detected and "soladonulmez" not in self.processed_signs:
                 self.get_logger().info(" Kırmızı ışık algılandı.")
                 self.processed_signs.add("kirmizi")
                 self.motion_enabled = False
@@ -198,9 +198,9 @@ class FullMissionNode(Node):
                 self.cmd_vel_pub.publish(stop_msg)
                 return
             
-            elif "girisiyok" in detected and "girisiyok" not in self.processed_signs:
+            elif "girisyok" in detected and "girisyok" not in self.processed_signs:
                 self.get_logger().info(" Girilmez levhası algılandı.")
-                self.processed_signs.add("girisiyok")
+                self.processed_signs.add("girisyok")
                 self.decide_no_entry_diversion()
 
 

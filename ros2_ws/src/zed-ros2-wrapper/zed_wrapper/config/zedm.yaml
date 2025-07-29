@@ -8,10 +8,10 @@
       camera_model: 'zedm'
       camera_name: 'zedm'
       grab_resolution: 'HD720'   # HD1080 yerine HD720 seçmek performans açısından daha dengelidir
-      grab_frame_rate: 50
+      grab_frame_rate: 15
 
     depth:
       min_depth: 0.3             # çok yakın mesafelerde false depth olmasın diye 0.2 iyidir
-      max_depth: 30.0            # yeterli, istersen 15.0 yapabilirsin ama çok fark etmez
+      max_depth: 10.0            # yeterli, istersen 15.0 yapabilirsin ama çok fark etmez
 
 
