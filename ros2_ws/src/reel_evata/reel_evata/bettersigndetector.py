@@ -29,7 +29,10 @@ logging.getLogger('ultralytics').setLevel(logging.ERROR)
 class SignDetectorWithNavigation(Node):
     def __init__(self):
         super().__init__('sign_detector_navigation_node')
-        model_path = ("/home/otonom/evata_2025/ros2_ws/src/evata_sim/sol300best.pt")
+
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        src_dir = dir_path.split('/install')[0]  # install kısmını çıkar
+        model_path = os.path.join(src_dir, 'src', 'reel_evata', 'reel_evata', 'utils', 'sol300best.pt')
 
         self.model = YOLO(model_path)
         self.bridge = CvBridge()
