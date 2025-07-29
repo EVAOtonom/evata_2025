@@ -30,7 +30,7 @@ class SignDetectorWithNavigation(Node):
     def __init__(self):
         super().__init__('sign_detector_navigation_node')
         package_path = get_package_share_directory('evata_sim')
-        model_path = os.path.join(package_path, 'model', 'sol300best.pt')
+        model_path = os.path.join(package_path, 'model', 'deneme.pt')
 
         self.model = YOLO(model_path)
         self.bridge = CvBridge()
