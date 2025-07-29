@@ -131,6 +131,9 @@ class FullMissionNode(Node):
 
     def send_nearest_left_waypoint(self):
         self.send_nearest_side_waypoint(target="left")
+   
+    def decide_no_entry_diversion(self):
+        self.send_nearest_side_waypoint("noentry")
 
 
     def send_nearest_side_waypoint(self, target):
@@ -158,6 +161,9 @@ class FullMissionNode(Node):
                 candidates.append((distance, wp))
             elif target == "left" and 70 < yaw_diff < 110:
                 candidates.append((distance, wp))
+            elif target == "noentry" and (70 < yaw_diff < 110 or -110 < yaw_diff < -70):
+                candidates.append((distance, wp))
+        
 
         if not candidates:
             self.get_logger().warn(f" {target.upper()} yönünde uygun waypoint yok.")
@@ -166,39 +172,6 @@ class FullMissionNode(Node):
         nearest_wp = min(candidates, key=lambda t: t[0])[1]
         self.get_logger().info(f"➡️ {target.upper()} yönüne sapılıyor: {nearest_wp['x']:.2f}, {nearest_wp['y']:.2f}")
         self.divert_to(nearest_wp)
-
-    def decide_no_entry_diversion(self):
-        if not self.current_pose or self.current_yaw is None:
-            self.get_logger().warn("Pozisyon veya yön bilgisi eksik.")
-            return
-
-        x, y = self.current_pose.x, self.current_pose.y
-        yaw = self.current_yaw
-        candidates = []
-
-        for wp in self.diversion_waypoints:
-            wp_x, wp_y = wp['x'], wp['y']
-            dx, dy = wp_x - x, wp_y - y
-            distance = math.hypot(dx, dy)
-            if distance < 0.5:
-                continue
-
-            angle_to_wp = math.atan2(dy, dx)
-            angle_diff = math.degrees(angle_to_wp - yaw)
-            angle_diff = (angle_diff + 180) % 360 - 180  
-
-            if 70 < angle_diff < 110 or -110 < angle_diff < -70:
-                candidates.append((distance, wp))
-
-        if not candidates:
-            self.get_logger().warn("Girilemez için uygun sağ/sol sapma noktası bulunamadı.")
-            return
-
-        # En yakını seç
-        nearest_wp = min(candidates, key=lambda t: t[0])[1]
-        self.get_logger().info(f" Girilmez → En yakın sapma noktasına yöneliniyor: ({nearest_wp['x']:.2f}, {nearest_wp['y']:.2f})")
-        self.divert_to(nearest_wp)
-
 
 
     def sign_callback(self, msg):
