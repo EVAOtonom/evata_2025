@@ -9,6 +9,7 @@ from tf_transformations import euler_from_quaternion
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import Twist
+import time
 import math
 import json
 
@@ -18,10 +19,7 @@ class FullMissionNode(Node):
         super().__init__('full_mission_node')
 
         self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
-        self._active_goal_handle = None
-        self._current_main_goal_msg = None
         self.cmd_vel_pub = self.create_publisher(Twist, '/cmd_vel', 10)
-        self.motion_enabled = True 
 
 
         # Ana hedefler
@@ -113,6 +111,14 @@ class FullMissionNode(Node):
         self.current_yaw = None
         self.processed_signs = set()
 
+        self._active_goal_handle = None
+        self._current_main_goal_msg = None
+        self.motion_enabled = True 
+        self.mode = 'normal'
+        self.original_goal = None
+
+
+
         self.create_subscription(String, '/detected_signs', self.sign_callback, 10)
         self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
 
@@ -125,6 +131,7 @@ class FullMissionNode(Node):
         q = pose.orientation
         _, _, yaw = euler_from_quaternion([q.x, q.y, q.z, q.w])
         self.current_yaw = yaw
+
 
     def send_nearest_right_waypoint(self):
         self.send_nearest_side_waypoint(target="right")
@@ -173,6 +180,58 @@ class FullMissionNode(Node):
         self.get_logger().info(f"➡️ {target.upper()} yönüne sapılıyor: {nearest_wp['x']:.2f}, {nearest_wp['y']:.2f}")
         self.divert_to(nearest_wp)
 
+    def send_forward_waypoint(self, distance=10.0):
+        if not self.current_pose or self.current_yaw is None:
+            self.get_logger().warn("Pozisyon veya yön bilgisi eksik.")
+            return
+
+        x = self.current_pose.x
+        y = self.current_pose.y
+        yaw = self.current_yaw
+
+        forward_x = x + distance * math.cos(yaw)
+        forward_y = y + distance * math.sin(yaw)
+
+        self.get_logger().info(f"➡️ {distance} metre ileri sapma hedefi oluşturuluyor: ({forward_x:.2f}, {forward_y:.2f})")
+
+        temp_goal = {
+            'x': forward_x,
+            'y': forward_y,
+            'z': 0.0,
+            'ox': 0.0,
+            'oy': 0.0,
+            'oz': math.sin(yaw / 2.0),
+            'ow': math.cos(yaw / 2.0)
+        }
+
+        self.divert_to(temp_goal)
+
+
+    def _handle_red_light(self):
+        if self.mode == 'traffic_light_wait':
+            return
+
+        self.motion_enabled = False
+        stop_msg = Twist()
+        self.cmd_vel_pub.publish(stop_msg)
+
+        if self._active_goal_handle:
+            self.get_logger().info(" Kırmızı ısık: duruluyor.")
+            self.original_goal = self._current_main_goal_msg
+            self._active_goal_handle.cancel_goal_async()
+
+        self.mode = 'traffic_light_wait'
+
+    def _handle_green_light(self):
+        if self.mode == 'traffic_light_wait' and self.original_goal:
+            self.get_logger().info("Yeşil ışık: devam ediliyor.")
+            future = self._action_client.send_goal_async(self.original_goal)
+            future.add_done_callback(self.main_goal_response_callback)
+
+        self.motion_enabled = True
+        self.mode = 'normal'
+
+
 
     def sign_callback(self, msg):
         if self._in_diversion:
@@ -190,18 +249,28 @@ class FullMissionNode(Node):
                 self.processed_signs.add("sol")
                 self.send_nearest_left_waypoint()
 
-            if "soladonulmez" in detected and "soladonulmez" not in self.processed_signs:
-                self.get_logger().info(" Kırmızı ışık algılandı.")
-                self.processed_signs.add("kirmizi")
-                self.motion_enabled = False
-                stop_msg = Twist()
-                self.cmd_vel_pub.publish(stop_msg)
-                return
-            
+            elif "sagadonulmez" in detected and "sagadonulmez" not in self.processed_signs:
+                self.get_logger().info("Sağa dönülmez levhası algılandı.")
+                self.processed_signs.add("sagadonulmez")
+                self.send_forward_waypoint()
+
+            elif "soladonulmez" in detected and "soladonulmez" not in self.processed_signs:
+                self.get_logger().info("Sola dönülmez levhası algılandı.")
+                self.processed_signs.add("soladonulmez")
+                self.send_forward_waypoint()
+
             elif "girisyok" in detected and "girisyok" not in self.processed_signs:
                 self.get_logger().info(" Girilmez levhası algılandı.")
                 self.processed_signs.add("girisyok")
                 self.decide_no_entry_diversion()
+
+            elif "kirmizi" in detected:
+                self.get_logger().info("Kırmızı ışık algılandı.")
+                self._handle_red_light()
+
+            elif "yesil" in detected:
+                self.get_logger().info("Yeşil ışık algılandı.")
+                self._handle_green_light()
 
 
         except Exception as e:
