@@ -249,6 +249,16 @@ class FullMissionNode(Node):
                 self.processed_signs.add("sol")
                 self.send_nearest_left_waypoint()
 
+            elif ("ileriden_saga" in detected and "ileriden_saga" not in self.processed_signs):
+                self.get_logger().info(" İleriden sağa levhası algılandı.")
+                self.processed_signs.add("ileriden_saga")
+                self.send_nearest_right_waypoint()
+
+            elif ("ileriden_sola" in detected and "ileriden_sola" not in self.processed_signs):
+                self.get_logger().info(" İleriden sola levhası algılandı.")
+                self.processed_signs.add("ileriden_sola")
+                self.send_nearest_left_waypoint()
+
             elif "sagadonulmez" in detected and "sagadonulmez" not in self.processed_signs:
                 self.get_logger().info("Sağa dönülmez levhası algılandı.")
                 self.processed_signs.add("sagadonulmez")
