@@ -216,7 +216,7 @@ class STMCommunication(Node):
                     self.get_logger().warn("Geçersiz odometre değeri.")
             
             if self.check_otonom is not None and self.check_otonom != 0:
-                self.check_otonom_pub.publish(Bool(data=self.check_otonom))
+                self.check_otonom_pub.publish(Bool(data=bool(self.check_otonom)))
 
             self.mutex = 0
 
