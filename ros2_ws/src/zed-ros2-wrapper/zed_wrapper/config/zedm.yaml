@@ -23,7 +23,3 @@
       resolution: 0.05
       range: 3.5
 
-    point_cloud:
-      pc_topic_freq: 15.0            # FPS ile aynı olmalı
-      resolution: 1.0                # 1.0 = tüm noktalar, gerekirse 0.5 deneyebilirsin
-      confidence: 80                 # 80-95 arası iyidir, daha düşük olursa daha gürültülü olur

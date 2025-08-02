@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String
+from std_msgs.msg import String, Int8
 from sensor_msgs.msg import Imu
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav2_msgs.action import NavigateToPose
@@ -20,6 +20,7 @@ class FullMissionNode(Node):
 
         self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
         self.cmd_vel_pub = self.create_publisher(Twist, '/cmd_vel', 10)
+        self.motor_power_pub = self.create_publisher(Int8, '/stm/motor_power', 10)
 
 
         # Ana hedefler
@@ -212,13 +213,26 @@ class FullMissionNode(Node):
             return
 
         self.motion_enabled = False
+
+        # Motor gücünü kapat
+        motor_msg = Int8()
+        motor_msg.data = 0
+        self.motor_power_pub.publish(motor_msg)
+        self.get_logger().info("Motor gücü kapatıldı (0 gönderildi).")
+
+        # Robotu durdur
         stop_msg = Twist()
+        stop_msg.linear.x = 0.0
+        stop_msg.angular.z = 0.0
         self.cmd_vel_pub.publish(stop_msg)
 
         if self._active_goal_handle:
-            self.get_logger().info(" Kırmızı ısık: duruluyor.")
+            self.get_logger().info("Kırmızı ışık: duruluyor.")
             self.original_goal = self._current_main_goal_msg
             self._active_goal_handle.cancel_goal_async()
+
+        # 5 saniye bekle
+        time.sleep(5)
 
         self.mode = 'traffic_light_wait'
 
@@ -259,26 +273,26 @@ class FullMissionNode(Node):
                 self.processed_signs.add("ileriden_sola")
                 self.send_nearest_left_waypoint()
 
-            elif "sagadonulmez" in detected and "sagadonulmez" not in self.processed_signs:
-                self.get_logger().info("Sağa dönülmez levhası algılandı.")
-                self.processed_signs.add("sagadonulmez")
-                self.send_forward_waypoint()
+           # elif "sagadonulmez" in detected and "sagadonulmez" not in self.processed_signs:
+            #    self.get_logger().info("Sağa dönülmez levhası algılandı.")
+             #   self.processed_signs.add("sagadonulmez")
+              #  self.send_forward_waypoint()
 
-            elif "soladonulmez" in detected and "soladonulmez" not in self.processed_signs:
-                self.get_logger().info("Sola dönülmez levhası algılandı.")
-                self.processed_signs.add("soladonulmez")
-                self.send_forward_waypoint()
+           # elif "soladonulmez" in detected and "soladonulmez" not in self.processed_signs:
+            #    self.get_logger().info("Sola dönülmez levhası algılandı.")
+             #   self.processed_signs.add("soladonulmez")
+              #  self.send_forward_waypoint()
 
             elif "girisyok" in detected and "girisyok" not in self.processed_signs:
                 self.get_logger().info(" Girilmez levhası algılandı.")
                 self.processed_signs.add("girisyok")
                 self.decide_no_entry_diversion()
 
-            elif "kirmizi" in detected:
+            elif "soladonulmez" in detected:
                 self.get_logger().info("Kırmızı ışık algılandı.")
                 self._handle_red_light()
 
-            elif "yesil" in detected:
+            elif "sagadonulmez" in detected:
                 self.get_logger().info("Yeşil ışık algılandı.")
                 self._handle_green_light()
 

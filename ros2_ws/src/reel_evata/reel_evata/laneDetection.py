@@ -178,6 +178,8 @@ class ImageSaver(Node):
         da_seg_mask = driving_area_mask(seg)
         ll_seg_mask = lane_line_mask(ll)
         
+
+        
         ll_seg_mask_for_thinning_uint8 = (ll_seg_mask.astype(np.uint8) * 255)
         
         thinned_ll_mask_255 = cv2.ximgproc.thinning(ll_seg_mask_for_thinning_uint8, thinningType=cv2.ximgproc.THINNING_ZHANGSUEN)
@@ -214,6 +216,8 @@ class ImageSaver(Node):
         mid_points = []
         fallback_points = []  # Yedek noktalar için liste
         all_points = [] # PointCloud paylaşımı için
+        
+
 
         # Her 10 y değeri için işlem yapma
         for y in range(roi_y_start, roi_y_end + 1):
@@ -290,10 +294,34 @@ class ImageSaver(Node):
                         # (This depends on your coordinate frames)
                         matched_points.append((x, y, z))
 
+                # Hayali şerit noktaları (5 metre geride, 6 metre genişlikte)
+                fake_lane_points = []
+                z_pos = 0.1   # Zemin seviyesinde olacak (costmap'e girmesi için)
+                y_min = -5.0
+                y_max = 5.0
+                x_pos = -5.0
+                step = 0.2    # Nokta aralığı
+
+                y = y_min
+                while y <= y_max:
+                    fake_lane_points.append((
+                        np.float32(x_pos),
+                        np.float32(y),
+                        np.float32(z_pos)
+                    ))
+                    y += step
+
                 if matched_points:
-                    # Create PointCloud2 message
+                    # Tüm matched_points'i de float32 yap
+                    matched_points = [
+                        (np.float32(px), np.float32(py), np.float32(pz))
+                        for px, py, pz in matched_points
+                    ]
+
+                    # Hayali şerit noktalarını ekle
+                    matched_points.extend(fake_lane_points)
                     header = self.latest_pointcloud_header
-                    header.frame_id = "zed_camera_link"  # Publish in camera frame
+                    header.frame_id = "zed_camera_link"
 
                     fields = [
                         PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
@@ -303,7 +331,6 @@ class ImageSaver(Node):
 
                     pc2_msg = point_cloud2.create_cloud(header, fields, matched_points)
                     self.filtered_pointcloud_pub.publish(pc2_msg)
-                    self.get_logger().info(f"Published filtered PointCloud2 with {len(matched_points)} points")
 
             except Exception as e:
                 self.get_logger().error(f"Error creating filtered PointCloud: {str(e)}")
