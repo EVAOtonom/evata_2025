@@ -27,8 +27,8 @@ lidar:
       ts_first_point: true         #  true: time-stamp point cloud with the first point; false: with the last point;   
                                    #  these parameters are used from mechanical lidar
 
-      start_angle: -90               #  Start angle of point cloud
-      end_angle: 90              #  End angle of point cloud
+      start_angle: 0               #  Start angle of point cloud
+      end_angle: 360              #  End angle of point cloud
 
                                    #  When msg_source is 3, the following parameters will be used
       pcap_repeat: true            #  true: The pcap bag will repeat play   

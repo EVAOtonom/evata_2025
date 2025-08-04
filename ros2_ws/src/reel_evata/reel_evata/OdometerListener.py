@@ -26,7 +26,7 @@ class OdometryPublisher(Node):
         self.create_subscription(Float32, '/stm/read_odometer', self.odom_callback, 10)
         self.create_subscription(Int32, '/stm/read_wheel_angle', self.angle_callback, 10)
         self.create_subscription(PoseWithCovarianceStamped, '/initialpose', self.initialpose_callback, 10)
-        self.create_subscription(Imu, '/zed2i/zed_node/imu/data', self.imu_callback, 10)
+        self.create_subscription(Imu, '/zedm/zed_node/imu/data', self.imu_callback, 10)
 
         # Değişkenler
         self.last_odom = None
