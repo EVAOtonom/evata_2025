@@ -295,21 +295,21 @@ class ImageSaver(Node):
                         matched_points.append((x, y, z))
 
                 # Hayali şerit noktaları (5 metre geride, 6 metre genişlikte)
-                fake_lane_points = []
-                z_pos = 0.1   # Zemin seviyesinde olacak (costmap'e girmesi için)
-                y_min = -5.0
-                y_max = 5.0
-                x_pos = -5.0
-                step = 0.2    # Nokta aralığı
+                #fake_lane_points = []
+                #z_pos = 0.1   # Zemin seviyesinde olacak (costmap'e girmesi için)
+                #y_min = -5.0
+                #y_max = 5.0
+                #x_pos = -5.0
+                #step = 0.2    # Nokta aralığı
 
-                y = y_min
-                while y <= y_max:
-                    fake_lane_points.append((
-                        np.float32(x_pos),
-                        np.float32(y),
-                        np.float32(z_pos)
-                    ))
-                    y += step
+                #y = y_min
+                #while y <= y_max:
+#                    fake_lane_points.append((
+ #                       np.float32(x_pos),
+  #                      np.float32(y),
+   #                     np.float32(z_pos)
+    #                ))
+     #               y += step
 
                 if matched_points:
                     # Tüm matched_points'i de float32 yap
@@ -319,7 +319,7 @@ class ImageSaver(Node):
                     ]
 
                     # Hayali şerit noktalarını ekle
-                    matched_points.extend(fake_lane_points)
+                    #matched_points.extend(fake_lane_points)
                     header = self.latest_pointcloud_header
                     header.frame_id = "zed_camera_link"
 

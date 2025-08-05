@@ -16,7 +16,7 @@ amcl:
     transform_tolerance: 0.1
 
     ### Lazer modeli ###
-   # scan_topic: rslidar_points 
+    #scan_topic: rslidar_points 
     laser_model_type: "beam"
     laser_max_range: 30.0
     laser_min_range: 0.1

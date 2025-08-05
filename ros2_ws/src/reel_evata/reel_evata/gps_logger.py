@@ -49,7 +49,7 @@ class GPSLogger(Node):
         if self.latitude is not None and self.longitude is not None:
             try:
                 with open(self.file_path, "a") as file:
-                    file.write(f"({self.latitude}, {self.longitude})\n")
+                    file.write(f"({self.latitude}, {self.longitude}),\n")
                 self.get_logger().info(f"Kayıt: ({self.latitude}, {self.longitude})")
             except Exception as e:
                 self.get_logger().error(f"Dosyaya yazılamadı: {e}")

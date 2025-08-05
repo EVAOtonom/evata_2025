@@ -22,13 +22,14 @@ class ReelGPS(Node):
         self.target_file = os.path.join(src_dir, 'src', 'reel_evata', 'reel_evata', 'gps_reel.json')
         self.gps_map_file = os.path.join(src_dir, 'src', 'reel_evata', 'reel_evata', 'rgps.txt')
 
+        self.prev_lat = None
+        self.prev_lon = None
+        self.heading_ready = False
         self.current_lat = None
         self.current_lon = None
         self.current_pose = None
-        self.goal_sent = False
-        self.goal_handle = None
-        self.goal_cancelling = False
-        self.distance_threshold = 2.0  # metre
+        self.distance_threshold = 2.0
+        self.heading_update_interval = 10
         self.motion_enabled = True
         self.paused = False
 
@@ -40,9 +41,6 @@ class ReelGPS(Node):
         self.create_subscription(Float32, '/stm/gps_longitude', self.lon_callback, 10)
 
         self.init_pose_pub = self.create_publisher(PoseWithCovarianceStamped, '/initialpose', 10)
-
-        self._client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
-        self._client.wait_for_server()
 
         self.timer_counter = 0
         self.create_timer(1.0, self.timer_callback)
@@ -78,9 +76,13 @@ class ReelGPS(Node):
         return x_sum / total_weight, y_sum / total_weight
 
     def lat_callback(self, msg):
+        if self.current_lat is not None:
+            self.prev_lat = self.current_lat
         self.current_lat = msg.data
 
     def lon_callback(self, msg):
+        if self.current_lon is not None:
+            self.prev_lon = self.current_lon
         self.current_lon = msg.data
 
     def timer_callback(self):
@@ -90,8 +92,22 @@ class ReelGPS(Node):
         self.timer_counter += 1
 
         # İlk 5 saniye boyunca bekle (AMCL başlasın)
-        if not self.init_pose_published and self.timer_counter >= 5:
+        if self.timer_counter >= 5 and self.timer_counter % self.heading_update_interval == 0:
             x, y = self.gps_to_xy(self.current_lat, self.current_lon)
+
+            # Yön hesaplama
+            yaw = 0.0
+            if self.prev_lat is not None and self.prev_lon is not None:
+                prev_x, prev_y = self.gps_to_xy(self.prev_lat, self.prev_lon)
+                dx = x - prev_x
+                dy = y - prev_y
+                if math.hypot(dx, dy) > 0.05:
+                    yaw = math.atan2(dy, dx)
+                    self.heading_ready = True
+
+            # Yaw → Quaternion
+            qz = math.sin(yaw / 2.0)
+            qw = math.cos(yaw / 2.0)
 
             pose = PoseWithCovarianceStamped()
             pose.header.stamp = self.get_clock().now().to_msg()
@@ -102,8 +118,8 @@ class ReelGPS(Node):
 
             pose.pose.pose.orientation.x = 0.0
             pose.pose.pose.orientation.y = 0.0
-            pose.pose.pose.orientation.z = 0.0
-            pose.pose.pose.orientation.w = 1.0
+            pose.pose.pose.orientation.z = qz
+            pose.pose.pose.orientation.w = qw
 
             pose.pose.covariance = [
                 0.25, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -116,7 +132,6 @@ class ReelGPS(Node):
 
             self.init_pose_pub.publish(pose)
             self.init_pose_published = True
-            self.get_logger().info(f"[✓] Initial pose yayınlandı → x: {x:.2f}, y: {y:.2f}")
 
             return
 
@@ -129,89 +144,6 @@ class ReelGPS(Node):
         self.current_pose = PoseStamped().pose
         self.current_pose.position.x = x
         self.current_pose.position.y = y
-
-        self.check_goal_distance()
-
-        if not self.goal_sent:
-            lat, lon = self.gps_targets[self.current_index]
-            goal_x, goal_y = self.gps_to_xy(lat, lon)
-            self.send_goal(goal_x, goal_y)
-            self.goal_sent = True
-
-
-    def check_goal_distance(self):
-        if (self.paused or not self.motion_enabled or not self.current_pose or 
-    self.goal_cancelling or self.current_index >= len(self.gps_targets)):
-            return
-
-        target_lat, target_lon = self.gps_targets[self.current_index]
-        target_x, target_y = self.gps_to_xy(target_lat, target_lon)
-
-        cur_x = self.current_pose.position.x
-        cur_y = self.current_pose.position.y
-        distance = math.hypot(target_x - cur_x, target_y - cur_y)
-
-
-        if distance <= 2.0:
-            self.get_logger().info(f"✅ {self.current_index+1}. hedefe 2m'den fazla yaklaşılmış. Geçiliyor...")
-            self.goal_cancelling = True
-            if self.goal_handle:
-                cancel_future = self.goal_handle.cancel_goal_async()
-                cancel_future.add_done_callback(self._handle_distance_cancel)
-            else:
-                self._proceed_to_next()
-
-    def _handle_distance_cancel(self, future):
-        self.get_logger().info("🛑 Hedef iptal edildi.")
-        self.goal_handle = None
-        self.goal_cancelling = False
-        self._proceed_to_next()
-
-    def _proceed_to_next(self):
-        self.current_index += 1
-        self.goal_handle = None
-        if self.current_index < len(self.gps_targets):
-            self.send_next_goal()
-        self.get_logger().info(f"➡️ Sonraki hedefe geçildi. Index: {self.current_index}")
-
-
-    def send_goal(self, x, y):
-        goal_msg = NavigateToPose.Goal()
-        goal_msg.pose.header.frame_id = 'map'
-        goal_msg.pose.header.stamp = self.get_clock().now().to_msg()
-        goal_msg.pose.pose.position.x = x
-        goal_msg.pose.pose.position.y = y
-        goal_msg.pose.pose.orientation.w = 1.0
-
-        self.get_logger().info(f"[→] Hedef gönderiliyor: x={x:.2f}, y={y:.2f}")
-        send_future = self._client.send_goal_async(goal_msg)
-        send_future.add_done_callback(self.goal_response_callback)
-
-    def goal_response_callback(self, future):
-        self.goal_handle = future.result()
-        if not self.goal_handle.accepted:
-            self.get_logger().warn(" Hedef reddedildi!")
-            return
-        self.get_logger().info("✅ Hedef kabul edildi.")
-        self.goal_handle.get_result_async().add_done_callback(self.goal_result_callback)
-
-    def goal_result_callback(self, future):
-        result = future.result()
-        if result.status == GoalStatus.STATUS_SUCCEEDED:
-            self.get_logger().info(" Hedefe ulaşıldı.")
-        else:
-            self.get_logger().warn(f"🚫 Hedefe ulaşılamadı! Status: {result.status}")
-            
-        self.goal_sent = False
-        self.goal_handle = None
-
-    def send_next_goal(self):
-        if self.current_index < len(self.gps_targets):
-            lat, lon = self.gps_targets[self.current_index]
-            goal_x, goal_y = self.gps_to_xy(lat, lon)
-            self.send_goal(goal_x, goal_y)
-            self.goal_sent = True
-
 
 def main(args=None):
     rclpy.init(args=args)

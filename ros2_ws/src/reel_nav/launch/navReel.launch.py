@@ -23,7 +23,7 @@ def generate_launch_description():
     slam_params_file = os.path.join(src_dir, "src", "reel_nav", "config", "slam_toolbox_params.yaml")  # SLAM yapılandırması
     map_dir = LaunchConfiguration(
         'map',
-        default=os.path.join(src_dir,"src","reel_nav",'map', 'gbahce.yaml')
+        default=os.path.join(src_dir,"src","reel_nav",'map', 'day1_map.yaml')
     )
     param_dir = LaunchConfiguration(
         'params_file',
@@ -100,7 +100,7 @@ def generate_launch_description():
                 'params_file': param_dir
             }.items(),
         ),
-        
+       
      
 Node(
     package='reel_evata',
