@@ -26,13 +26,13 @@ class FullMissionNode(Node):
         # Ana hedefler
         self.main_goals = [
             {
-                'x': 16.225223541259766,
-                'y': 2.757939338684082,
+                'x': 58.2845878,
+                'y': 9.632181,
                 'z': 0.0,
                 'ox': 0.0,
                 'oy': 0.0,
-                'oz': 0.7398665063768184,
-                'ow': 0.6727537088279495
+                'oz': 0.0,
+                'ow': 0.0
             },
             {
                 'x': 1.49641990661621,
@@ -56,56 +56,7 @@ class FullMissionNode(Node):
         self.current_main_index = 0
 
         # Sağ ve sol sapma waypoint'leri
-        self.diversion_waypoints = [{
-            "x": 14.504013061523438,
-            "y": 3.9969482421875,
-            "z": 0.0,
-            "ox": 0.0,
-            "oy": 0.0,
-            "oz": 0.016691209637834846,
-            "ow": 0.9998606920570614
-        },
-        {   "x": 10.576292037963867,
-            "y": -7.927124977111816,
-            "z": 0.0,
-            "ox": 0.0,
-            "oy": 0.0,
-            "oz": -0.7088734908016752,
-            "ow": 0.7053356463689096
-        },
-        {   "x": 15.27441978454589,
-            "y": -7.890341758728027,
-            "z": 0.0,
-            "ox": 0.0,
-            "oy": 0.0,
-            "oz": -0.6963168225090538,
-            "ow": 0.717734548904325
-        },    #SOL
-        {
-            "x": 14.649698257446289,
-            "y": -3.3240017890930176,
-            "z": 0.0,
-            "ox": 0.0,
-            "oy": 0.0,
-            "oz": -0.01931759630839744,
-            "ow": 0.9998133978262472
-        },
-        {   "x": 11.91103744506836,
-            "y": 4.908627033233643,
-            "z": 0.0,
-            "ox": 0.0,
-            "oy": 0.0,
-            "oz": 0.712387997428572,
-            "ow": 0.7017858228261019
-        },
-        {   "x": 16.0960636138916,
-            "y": 4.619955539703369,
-            "z": 0.0,
-            "ox": 0.0,
-            "oy": 0.0,
-            "oz": 0.7176323193830824,
-            "ow": 0.6964221809914283
-        },]
+        self.diversion_waypoints = self.load_diversion_waypoints_from_txt('diversion_waypoints.txt')
 
         self._in_diversion = False
         self.current_pose = None
@@ -132,6 +83,29 @@ class FullMissionNode(Node):
         q = pose.orientation
         _, _, yaw = euler_from_quaternion([q.x, q.y, q.z, q.w])
         self.current_yaw = yaw
+        
+    def load_diversion_waypoints_from_txt(self, filepath):
+        waypoints = []
+        try:
+            with open(filepath, 'r') as f:
+                for line in f:
+                    parts = line.strip().split()
+                    if len(parts) != 2:
+                        continue
+                    x, y = map(float, parts)
+                    waypoints.append({
+                        'x': x,
+                        'y': y,
+                        'z': 0.0,
+                        'ox': 0.0,
+                        'oy': 0.0,
+                        'oz': 0.0,
+                        'ow': 1.0  # yönsüz (yaw = 0)
+                    })
+            self.get_logger().info(f"{len(waypoints)} diversion waypoint yüklendi.")
+        except Exception as e:
+            self.get_logger().error(f"Waypoint dosyası okunamadı: {e}")
+            return waypoints
 
 
     def send_nearest_right_waypoint(self):
@@ -273,26 +247,26 @@ class FullMissionNode(Node):
                 self.processed_signs.add("ileriden_sola")
                 self.send_nearest_left_waypoint()
 
-           # elif "sagadonulmez" in detected and "sagadonulmez" not in self.processed_signs:
-            #    self.get_logger().info("Sağa dönülmez levhası algılandı.")
-             #   self.processed_signs.add("sagadonulmez")
-              #  self.send_forward_waypoint()
+            elif "sagadonulmez" in detected and "sagadonulmez" not in self.processed_signs:
+                self.get_logger().info("Sağa dönülmez levhası algılandı.")
+                self.processed_signs.add("sagadonulmez")
+                self.send_forward_waypoint()
 
-           # elif "soladonulmez" in detected and "soladonulmez" not in self.processed_signs:
-            #    self.get_logger().info("Sola dönülmez levhası algılandı.")
-             #   self.processed_signs.add("soladonulmez")
-              #  self.send_forward_waypoint()
+            elif "soladonulmez" in detected and "soladonulmez" not in self.processed_signs:
+                self.get_logger().info("Sola dönülmez levhası algılandı.")
+                self.processed_signs.add("soladonulmez")
+                self.send_forward_waypoint()
 
             elif "girisyok" in detected and "girisyok" not in self.processed_signs:
                 self.get_logger().info(" Girilmez levhası algılandı.")
                 self.processed_signs.add("girisyok")
                 self.decide_no_entry_diversion()
 
-            elif "soladonulmez" in detected:
+            elif "kirmizi" in detected:
                 self.get_logger().info("Kırmızı ışık algılandı.")
                 self._handle_red_light()
 
-            elif "sagadonulmez" in detected:
+            elif "yesil" in detected:
                 self.get_logger().info("Yeşil ışık algılandı.")
                 self._handle_green_light()
 
