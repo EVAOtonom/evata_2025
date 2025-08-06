@@ -1,5 +1,5 @@
 free_thresh: 0.25
-image: seritli_map.pgm
+image: seritli_map11.pgm
 mode: trinary
 negate: 0
 occupied_thresh: 0.65
