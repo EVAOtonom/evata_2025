@@ -70,14 +70,14 @@
 
         pos_tracking: # Only stereo cameras
             pos_tracking_enabled: true # True to enable positional tracking from start
-            pos_tracking_mode: "GEN_2" # Matches the ZED SDK setting: 'GEN_1', 'GEN_2'
-            imu_fusion: true # enable/disable IMU fusion. When set to false, only the optical odometry will be used.
+            #pos_tracking_mode: "GEN_2" # Matches the ZED SDK setting: 'GEN_1', 'GEN_2'
+            imu_fusion: false # enable/disable IMU fusion. When set to false, only the optical odometry will be used.
             publish_tf: true # [usually overwritten by launch file] publish `odom -> camera_link` TF
             publish_map_tf: true # [usually overwritten by launch file] publish `map -> odom` TF
             map_frame: "map"
             odometry_frame: "odom"
             area_memory_db_path: ""
-            area_memory: true # Enable to detect loop closure
+            area_memory: false # Enable to detect loop closure
             reset_odom_with_loop_closure: true # Re-initialize odometry to the last valid pose when loop closure happens (reset camera odometry drift)
             depth_min_range: 0.0 # Set this value for removing fixed zones of the robot in the FoV of the camerafrom the visual odometry evaluation
             set_as_static: false # If 'true' the camera will be static and not move in the environment

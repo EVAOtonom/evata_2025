@@ -28,8 +28,7 @@ class ReelGPS(Node):
         self.current_lat = None
         self.current_lon = None
         self.current_pose = None
-        self.distance_threshold = 2.0
-        self.heading_update_interval = 3
+        self.distance_threshold = 2.0  # metre
         self.motion_enabled = True
         self.paused = False
 
@@ -65,15 +64,20 @@ class ReelGPS(Node):
         return points
 
     def gps_to_xy(self, lat, lon):
-        nearest = sorted(self.gps_map, key=lambda p: (p[2] - lat) ** 2 + (p[3] - lon) ** 2)[:3]
-        x_sum = y_sum = total_weight = 0.0
-        for x, y, plat, plon in nearest:
-            dist = math.hypot(plat - lat, plon - lon) + 1e-6
-            weight = 1.0 / dist
-            x_sum += x * weight
-            y_sum += y * weight
-            total_weight += weight
-        return x_sum / total_weight, y_sum / total_weight
+            nearest = min(
+                self.gps_map,
+                key=lambda p: (p[2] - lat)**2 + (p[3] - lon)**2
+            )
+            
+            # Debug için log bas
+            self.get_logger().info(
+                f"GPS→XY: ({lat:.8f}, {lon:.8f}) -> "
+                f"En yakın: ({nearest[0]:.2f}, {nearest[1]:.2f}) "
+                f"GPS ref: ({nearest[2]:.8f}, {nearest[3]:.8f})"
+            )
+
+            return nearest[0], nearest[1]
+
 
     def lat_callback(self, msg):
         if self.current_lat is not None:
@@ -92,7 +96,7 @@ class ReelGPS(Node):
         self.timer_counter += 1
 
         # İlk 5 saniye boyunca bekle (AMCL başlasın)
-        if self.timer_counter >= 5 and self.timer_counter % self.heading_update_interval == 0:
+        if not self.init_pose_published and self.timer_counter >= 5:
             x, y = self.gps_to_xy(self.current_lat, self.current_lon)
 
             # Yön hesaplama
@@ -101,21 +105,13 @@ class ReelGPS(Node):
                 prev_x, prev_y = self.gps_to_xy(self.prev_lat, self.prev_lon)
                 dx = x - prev_x
                 dy = y - prev_y
-                if math.hypot(dx, dy) > 0.05:
+                if math.hypot(dx, dy) > 0.05:  # Hareket varsa
                     yaw = math.atan2(dy, dx)
                     self.heading_ready = True
-
-                    self.get_logger().info(f"[YÖN] Hareket tespit edildi: Δx={dx:.2f}, Δy={dy:.2f}, Yaw={math.degrees(yaw):.2f}°")
-                else:
-                    self.get_logger().info(f"[YÖN] Hareket yetersiz: Δx={dx:.2f}, Δy={dy:.2f} (yaw güncellenmedi)")
-            else:
-                self.get_logger().info("[YÖN] Önceki konum mevcut değil, yaw hesaplanamadı.")
 
             # Yaw → Quaternion
             qz = math.sin(yaw / 2.0)
             qw = math.cos(yaw / 2.0)
-
-            self.get_logger().info(f"Yaw (heading): {math.degrees(yaw):.2f}°")
 
             pose = PoseWithCovarianceStamped()
             pose.header.stamp = self.get_clock().now().to_msg()
