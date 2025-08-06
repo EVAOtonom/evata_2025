@@ -19,7 +19,7 @@ class XYLatLonMapper(Node):
         self.time_lon = None
 
         # Kayıt dosyası
-        self.output_file = f"/home/akif/evata_2025/xy_latlon_map_{int(time.time())}.txt"
+        self.output_file = "/home/otonom/evata_2025/rgps1.txt"
         self.get_logger().info(f"📄 Kayıt dosyası: {self.output_file}")
 
         # Abonelikler

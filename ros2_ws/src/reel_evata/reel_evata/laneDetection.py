@@ -57,10 +57,10 @@ class ImageSaver(Node):
         super().__init__('image_saver')
         self.subscription = self.create_subscription(
             Image,
-            '/zed/zed_node/rgb/image_rect_color',
+            '/zedm/zed_node/rgb/image_rect_color',
             self.image_callback,
             1)
-        self.create_subscription(PointCloud2, "/zed/zed_node/point_cloud/cloud_registered", self.point_cloud_callback, 1)
+        self.create_subscription(PointCloud2, "/zedm/zed_node/point_cloud/cloud_registered", self.point_cloud_callback, 1)
 
         self.bridge = CvBridge()
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -193,10 +193,10 @@ class ImageSaver(Node):
         y_coords, x_coords = np.where(thinned_ll_mask_for_show == 1)
 
         roi_y_start = 450
-        roi_y_end = 700
+        roi_y_end = 720
                    
-        sol_ust=270
-        sag_ust=1010	
+        sol_ust=0
+        sag_ust=1280	
         sol_alt=0	
         sag_alt=1280
         
