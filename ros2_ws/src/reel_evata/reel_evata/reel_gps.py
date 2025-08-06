@@ -29,7 +29,7 @@ class ReelGPS(Node):
         self.current_lon = None
         self.current_pose = None
         self.distance_threshold = 2.0
-        self.heading_update_interval = 10
+        self.heading_update_interval = 3
         self.motion_enabled = True
         self.paused = False
 
@@ -105,9 +105,17 @@ class ReelGPS(Node):
                     yaw = math.atan2(dy, dx)
                     self.heading_ready = True
 
+                    self.get_logger().info(f"[YÖN] Hareket tespit edildi: Δx={dx:.2f}, Δy={dy:.2f}, Yaw={math.degrees(yaw):.2f}°")
+                else:
+                    self.get_logger().info(f"[YÖN] Hareket yetersiz: Δx={dx:.2f}, Δy={dy:.2f} (yaw güncellenmedi)")
+            else:
+                self.get_logger().info("[YÖN] Önceki konum mevcut değil, yaw hesaplanamadı.")
+
             # Yaw → Quaternion
             qz = math.sin(yaw / 2.0)
             qw = math.cos(yaw / 2.0)
+
+            self.get_logger().info(f"Yaw (heading): {math.degrees(yaw):.2f}°")
 
             pose = PoseWithCovarianceStamped()
             pose.header.stamp = self.get_clock().now().to_msg()
@@ -132,6 +140,7 @@ class ReelGPS(Node):
 
             self.init_pose_pub.publish(pose)
             self.init_pose_published = True
+            self.get_logger().info(f"[✓] Initial pose yayınlandı → x: {x:.2f}, y: {y:.2f}")
 
             return
 
