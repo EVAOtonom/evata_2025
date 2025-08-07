@@ -3,10 +3,10 @@ amcl:
     use_sim_time: False
     ### Hareket modeli ###
     robot_model_type: "nav2_amcl::DifferentialMotionModel"
-    alpha1: 0.05  # yaw noise (rotation from rotation)
-    alpha2: 0.05  # velocity noise (rotation from translation)
-    alpha3: 0.01  # translation noise (translation from translation)
-    alpha4: 0.01  # rotation noise (translation from rotation)
+    alpha1: 0.2  # yaw noise (rotation from rotation)
+    alpha2: 0.2  # velocity noise (rotation from translation)
+    alpha3: 0.2  # translation noise (translation from translation)
+    alpha4: 0.2  # rotation noise (translation from rotation)
     alpha5: 0.0   # not used in DifferentialMotionModel
 
     base_frame_id: "base_footprint"
@@ -16,10 +16,10 @@ amcl:
     transform_tolerance: 0.1
 
     ### Lazer modeli ###
-    #scan_topic: rslidar_points 
-    laser_model_type: "beam"
-    laser_max_range: 30.0
-    laser_min_range: 0.1
+    scan_topic: scan 
+    laser_model_type: "likelihood_field"
+    laser_max_range: 150.0
+    laser_min_range: 0.3
     laser_likelihood_max_dist: 2.0
     z_hit: 0.8
     z_rand: 0.15
@@ -29,14 +29,14 @@ amcl:
     lambda_short: 0.1
 
     ### Beam skip ayarları ###
-    do_beamskip: true
+    do_beamskip: false
     beam_skip_distance: 0.5
     beam_skip_threshold: 0.3
     beam_skip_error_threshold: 0.9
 
     ### Parçacık filtre ayarları ###
     min_particles: 500
-    max_particles: 1500
+    max_particles: 2000
     resample_interval: 1
     pf_err: 0.05
     pf_z: 0.99
@@ -44,8 +44,11 @@ amcl:
     recovery_alpha_fast: 0.1
 
     ### Güncelleme eşikleri ###
-    update_min_d: 0.15     # 15 cm'de bir güncelle
-    update_min_a: 0.1      # 0.1 rad (5.7°) dönüşte güncelle
+    update_min_d: 0.25    # 15 cm'de bir güncelle
+    update_min_a: 0.2
+    set_initial_pose: false
+    always_reset_initial_pose: false     # 0.1 rad (5.7°) dönüşte güncelle
+
 
     ### Diğer ###
     save_pose_rate: 1.0
@@ -205,8 +208,8 @@ controller_server:
 local_costmap:
   local_costmap:
     ros__parameters:
-      update_frequency: 9.0
-      publish_frequency: 9.0
+      update_frequency: 15.0
+      publish_frequency: 15.0
       global_frame: odom
       robot_base_frame: base_footprint
       use_sim_time: False
@@ -256,8 +259,8 @@ local_costmap:
 global_costmap:
   global_costmap:
     ros__parameters:
-      update_frequency: 9.0
-      publish_frequency: 9.0
+      update_frequency: 15.0
+      publish_frequency: 15.0
       global_frame: map
       robot_base_frame: base_footprint
       use_sim_time: False

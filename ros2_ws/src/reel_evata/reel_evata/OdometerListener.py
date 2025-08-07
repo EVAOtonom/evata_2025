@@ -12,6 +12,13 @@ class OdometryPublisher(Node):
     def __init__(self):
         super().__init__('odometry_publisher')
 
+        self.current_angle_deg = 0.0
+        self.angular_z = 0.0
+        self.yaw = 0.0
+        self.x = 0.0
+        self.y = 0.0
+
+
         # Parametreler
         self.declare_parameter('wheel_base_cm', 155.0)
         self.declare_parameter('steering_scale_factor', 0.45)
@@ -60,22 +67,27 @@ class OdometryPublisher(Node):
             self.last_time = now
             return
 
-        delta_s = current_odom - self.last_odom
+        # Odometre farkı (cm → m)
+        delta_s_m = (current_odom - self.last_odom) / 100.0
+        v = delta_s_m / dt  # m/s
 
-        if self.imu_yaw is not None:
-            yaw = self.imu_yaw
-        else:
-            yaw = self.yaw
+        # Direksiyon açısına göre açısal hız hesabı
+        wheelbase_m = self.wheel_base / 100.0
+        steering_rad = math.radians(-self.current_angle_deg)
+        self.angular_z = v / wheelbase_m * math.tan(steering_rad)
 
-        dx = delta_s * math.cos(yaw)
-        dy = delta_s * math.sin(yaw)
+        # Yaw güncelle
+        self.yaw += self.angular_z * dt
 
-        self.x += dx
-        self.y += dy
-        self.yaw = yaw
+        # Konum güncelle
+        dx = delta_s_m * math.cos(self.yaw)
+        dy = delta_s_m * math.sin(self.yaw)
+        self.x += dx * 100.0  # tekrar cm
+        self.y += dy * 100.0
 
         self.last_odom = current_odom
         self.last_time = now
+
 
     def initialpose_callback(self, msg: PoseWithCovarianceStamped):
         pose = msg.pose.pose
@@ -114,7 +126,7 @@ class OdometryPublisher(Node):
         odom_msg.pose.pose.position.z = 0.0
         odom_msg.pose.pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
         odom_msg.twist.twist.linear.x = 0.0
-        odom_msg.twist.twist.angular.z = 0.0
+        odom_msg.twist.twist.angular.z = self.angular_z
         odom_msg.pose.covariance = [0.0] * 36
         odom_msg.twist.covariance = [0.0] * 36
 
