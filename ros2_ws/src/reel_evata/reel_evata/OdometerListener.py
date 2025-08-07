@@ -21,7 +21,7 @@ class OdometryPublisher(Node):
 
         # Parametreler
         self.declare_parameter('wheel_base_cm', 155.0)
-        self.declare_parameter('steering_scale_factor', 0.45)
+        self.declare_parameter('steering_scale_factor', 0.47)
         self.wheel_base = self.get_parameter('wheel_base_cm').value
         self.steering_scale = self.get_parameter('steering_scale_factor').value
 

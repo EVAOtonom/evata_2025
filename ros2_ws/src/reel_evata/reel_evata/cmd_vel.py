@@ -89,8 +89,8 @@ class CmdVelSubscriber(Node):
         is_reverse = self.target_velocity < 0
 
         WHEELBASE = 1.75
-        MAX_LEFT_DEG = 40
-        MAX_RIGHT_DEG = -43
+        MAX_LEFT_DEG = 30
+        MAX_RIGHT_DEG = -33
 
         if abs(self.target_velocity) > 0.01:
             steering_rad = math.atan((WHEELBASE * angular_z) / self.target_velocity)

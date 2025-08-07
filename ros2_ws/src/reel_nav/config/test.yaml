@@ -16,7 +16,7 @@ amcl:
     transform_tolerance: 0.1
 
     ### Lazer modeli ###
-    scan_topic: scan 
+    #scan_topic: scan 
     laser_model_type: "likelihood_field"
     laser_max_range: 150.0
     laser_min_range: 0.3
