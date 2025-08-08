@@ -182,13 +182,13 @@ class ImageSaver(Node):
         deadzone_mask = np.zeros_like(ll_seg_mask, dtype=np.uint8)
 
         # Deadzone sınırları (ROI gibi okunabilir hale getirildi)
-        deadzone_y_start = 216
-        deadzone_y_end = 704
+        deadzone_y_start = 450
+        deadzone_y_end = 720
 
-        deadzone_sol_ust = 315
-        deadzone_sag_ust = 706
+        deadzone_sol_ust = 454
+        deadzone_sag_ust = 826
         deadzone_sol_alt = 216
-        deadzone_sag_alt = 810
+        deadzone_sag_alt = 1043
 
         # Noktaları sırayla yerleştir: [sol_ust, sag_ust, sag_alt, sol_alt]
         deadzone_points = np.array([
@@ -245,7 +245,7 @@ class ImageSaver(Node):
                 # DEADZONE alanını çiz (sarı)
         deadzone_pts = deadzone_points.reshape((-1, 1, 2))
         cv2.polylines(im0s, [deadzone_pts], isClosed=True, color=(0, 255, 255), thickness=2)
-        cv2.putText(im0s, "Deadzone", (deadzone_points[0][0], deadzone_points[0][1] - 10),
+        cv2.putText(im0s, "ayemu", (deadzone_points[0][0], deadzone_points[0][1] - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
 
 
