@@ -16,6 +16,6 @@ def generate_launch_description():
         gnome_tab('USB & Aks', 'ros2 run reel_nav usb_settings && ros2 run reel_evata Aks'),
         gnome_tab('RSlidar',      'ros2 launch rslidar_sdk start.py'),
         gnome_tab('cmd_vel',      'ros2 run reel_evata cmd_vel'),
-        gnome_tab('LaneDetection','ros2 run reel_evata teknikLaneD.py'),
-        gnome_tab('LidarEngel',    'ros2 run reel_nav lidar_obstacle_detector_with_audio_text.py'),
+        gnome_tab('LaneDetection','ros2 run reel_evata teknikLaneD'),
+        gnome_tab('LidarEngel',    'ros2 run reel_nav lidar_obstacle_detector_with_audio_text'),
     ])
