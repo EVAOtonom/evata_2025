@@ -13,7 +13,7 @@ def generate_launch_description():
     dir_path = os.path.dirname(os.path.realpath(__file__))
     # /install/evata_sim/share/evata_sim/launch kısmına kadar yolu al
     src_dir = dir_path.split('/install')[0]  # install kısmını çıkar
-    sdf_path = os.path.join(src_dir, "src","reel_nav",'2zed.sdf')  
+    sdf_path = os.path.join(src_dir, "src","reel_nav",'final_deneme.sdf')  
     # Parametreler
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     slam_mode = LaunchConfiguration('slam', default='True')

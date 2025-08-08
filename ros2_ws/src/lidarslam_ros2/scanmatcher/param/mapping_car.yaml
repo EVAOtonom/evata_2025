@@ -1,10 +1,29 @@
 scan_matcher:
-    ros__parameters:
-      registration_method: "NDT"
-      ndt_resolution: 5.0
-      ndt_num_threads: 4
-      trans_for_mapupdate: 1.5
-      vg_size_for_input: 2.5
-      vg_size_for_map: 0.05
-      set_initial_pose: false
-      use_imu: false
+  ros__parameters:
+    global_frame_id: "map"
+    robot_frame_id: "base_footprint"
+    registration_method: "NDT"
+    ndt_resolution: 2.0
+    ndt_num_threads: 4
+    gicp_corr_dist_threshold: 5.0
+    trans_for_mapupdate: 1.5
+    vg_size_for_input: 0.5
+    vg_size_for_map: 0.3
+    use_min_max_filter: false
+    scan_min_range: 3.0
+    scan_max_range: 150.0
+    scan_period: 0.1
+    map_publish_period: 10.0
+    num_targeted_cloud: 20
+    set_initial_pose: true
+    initial_pose_x: 0.0
+    initial_pose_y: 0.0
+    initial_pose_z: 0.0
+    initial_pose_qx: 0.0
+    initial_pose_qy: 0.0
+    initial_pose_qz: 0.0
+    initial_pose_qw: 0.0
+    use_odom: true
+    debug_flag: false
+    use_imu: true
+    imu_topic: '/zed/zed_node/imu/data'
