@@ -27,6 +27,33 @@ class FullMissionNode(Node):
         # Ana hedefler
         self.main_goals = [
             {
+                'x': 23.832704544067383,
+                'y': -7.868636608123779,
+                'z': 0.0,
+                'ox': 0.0,
+                'oy': 0.0,
+                'oz': -0.11019195660834123,
+                'ow': 0.99391032427419
+            },
+            {
+                'x': 23.832704544067383,
+                'y': -7.868636608123779,
+                'z': 0.0,
+                'ox': 0.0,
+                'oy': 0.0,
+                'oz': -0.11019195660834123,
+                'ow': 0.99391032427419
+            },
+            {
+                'x': 37.27454376220703,
+                'y': -7.282447338104248,
+                'z': 0.0,
+                'ox': 0.0,
+                'oy': 0.0,
+                'oz': 0.4207458880855838,
+                'ow': 0.9071785368156995
+            },
+            {
                 'x': 41.46486282348633,
                 'y': -0.29233407974243164,
                 'z': 0.0,
@@ -34,15 +61,6 @@ class FullMissionNode(Node):
                 'oy': 0.0,
                 'oz': 0.6439949568774449,
                 'ow': 0.7650297350537546
-            },
-            {
-                'x': 59.13648986816406,
-                'y': 47.55416488647461,
-                'z': 0.0,
-                'ox': 0.0,
-                'oy': 0.0,
-                'oz': -0.09406762750698933,
-                'ow': 0.9955658097058206
             }
         ]
         self.current_main_index = 0
@@ -58,6 +76,8 @@ class FullMissionNode(Node):
         self.motion_enabled = True 
         self.mode = 'normal'
         self.original_goal = None
+
+        self.create_timer(0.5, self.check_goal_distance)
 
         self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
 
@@ -99,22 +119,39 @@ class FullMissionNode(Node):
         self._active_goal_handle = goal_handle
         result_future = goal_handle.get_result_async()
         result_future.add_done_callback(self.main_goal_result_callback)
-
+    
     def main_goal_result_callback(self, future):
-        if self._in_diversion:
-            self.get_logger().warn(" Sapma sırasında sonuç geldi, dikkate alınmıyor.")
+        try:
+            result = future.result().result
+            self.get_logger().info("✅ Ana hedef tamamlandı.")
+        except Exception as e:
+            self.get_logger().error(f"❌ Ana hedef tamamlanırken hata: {e}")
+
+
+    def check_goal_distance(self):
+        if not self.current_pose or self.current_main_index >= len(self.main_goals):
             return
-        self.get_logger().info(f" Ana hedef {self.current_main_index + 1} tamamlandı.")
+
+        target = self.main_goals[self.current_main_index]
+        dist = math.hypot(
+            target['x'] - self.current_pose.x,
+            target['y'] - self.current_pose.y
+        )
+
+        if dist <= 3.0:  
+            self.get_logger().info(f"📍 Hedefe ulaşıldı ({dist:.2f} m). Sonraki hedefe geçiliyor...")
+            if self._active_goal_handle:
+                cancel_future = self._active_goal_handle.cancel_goal_async()
+                cancel_future.add_done_callback(self._handle_goal_cancel)
+            else:
+                self._proceed_to_next_goal()
+
+    def _handle_goal_cancel(self, future):
+        self._proceed_to_next_goal()
+
+    def _proceed_to_next_goal(self):
         self.current_main_index += 1
         self.send_next_main_goal()
-
-
-    def return_to_main_goal(self, future):
-        self.get_logger().info("🔁 Sapma tamamlandı. Ana hedefe dönülüyor...")
-        self._in_diversion = False
-        if self._current_main_goal_msg:
-            future = self._action_client.send_goal_async(self._current_main_goal_msg)
-            future.add_done_callback(self.main_goal_response_callback)
 
     def create_pose_msg(self, pose_dict):
         msg = NavigateToPose.Goal()
