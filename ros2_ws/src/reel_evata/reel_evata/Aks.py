@@ -211,27 +211,27 @@ class STMCommunication(Node):
                     self.get_logger().warn(f"Wheel angle out of Int32 range. {self.read_wheel_angle}")
 
                                 # Sağ sinyal kontrolü
-                if self.read_wheel_angle > 25:
-                    if self.right_angle_start_time is None:
-                        self.right_angle_start_time = time.time()
-                    elif time.time() - self.right_angle_start_time >= 3 and not self.right_signal_sent:
-                        self.get_logger().info("3 sn boyunca >25 derece, sağ sinyal gönderiliyor.")
-                        self.right_signal_pub.publish(Int8(data=10))
-                        self.right_angle_start_time = None
-                        #self.right_signal_sent = True
-                else:
-                    self.right_angle_start_time = None
-                    self.right_signal_sent = False
+                # if self.read_wheel_angle > 27:
+                #     if self.right_angle_start_time is None:
+                #         self.right_angle_start_time = time.time()
+                #     elif time.time() - self.right_angle_start_time >= 0.5 and not self.right_signal_sent:
+                #         self.get_logger().info("3 sn boyunca >25 derece, sağ sinyal gönderiliyor.")
+                #         self.right_signal_pub.publish(Int8(data=10))
+                #         self.right_angle_start_time = None
+                #         #self.right_signal_sent = True
+                # else:
+                #     self.right_angle_start_time = None
+                #     self.right_signal_sent = False
 
                 # --- Sol sinyal kontrolü ---
-                if self.read_wheel_angle < -25:
+                if self.read_wheel_angle < -20:
                     if self.left_angle_start_time is None:
                         self.left_angle_start_time = time.time()
-                    elif time.time() - self.left_angle_start_time >= 3 and not self.left_signal_sent:
+                    elif time.time() - self.left_angle_start_time >= 0.5 and not self.left_signal_sent:
                         self.get_logger().info("3 sn boyunca <-25 derece, sol sinyal gönderiliyor.")
                         self.left_signal_pub.publish(Int8(data=10))
-                        self.left_angle_start_time = None
-                        #self.left_signal_sent = True
+                        #self.left_angle_start_time = None
+                        self.left_signal_sent = True
                 else:
                     self.left_angle_start_time = None
                     self.left_signal_sent = False
