@@ -140,12 +140,17 @@ class STMCommunication(Node):
         self.get_logger().info("SAG SINYAL BITTI")
 
     def left_signal(self, x=5):
-        for _ in range(x):
+        # for _ in range(x):
+        #     self.send_command(Register.LEFT_TURN_SIGNAL, 1)
+        #     time.sleep(0.6)
+        #     self.send_command(Register.LEFT_TURN_SIGNAL, 0)
+        #     time.sleep(0.6)
+        # self.get_logger().info("SOL SINYAL BITTI")
+        if x == 1:
             self.send_command(Register.LEFT_TURN_SIGNAL, 1)
-            time.sleep(0.6)
+        else:
             self.send_command(Register.LEFT_TURN_SIGNAL, 0)
-            time.sleep(0.6)
-        self.get_logger().info("SOL SINYAL BITTI")
+        
 
     def r_signal_callback(self, msg):
         self.right_signal(msg.data)
@@ -224,17 +229,13 @@ class STMCommunication(Node):
                 #     self.right_signal_sent = False
 
                 # --- Sol sinyal kontrolü ---
-                if self.read_wheel_angle < -20:
-                    if self.left_angle_start_time is None:
-                        self.left_angle_start_time = time.time()
-                    elif time.time() - self.left_angle_start_time >= 0.5 and not self.left_signal_sent:
-                        self.get_logger().info("3 sn boyunca <-25 derece, sol sinyal gönderiliyor.")
-                        self.left_signal_pub.publish(Int8(data=10))
-                        #self.left_angle_start_time = None
-                        self.left_signal_sent = True
-                else:
-                    self.left_angle_start_time = None
-                    self.left_signal_sent = False
+                if self.read_wheel_angle < -20 and not self.left_signal_sent and (self.left_angle_start_time == None):
+                    self.left_angle_start_time = time.time()
+                    self.left_signal_pub.publish(Int8(data=1))
+                    self.right_signal_sent = True
+                    
+                # if self.left_angle_start_time != None and (time.time - self.left_angle_start_time > 5):
+                #     self.left_signal_pub.publish(Int8(data=0))
 
             except ValueError:
                 self.get_logger().warn("Geçersiz wheel angle değeri.")
