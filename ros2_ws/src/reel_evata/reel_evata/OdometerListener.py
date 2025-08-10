@@ -17,11 +17,13 @@ class OdometryPublisher(Node):
         self.yaw = 0.0
         self.x = 0.0
         self.y = 0.0
-
+        self.linear_velocity = 0.0
 
         # Parametreler
         self.declare_parameter('wheel_base_cm', 155.0)
+        self.declare_parameter('linear_scale', 1)  # Linear hız scale değeri (m/s)
         self.wheel_base = self.get_parameter('wheel_base_cm').value
+        self.linear_scale = self.get_parameter('linear_scale').value
 
         # Yayıncılar
         self.odom_pub = self.create_publisher(Odometry, '/odom', 10)
@@ -36,12 +38,8 @@ class OdometryPublisher(Node):
         # Değişkenler
         self.last_odom = None
         self.last_time = self.get_clock().now()
-        self.current_angle_deg = 0.0
         self.imu_yaw = None
         self.imu_yaw_offset = 0.0
-        self.yaw = 0.0
-        self.x = 0.0
-        self.y = 0.0
 
         self.timer = self.create_timer(0.05, self.publish_odometry)  # 20 Hz yayın
 
@@ -50,7 +48,7 @@ class OdometryPublisher(Node):
         if raw_value < 0:
             scale_factor = 0.522
         elif raw_value > 0:
-            scale_factor = 0.55
+            scale_factor = 0.56
         else:
             scale_factor = 0.0
 
@@ -62,7 +60,7 @@ class OdometryPublisher(Node):
     def imu_callback(self, msg: Imu):
         q = msg.orientation
         _, _, raw_yaw = euler_from_quaternion([q.x, q.y, q.z, q.w])
-        self.imu_yaw = raw_yaw + self.imu_yaw_offset  # çalışmazsa bu hesaba bir de initialpose_callback'e bak
+        self.imu_yaw = raw_yaw + self.imu_yaw_offset
 
     def odom_callback(self, msg: Float32):
         current_odom = msg.data
@@ -76,7 +74,10 @@ class OdometryPublisher(Node):
 
         # Odometre farkı (cm → m)
         delta_s_m = (current_odom - self.last_odom) / 100.0
-        v = delta_s_m / dt  # m/s
+
+        # Ölçeklendirilmiş lineer hız (m/s)
+        v = (delta_s_m / dt) * self.linear_scale
+        self.linear_velocity = v
 
         # Direksiyon açısına göre açısal hız hesabı
         wheelbase_m = self.wheel_base / 100.0
@@ -95,7 +96,6 @@ class OdometryPublisher(Node):
         self.last_odom = current_odom
         self.last_time = now
 
-
     def initialpose_callback(self, msg: PoseWithCovarianceStamped):
         pose = msg.pose.pose
         self.x = pose.position.x * 100.0  # metre -> cm
@@ -110,15 +110,17 @@ class OdometryPublisher(Node):
 
         self.yaw = initial_yaw
         if self.imu_yaw is not None:
-            self.imu_yaw_offset = initial_yaw - (self.imu_yaw - self.imu_yaw_offset)  # çalışmazsa burayı değiştir
+            self.imu_yaw_offset = initial_yaw - (self.imu_yaw - self.imu_yaw_offset)
         else:
             self.imu_yaw_offset = 0.0
 
-        self.imu_yaw = self.yaw  # Doğrulama için güncelle
+        self.imu_yaw = self.yaw
         self.last_odom = None
         self.last_time = self.get_clock().now()
 
-        self.get_logger().info(f"Initial pose set -> x: {self.x:.2f} cm, y: {self.y:.2f} cm, yaw: {math.degrees(self.yaw):.2f}°")
+        self.get_logger().info(
+            f"Initial pose set -> x: {self.x:.2f} cm, y: {self.y:.2f} cm, yaw: {math.degrees(self.yaw):.2f}°"
+        )
 
     def publish_odometry(self):
         now = self.get_clock().now()
@@ -132,7 +134,7 @@ class OdometryPublisher(Node):
         odom_msg.pose.pose.position.y = self.y / 100.0
         odom_msg.pose.pose.position.z = 0.0
         odom_msg.pose.pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
-        odom_msg.twist.twist.linear.x = 0.0
+        odom_msg.twist.twist.linear.x = self.linear_velocity
         odom_msg.twist.twist.angular.z = self.angular_z
         odom_msg.pose.covariance = [0.0] * 36
         odom_msg.twist.covariance = [0.0] * 36

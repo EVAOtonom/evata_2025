@@ -40,7 +40,8 @@ setup(
             "sign_handler=" + package_name + ".sign_handler:main",
             "zedimu=" + package_name + ".zedimu:main",
             'movement = reel_evata.movement:main',
-            "teknikLaneD=" + package_name + ".teknikLaneD:main",	
+            "teknikLaneD=" + package_name + ".teknikLaneD:main",
+            "tek_control=" + package_name + ".tek_control:main",		
 
 
         ],

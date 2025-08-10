@@ -79,7 +79,7 @@ class CmdVelSubscriber(Node):
             
         linear_x = msg.linear.x
         if linear_x > 0:
-            self.target_velocity = 0.533 
+            self.target_velocity = 0.6 
         else:
             self.target_velocity = 0.0
             self.last_motor_power = 0
@@ -173,4 +173,3 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
-

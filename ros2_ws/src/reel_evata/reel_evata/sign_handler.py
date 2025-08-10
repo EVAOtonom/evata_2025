@@ -26,37 +26,28 @@ class FullMissionNode(Node):
         # Ana hedefler
         self.main_goals = [
             {
-                'x': 58.2845878,
-                'y': 9.632181,
+                'x': 69.20761108398438,
+      		'y': 39.633628845214844,
                 'z': 0.0,
                 'ox': 0.0,
                 'oy': 0.0,
-                'oz': 0.0,
-                'ow': 0.0
+                'oz': 0.6596901503297575,
+                'ow': 0.7515376940366344
             },
             {
-                'x': 1.49641990661621,
-                'y': 14.913789749145508,
+                'x': 59.38241958618164,
+                'y': 59.32367706298828,
                 'z': 0.0,
                 'ox': 0.0,
                 'oy': 0.0,
-                'oz': 0.9471947967777883,
-                'ow': 0.9471947967777883
+                'oz': -0.12218488732067498,
+                'ow': 0.9925073568041871
             },
-            {
-                'x': 2.0612287521362305,
-                'y': 5.090720176696777,
-                'z': 0.0,
-                'ox': 0.0,
-                'oy': 0.0,
-                'oz': -0.6545659666592883,
-                'ow': 0.7560048910499134
-            }
         ]
         self.current_main_index = 0
 
         # Sağ ve sol sapma waypoint'leri
-        self.diversion_waypoints = self.load_diversion_waypoints_from_txt('diversion_waypoints.txt')
+        self.diversion_waypoints = self.load_diversion_waypoints_from_txt('/home/otonom/evata_2025/ros2_ws/src/reel_evata/reel_evata/diversion_waypoints.txt')
 
         self._in_diversion = False
         self.current_pose = None

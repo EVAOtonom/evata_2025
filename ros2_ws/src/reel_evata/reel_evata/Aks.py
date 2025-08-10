@@ -72,6 +72,8 @@ class STMCommunication(Node):
         self.gps_minutes_pub = self.create_publisher(Int8, '/stm/gps_minutes', 10)
         self.gps_seconds_pub = self.create_publisher(Int8, '/stm/gps_seconds', 10)
         self.gps_course_pub = self.create_publisher(Float32, '/stm/gps_course', 10)
+        self.left_signal_pub = self.create_publisher(Int8, '/stm/left_signal', 10)
+        self.right_signal_pub = self.create_publisher(Int8, '/stm/right_signal', 10)
 
 
         # Subscribers
@@ -82,6 +84,13 @@ class STMCommunication(Node):
         self.create_subscription(Int8, '/stm/left_signal', self.l_signal_callback, 10)
         self.create_subscription(Int8, '/stm/right_signal', self.r_signal_callback, 10)
         self.create_subscription(Bool, '/stm/reverse_command', self.reverse_command_callback, 10)
+
+                # Sayaç değişkenleri
+        self.right_angle_start_time = None
+        self.left_angle_start_time = None
+        self.right_signal_sent = False
+        self.left_signal_sent = False
+
 
 
         self.create_timer(1.0 / 3.0, self.publish_data)  # 3 Hz
@@ -131,6 +140,11 @@ class STMCommunication(Node):
         self.get_logger().info("SAG SINYAL BITTI")
 
     def left_signal(self, x=5):
+        for _ in range(x):
+            self.send_command(Register.LEFT_TURN_SIGNAL, 1)
+            time.sleep(0.6)
+            self.send_command(Register.LEFT_TURN_SIGNAL, 0)
+            time.sleep(0.6)
         self.get_logger().info("SOL SINYAL BITTI")
 
     def r_signal_callback(self, msg):
@@ -195,6 +209,33 @@ class STMCommunication(Node):
                     self.read_wheel_angle_pub.publish(Int32(data=self.read_wheel_angle))
                 else:
                     self.get_logger().warn(f"Wheel angle out of Int32 range. {self.read_wheel_angle}")
+
+                                # Sağ sinyal kontrolü
+                if self.read_wheel_angle > 25:
+                    if self.right_angle_start_time is None:
+                        self.right_angle_start_time = time.time()
+                    elif time.time() - self.right_angle_start_time >= 3 and not self.right_signal_sent:
+                        self.get_logger().info("3 sn boyunca >25 derece, sağ sinyal gönderiliyor.")
+                        self.right_signal_pub.publish(Int8(data=10))
+                        self.right_angle_start_time = None
+                        #self.right_signal_sent = True
+                else:
+                    self.right_angle_start_time = None
+                    self.right_signal_sent = False
+
+                # --- Sol sinyal kontrolü ---
+                if self.read_wheel_angle < -25:
+                    if self.left_angle_start_time is None:
+                        self.left_angle_start_time = time.time()
+                    elif time.time() - self.left_angle_start_time >= 3 and not self.left_signal_sent:
+                        self.get_logger().info("3 sn boyunca <-25 derece, sol sinyal gönderiliyor.")
+                        self.left_signal_pub.publish(Int8(data=10))
+                        self.left_angle_start_time = None
+                        #self.left_signal_sent = True
+                else:
+                    self.left_angle_start_time = None
+                    self.left_signal_sent = False
+
             except ValueError:
                 self.get_logger().warn("Geçersiz wheel angle değeri.")
             
