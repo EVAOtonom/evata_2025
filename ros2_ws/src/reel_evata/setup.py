@@ -41,7 +41,8 @@ setup(
             "zedimu=" + package_name + ".zedimu:main",
             'movement = reel_evata.movement:main',
             "teknikLaneD=" + package_name + ".teknikLaneD:main",
-            "tek_control=" + package_name + ".tek_control:main",		
+            "tek_control=" + package_name + ".tek_control:main",	
+            "sag_engel_control=" + package_name + ".sag_engel_control:main",		
 
 
         ],
