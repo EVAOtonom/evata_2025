@@ -239,12 +239,14 @@ class STMCommunication(Node):
                     self.right_signal_pub.publish(Int8(data=0))
                     self.left_signal_sent = True
                     self.right_signal_sent = False
+                    self.signal_off = False
 
                 if self.read_wheel_angle > 20 and not self.right_signal_sent:
                     self.right_signal_pub.publish(Int8(data=1))
                     self.left_signal_pub.publish(Int8(data=0))
                     self.right_signal_sent = True
                     self.left_signal_sent = False
+                    self.signal_off = False
                 
                 if not self.signal_off:
                     self.left_signal_pub.publish(Int8(data=0))
