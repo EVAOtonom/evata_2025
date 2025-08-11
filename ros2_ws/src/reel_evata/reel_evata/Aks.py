@@ -90,6 +90,7 @@ class STMCommunication(Node):
         self.left_angle_start_time = None
         self.right_signal_sent = False
         self.left_signal_sent = False
+        self.signal_off = False
 
 
 
@@ -132,12 +133,16 @@ class STMCommunication(Node):
         self.send_command(Register.RESET_ENCODER, msg.data)
 
     def right_signal(self, x=5):
-        for _ in range(x):
+        # for _ in range(x):
+        #     self.send_command(Register.RIGHT_TURN_SIGNAL, 1)
+        #     time.sleep(0.6)
+        #     self.send_command(Register.RIGHT_TURN_SIGNAL, 0)
+        #     time.sleep(0.6)
+        # self.get_logger().info("SAG SINYAL BITTI")
+        if x == 1:
             self.send_command(Register.RIGHT_TURN_SIGNAL, 1)
-            time.sleep(0.6)
+        else:
             self.send_command(Register.RIGHT_TURN_SIGNAL, 0)
-            time.sleep(0.6)
-        self.get_logger().info("SAG SINYAL BITTI")
 
     def left_signal(self, x=5):
         # for _ in range(x):
@@ -229,10 +234,24 @@ class STMCommunication(Node):
                 #     self.right_signal_sent = False
 
                 # --- Sol sinyal kontrolü ---
-                if self.read_wheel_angle < -20 and not self.left_signal_sent and (self.left_angle_start_time == None):
-                    self.left_angle_start_time = time.time()
+                if self.read_wheel_angle < -20 and not self.left_signal_sent:
                     self.left_signal_pub.publish(Int8(data=1))
+                    self.right_signal_pub.publish(Int8(data=0))
+                    self.left_signal_sent = True
+                    self.right_signal_sent = False
+
+                if self.read_wheel_angle > 20 and not self.right_signal_sent:
+                    self.right_signal_pub.publish(Int8(data=1))
+                    self.left_signal_pub.publish(Int8(data=0))
                     self.right_signal_sent = True
+                    self.left_signal_sent = False
+                
+                if not self.signal_off:
+                    self.left_signal_pub.publish(Int8(data=0))
+                    self.right_signal_pub.publish(Int8(data=0))
+                    self.signal_off = True
+                    self.left_signal_sent = False
+                    self.right_signal_sent = False
                     
                 # if self.left_angle_start_time != None and (time.time - self.left_angle_start_time > 5):
                 #     self.left_signal_pub.publish(Int8(data=0))
