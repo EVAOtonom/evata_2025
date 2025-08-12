@@ -264,6 +264,14 @@ class SignDetectorWithNavigation(Node):
                         if map_x is not None:
                             self.last_parking_coordinates = (map_x, map_y)
 
+                if class_name.lower() == "kirmizi":
+                    if distance <= 7.0:
+                        publish_data = {class_name: round(distance, 2)}
+                        msg = String()
+                        msg.data = json.dumps(publish_data)
+                        self.sign_publisher.publish(msg)
+                        self.get_logger().info(f"Published (kirmizi levha): {msg.data}")
+                    
                 if (class_name.lower() == "durak" and distance <= 12.0) or (class_name.lower() != "durak" and distance <= 7.0):
                     publish_data = {class_name: round(distance, 2)}
                     msg = String()
