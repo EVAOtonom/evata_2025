@@ -20,6 +20,7 @@ setup(
     entry_points={
         'console_scripts': [
             'OdometerListener = reel_evata.OdometerListener:main',
+            'amcl_pose_filter_tf = reel_evata.amcl_pose_filter_tf:main',
             'AKS_communication = reel_evata.AKS_communication:main',
             'Aks = reel_evata.Aks:main',
             'stabilThrottle = reel_evata.stabilThrottle:main',

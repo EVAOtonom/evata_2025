@@ -6,6 +6,8 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import Int8, Bool, Float32
 import math
 from time import time
+from std_msgs.msg import String
+import json
 
 
 class CmdVelSubscriber(Node):
@@ -20,6 +22,7 @@ class CmdVelSubscriber(Node):
         self.cmd_vel_sub = self.create_subscription(Twist, '/cmd_vel', self.cmd_vel_callback, 10)
         self.odom_sub = self.create_subscription(Float32, '/stm/read_odometer', self.odom_callback, 10)
         self.obstacle_sub = self.create_subscription(Int8, '/obstacle_detected', self.obstacle_callback, 10)
+        self.sign_sub = self.create_subscription(String, '/detected_signs', self.sign_callback, 10)
 
         self.current_velocity = 0.0  # m/s
         self.target_velocity = 0.0   # m/s
@@ -36,6 +39,8 @@ class CmdVelSubscriber(Node):
         self.last_motor_power = 0
         self.last_brake = False
         self.last_steering_deg = 0
+
+        self.kirmizi = False
 
         # Timer ile sabit frekansta yayın (50 Hz)
         self.timer = self.create_timer(0.02, self.timer_callback)
@@ -68,6 +73,17 @@ class CmdVelSubscriber(Node):
         self.current_velocity = velocity_mps
         self.last_odom = current_odom
         self.last_odom_time = current_time
+
+    def sign_callback(self, msg):
+        try:
+            detected = (msg.data)
+            if "kirmizi" in detected:
+                self.get_logger().info("Kırmızı ışık algılandı.")
+                self.kirmizi = True
+            else:
+                self.kirmizi = False
+        except Exception as e:
+            self.get_logger().error(f"Levha verisi işlenemedi: {e}")
         
     def cmd_vel_callback(self, msg: Twist):
         if self.obstacle_detected:
@@ -141,6 +157,8 @@ class CmdVelSubscriber(Node):
 
     def timer_callback(self):
         # Engel varsa her zaman fren uygula
+        if self.kirmizi:
+            return
         if self.obstacle_detected:
             self.motor_power_pub.publish(Int8(data=0))
             self.brake_pub.publish(Bool(data=True))

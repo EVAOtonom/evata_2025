@@ -5,29 +5,29 @@ amcl:
     ### Hareket modeli ###
     robot_model_type: "nav2_amcl::DifferentialMotionModel"
     alpha1: 0.3   # Yaw dönüş gürültüsü - düşük tuttum, tekerlek odometride güven varsa
-    alpha2: 0.1   # Velocity’den dönüş gürültüsü - makul düşük
-    alpha3: 0.1   # Translation (ilerleme) gürültüsü - düşük, tekerlek odometriye güven
-    alpha4: 0.1   # Rotation’dan translasyon gürültüsü - düşük
+    alpha2: 0.3   # Velocity’den dönüş gürültüsü - makul düşük
+    alpha3: 0.001   # Translation (ilerleme) gürültüsü - düşük, tekerlek odometriye güven
+    alpha4: 0.001   # Rotation’dan translasyon gürültüsü - düşük
     alpha5: 0.0   # Kullanılmıyor
 
     ### Frame Ayarları ###
     base_frame_id: "base_footprint"
     global_frame_id: "map"
     odom_frame_id: "odom"
-    tf_broadcast: true
+    tf_broadcast: false
     transform_tolerance: 0.5
 
     ### Lazer modeli ###
-    #scan_topic: scan
+    scan_topic: scan
     laser_model_type: "likelihood_field"
-    laser_max_range: 150.0    # Gerçek lidar max menzilin   #70 yaparak da dene
+    laser_max_range: 100.0    # Gerçek lidar max menzilin   #70 yaparak da dene
     laser_min_range: 3.0
     laser_likelihood_max_dist: 5.0   # 2.0’den biraz daha yüksek, çünkü uzak mesafelerde tolerans artmalı
-    z_hit: 0.85                    # Güven artırıldı, lidar uzun menzilli ve temizse
-    z_rand: 0.10                   # Rastgele ölçüm (gürültü) olasılığı biraz düşürüldü
+    z_hit: 0.5                    # Güven artırıldı, lidar uzun menzilli ve temizse
+    z_rand: 0.5                   # Rastgele ölçüm (gürültü) olasılığı biraz düşürüldü
     z_max: 0.03                   # Çok uzak ve yanlış ölçümlere düşük ağırlık
     z_short: 0.02                 # Ani kısa mesafe hatalarına düşük ağırlık
-    sigma_hit: 0.15               # Ölçüm gürültüsü standart sapması azaldı, lidar kaliteliysa
+    sigma_hit: 0.5               # Ölçüm gürültüsü standart sapması azaldı, lidar kaliteliysa
     lambda_short: 0.05            # Kısa mesafe model parametresi
 
     ### Beam skip ayarları ###
@@ -38,17 +38,22 @@ amcl:
 
     ### Parçacık filtre ayarları ###
     min_particles: 700            # Parçacık sayısı, biraz arttırdım daha stabil pozisyon için
-    max_particles: 1500
-    resample_interval: 1
+    max_particles: 2000
+    resample_interval: 3
     pf_err: 0.03                 # Daha hassas hata toleransı
     pf_z: 0.99                   # Güven seviyesi yüksek
-    recovery_alpha_slow: 0.001
-    recovery_alpha_fast: 0.1
+    recovery_alpha_slow: 0.0
+    recovery_alpha_fast: 0.0
 
     ### Güncelleme eşikleri ###
     update_min_d: 0.20            # 20 cm hareketten sonra güncelle
     update_min_a: 0.15            # 8.5° dönüşten sonra güncelle
     set_initial_pose: false
+    set_initial_pose: true
+    initial_pose_x: 0.0
+    initial_pose_y: 0.0
+    initial_pose_yaw: 1.57
+
     always_reset_initial_pose: false
 
     ### Diğer ###
@@ -127,6 +132,7 @@ controller_server:
     controller_frequency: 30.0
     goal_checker_plugins: ["general_goal_checker"]
     use_collision_checker: false
+    progress_checker.movement_time_allowance: 50.0
     general_goal_checker:
       plugin: "nav2_controller::SimpleGoalChecker"
       xy_goal_tolerance: 1.0
@@ -253,9 +259,9 @@ local_costmap:
           clearing: True
           marking: True
           data_type: "PointCloud2"
-          raytrace_max_range: 80.0
+          raytrace_max_range: 150.0
           raytrace_min_range: 0.0
-          obstacle_max_range: 70.5
+          obstacle_max_range: 150.5
           obstacle_min_range: 0.0
           observation_persistence: 20.0
 
@@ -291,9 +297,9 @@ global_costmap:
           clearing: True
           marking: True
           data_type: "PointCloud2"
-          raytrace_max_range: 80.0
+          raytrace_max_range: 150.0
           raytrace_min_range: 0.0
-          obstacle_max_range: 70.5
+          obstacle_max_range: 150.5
           obstacle_min_range: 0.0
           observation_persistence: 20.0
       static_layer:
