@@ -9,7 +9,7 @@ class ClickSaver(Node):
     def __init__(self):
         super().__init__('click_saver')
         
-        self.file_path = os.path.abspath("clicked_points.yaml")
+        self.file_path = os.path.expanduser('~/evata_2025/ros2_ws/clicked_points.yaml')
         self.points = []
 
         # Dosya varsa eski kayıtları oku
