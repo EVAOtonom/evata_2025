@@ -44,6 +44,9 @@ setup(
             "tek_control=" + package_name + ".tek_control:main",	
             "sag_engel_control=" + package_name + ".sag_engel_control:main",
             "fake_lanes=" + package_name + ".fake_lanes:main",
+            "clickedP=" + package_name + ".clickedP:main",	
+            "clicked_point_republisher=" + package_name + ".clicked_point_republisher:main",					
+
 
 
         ],
