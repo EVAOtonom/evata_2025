@@ -46,7 +46,11 @@ setup(
             "fake_lanes=" + package_name + ".fake_lanes:main",
             "clickedP=" + package_name + ".clickedP:main",	
             "clicked_point_republisher=" + package_name + ".clicked_point_republisher:main",
-            "logger=" + package_name + ".logger:main",					
+            "logger=" + package_name + ".logger:main",		
+            "final2_park1=" + package_name + ".final2_park1:main",	
+            "final2_park2=" + package_name + ".final2_park2:main",	
+            "final2_park3=" + package_name + ".final2_park3:main",	
+
 
 
 
