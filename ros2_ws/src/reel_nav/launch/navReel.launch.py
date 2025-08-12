@@ -78,13 +78,6 @@ def generate_launch_description():
                          'robot_description': doc.toxml()}]
         ),
         
-        Node(
-            package='reel_evata',  # kendi paket adınız
-            executable='amcl_pose_filter_tf',
-            name='amcl_pose_filter',
-            output='screen'
-        ),
-
         # robot_state_publisher
         Node(
             package='robot_state_publisher',
