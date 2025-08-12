@@ -15,7 +15,7 @@ class LaneStripPublisher(Node):
         self.publisher_ = self.create_publisher(PointCloud2, '/lane_pointcloud', 10)
         self.timer = self.create_timer(1.0, self.publish_lane_strips)
         self.z_height = 0.1          # Sabit z koordinatı
-        self.strip_width = 0.5       # Şerit genişliği (metre)
+        self.strip_width = 0.02      # Şerit genişliği (metre)
         self.points_per_segment = 50 # Her iki nokta arasında kaç nokta olacak (kalınlığı yaymak için)
 
         self.get_logger().info(f"Lane strip publisher started, reading from: {self.file_path}")
@@ -79,10 +79,7 @@ class LaneStripPublisher(Node):
             for (x, y) in line_points:
                 # center
                 all_points.append( (float(x), float(y), self.z_height) )
-                # sol offset
-                all_points.append( (float(x + normal[0]*half_width), float(y + normal[1]*half_width), self.z_height) )
-                # sağ offset
-                all_points.append( (float(x - normal[0]*half_width), float(y - normal[1]*half_width), self.z_height) )
+
 
         # PointCloud2 mesaji oluştur
         header = PointCloud2().header
