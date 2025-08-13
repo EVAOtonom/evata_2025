@@ -9,6 +9,8 @@ from tf_transformations import euler_from_quaternion
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import Twist
+from ament_index_python.packages import get_package_share_directory
+import os
 import time
 import math
 import json
@@ -47,8 +49,9 @@ class FullMissionNode(Node):
         self.current_main_index = 0
 
         # Sağ ve sol sapma waypoint'leri
-        self.diversion_waypoints = self.load_diversion_waypoints_from_txt('/home/otonom/evata_2025/ros2_ws/src/reel_evata/reel_evata/diversion_waypoints.txt')
-
+        package_share = get_package_share_directory('reel_evata')
+        self.diversion_waypoint_file = os.path.join(package_share, 'diversion_waypoints.txt')
+        
         self._in_diversion = False
         self.current_pose = None
         self.current_yaw = None
@@ -109,42 +112,6 @@ class FullMissionNode(Node):
         self.send_nearest_side_waypoint("noentry")
 
 
-    def send_nearest_side_waypoint(self, target):
-        if not self.current_pose or self.current_yaw is None:
-            self.get_logger().warn("Pozisyon veya yön bilgisi eksik.")
-            return
-
-        x, y = self.current_pose.x, self.current_pose.y
-        current_yaw = self.current_yaw
-        candidates = []
-
-        for wp in self.diversion_waypoints:
-            wp_x, wp_y = wp['x'], wp['y']
-            dx, dy = wp_x - x, wp_y - y
-            distance = math.hypot(dx, dy)
-            if distance < 0.5:
-                continue
-
-            wz, ww = wp['oz'], wp['ow']
-            wp_yaw = math.atan2(2.0 * (ww * wz), 1.0 - 2.0 * (wz * wz))
-            yaw_diff = math.degrees(wp_yaw - current_yaw)
-            yaw_diff = (yaw_diff + 180) % 360 - 180  # -180..180 aralığına getir
-
-            if target == "right" and -110 < yaw_diff < -70:
-                candidates.append((distance, wp))
-            elif target == "left" and 70 < yaw_diff < 110:
-                candidates.append((distance, wp))
-            elif target == "noentry" and (70 < yaw_diff < 110 or -110 < yaw_diff < -70):
-                candidates.append((distance, wp))
-        
-
-        if not candidates:
-            self.get_logger().warn(f" {target.upper()} yönünde uygun waypoint yok.")
-            return
-
-        nearest_wp = min(candidates, key=lambda t: t[0])[1]
-        self.get_logger().info(f"➡️ {target.upper()} yönüne sapılıyor: {nearest_wp['x']:.2f}, {nearest_wp['y']:.2f}")
-        self.divert_to(nearest_wp)
 
     def send_forward_waypoint(self, distance=10.0):
         if not self.current_pose or self.current_yaw is None:
@@ -230,7 +197,7 @@ class FullMissionNode(Node):
 
     def sign_callback(self, msg):
         try:
-            detected = json.loads(msg.data)
+            detected = msg.data
 
             # Kırmızı ışıkta sadece yeşil ışık algılamasına izin ver
             if self.mode == 'traffic_light_wait':

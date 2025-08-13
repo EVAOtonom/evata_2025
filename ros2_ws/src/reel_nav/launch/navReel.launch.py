@@ -23,7 +23,7 @@ def generate_launch_description():
 
     map_dir = LaunchConfiguration(
         'map',
-        default=os.path.join(src_dir, "src", "reel_nav", 'map', 'day1_map.yaml')
+        default=os.path.join(src_dir, "src", "reel_nav", 'map', 'seritli_map.yaml')
     )
     param_dir = LaunchConfiguration(
         'params_file',
@@ -52,13 +52,13 @@ def generate_launch_description():
         ),
 
         # Sabit dönüşler
-        # Node(
-        #     package='tf2_ros',
-        #     executable='static_transform_publisher',
-        #     name='static_tf_map_to_odom',
-        #     output='log',
-        #     arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom']
-        # ),
+        Node(
+              package='tf2_ros',
+              executable='static_transform_publisher',
+              name='static_tf_map_to_odom',
+              output='log',
+              arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom']
+        ),
 
         # Node(
         #     package='tf2_ros',
@@ -78,12 +78,6 @@ def generate_launch_description():
                          'robot_description': doc.toxml()}]
         ),
         
-        Node(
-            package='reel_evata',  # kendi paket adınız
-            executable='amcl_pose_filter_tf',
-            name='amcl_pose_filter',
-            output='screen'
-        ),
 
         # robot_state_publisher
         Node(
@@ -95,32 +89,32 @@ def generate_launch_description():
                          'robot_description': doc.toxml()}]
         ),
         
-        Node(
-            package='pointcloud_to_laserscan',
-            executable='pointcloud_to_laserscan_node',
-            name='pointcloud_to_laserscan',
-            output='screen',
-            parameters=[{
-                'target_frame': 'base_footprint',        # Scan'ı hangi frame'e göre vereceğiz
-                'transform_tolerance': 0.5,
-                'min_height': 0.1,
-                'max_height': 0.7,
-                'angle_min': -1.5708,
-                'angle_max': 1.5708,
-                'angle_increment': 0.00872,
-                'scan_time': 0.1,
-                'range_min': 3.0,
-                'range_max': 100.0,
-                'use_inf': True,
-                'inf_epsilon': 1.0,
-                'concurrency_level': 1,
-                'reliability': 'reliable'
-            }],
-            remappings=[
-                ('cloud_in', '/rslidar_points'),  # RSLidar’dan gelen PointCloud2
-                ('scan', '/scan')                 # AMCL’e gidecek LaserScan çıktısı
-            ]
-        ),
+        # Node(
+        #     package='pointcloud_to_laserscan',
+        #     executable='pointcloud_to_laserscan_node',
+        #     name='pointcloud_to_laserscan',
+        #     output='screen',
+        #     parameters=[{
+        #         'target_frame': 'base_footprint',        # Scan'ı hangi frame'e göre vereceğiz
+        #         'transform_tolerance': 0.5,
+        #         'min_height': 0.1,
+        #         'max_height': 0.7,
+        #         'angle_min': -3.14159,
+        #         'angle_max': 3.14159,
+        #         'angle_increment': 0.00872,
+        #         'scan_time': 0.1,
+        #         'range_min': 3.0,
+        #         'range_max': 100.0,
+        #         'use_inf': True,
+        #         'inf_epsilon': 1.0,
+        #         'concurrency_level': 1,
+        #         'reliability': 'reliable'
+        #     }],
+        #     remappings=[
+        #         ('cloud_in', '/rslidar_points'),  # RSLidar’dan gelen PointCloud2
+        #         ('scan', '/scan')                 # AMCL’e gidecek LaserScan çıktısı
+        #     ]
+        # ),
        	    
         # Nav2 bringup launch dosyasını dahil et
         IncludeLaunchDescription(
